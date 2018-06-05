@@ -450,16 +450,23 @@ class contagion_model(network_model):
             simulation_results.append((label_of_data, data))
         return simulation_results
 
-    def avg_speed_of_spread(self , dataset_size=1000,cap = 0.9 , mode = 'max'):
+    def avg_speed_of_spread(self , dataset_size=1000,cap=0.9 , mode='max'):
         if mode == 'integral':
             dataset = self.genTorchDataset(dataset_size)
-            sum_of_integral = 0
+            integrals = []
+            sum_of_integrals = 0
             for i in range(dataset_size):
                 integral = sum(dataset[i][1][:,0])/len(dataset[i][1])
-                sum_of_integral += integral
-            avg_speed = sum_of_integral/dataset_size
+                sum_of_integrals += integral
+                integrals += [integral]
+            avg_speed = sum_of_integrals/dataset_size
+            speed_std = np.std(integrals)
+            speed_max = np.max(integrals)
+            speed_min = np.min(integrals)
+
         elif mode == 'max':
             dataset = self.genTorchDataset(dataset_size)
+            cap_times = []
             sum_of_cap_times = 0
             for i in range(dataset_size):
                 cap_time = time_the_cap(dataset[i][1][:,0],cap)
@@ -467,11 +474,16 @@ class contagion_model(network_model):
                     dataset_size += -1
                     continue
                 sum_of_cap_times += cap_time
+                cap_times += [cap_time]
             if dataset_size == 0:
                 avg_speed = -1
             else:
                 avg_speed = sum_of_cap_times/dataset_size
+                speed_std = np.std(cap_times)
+                speed_max = np.max(cap_times)
+                speed_min = np.min(cap_times)
         elif mode == 'total':
+            total_spread_times = []
             sum_of_total_spread_times = 0
             count = 1
             while count <= dataset_size:
@@ -480,16 +492,21 @@ class contagion_model(network_model):
                     dataset_size += -1
                     print('The contagion did not spread totally.')
                     continue
+                total_spread_times += [total_spread_time]
                 sum_of_total_spread_times += total_spread_time
                 count += 1
             if dataset_size == 0:
                 avg_speed = -1
             else:
                 avg_speed = sum_of_total_spread_times/dataset_size
+                speed_std = np.std(total_spread_times)
+                speed_max = np.max(total_spread_times)
+                speed_min = np.min(total_spread_times)
+
 
         else:
             assert False, 'undefined mode for avg_speed_of_spread'
-        return avg_speed
+        return avg_speed,speed_std,speed_max,speed_min
 
     def outer_step(self):
         assert hasattr(self, 'classification_label'), 'classification_label not set'
