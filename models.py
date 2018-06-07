@@ -173,6 +173,7 @@ def cycle_union_Erdos_Renyi(n, k=2, c=2, seed=None):
     """
     if seed is not None:
         RD.seed(seed)
+
     if k >= n:
         raise NX.NetworkXError("k>=n, choose smaller k or larger n")
     C_k = NX.connected_watts_strogatz_graph(n, k, 0)
