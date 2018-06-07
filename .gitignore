@@ -1,0 +1,14 @@
+*.iml
+*.xml
+.Rhistory
+*.pyc
+*.out
+*.png
+*.pkl
+*.pckl
+*.sh 
+*.xls
+*.slurm
+.nfs*
+/data/
+/code/.idea/
