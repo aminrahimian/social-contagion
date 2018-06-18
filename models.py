@@ -593,7 +593,8 @@ class activation(contagion_model):
 
         for i in current_network.nodes():
             if current_network.node[i]['state'] == susceptible:
-                assert self.params['network'].node[i]['time_since_infection'] == 0, 'error: time_since_infection'
+                assert self.params['network'].node[i]['time_since_infection'] == 0, \
+                    'error: time_since_infection'
                 self.time_since_infection_is_updated = True
                 if RD.random() < self.activation_probabilities[count_node]:
                     self.params['network'].node[i]['state'] = infected
@@ -698,13 +699,13 @@ class SIS_threshold_soft(activation):
         self.activation_functions_is_set = True
 
 
-class probit(activation):
+class Probit(activation):
     """
     Probit activation function. Probability of adoption is set according to a normal CDF with mean theta and
     scale factor sigma.
     """
     def __init__(self,params):
-        super(probit, self).__init__(params)
+        super(Probit, self).__init__(params)
         self.classification_label = COMPLEX
 
     def set_activation_functions(self):
@@ -717,21 +718,26 @@ class probit(activation):
         if len(set(thresholds.values())) == 1: # all nodes have the same threshold
             probit_function = norm(self.params['theta'], self.params['sigma'])
             self.activation_functions = \
-                [lambda number_of_infected_neighbors: probit_function.cdf(number_of_infected_neighbors)]*self.params['size']
+                [lambda number_of_infected_neighbors:
+                 1.0 * (number_of_infected_neighbors > 0) * probit_function.cdf(number_of_infected_neighbors) +
+                 0.0 * 1.0 * (number_of_infected_neighbors == 0)]*self.params['size']
+
         else:
             for i in current_network.nodes():
                 probit_function = norm(current_network.node[i]['threshold'], self.params['sigma'])
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-                                                 probit_function.cdf(number_of_infected_neighbors))
+                                                 (1.0 * (number_of_infected_neighbors > 0)
+                                                  * probit_function.cdf(number_of_infected_neighbors)) +
+                                                 0.0 * 1.0 * (number_of_infected_neighbors == 0))
         self.activation_functions_is_set = True
 
 
-class logit(activation):
+class Logit(activation):
     """
     Logit activation function with threshold theta and scale sigma.
     """
     def __init__(self,params):
-        super(logit, self).__init__(params)
+        super(Logit, self).__init__(params)
         self.classification_label = COMPLEX
 
     def set_activation_functions(self):
@@ -741,20 +747,25 @@ class logit(activation):
         current_network = copy.deepcopy(self.params['network'])
 
         thresholds = NX.get_node_attributes(current_network, 'threshold')
-        if len(set(thresholds.values())) == 1: # all nodes have the same threshold
+        if len(set(thresholds.values())) == 1:  # all nodes have the same threshold
             self.activation_functions = \
-                [lambda number_of_infected_neighbors: 1/(1 + np.exp((1 / self.params['sigma']) * (
-                        self.params['theta'] - number_of_infected_neighbors)))]*self.params['size']
+                [lambda number_of_infected_neighbors: ((1/(1 + np.exp((1 / self.params['sigma']) * (
+                        self.params['theta'] - number_of_infected_neighbors))))
+                                                       * 1.0 * (number_of_infected_neighbors > 0)) +
+                                                      0.0 * 1.0 * (number_of_infected_neighbors == 0)
+                 ]*self.params['size']
         else:
             for i in current_network.nodes():
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i :
-                                                 1/( 1 + np.exp((1 / self.params['sigma'])*
+                                                 ((1/(1 + np.exp((1 / self.params['sigma']) *
                                                         (current_network.node[node_index]['threshold'] -
-                                                         number_of_infected_neighbors))))
+                                                         number_of_infected_neighbors)))) *
+                                                  1.0 * (number_of_infected_neighbors > 0)) +
+                                                 0.0 * 1.0 * (number_of_infected_neighbors == 0))
         self.activation_functions_is_set = True
 
 
-class linear(activation):
+class Linear(activation):
     """
     Implements a linear threshold activation function. Thresholds are set relative to the total number of neighbors
     (ratios of infected in the local neighborhoods). The threshold values are set uniformly at random from the (0,1)
@@ -774,10 +785,14 @@ class linear(activation):
 
         for i in current_network.nodes():
             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i :
-                                             self.params['fixed_prob_high'] * 1.0 *(
-                                             current_network.node[i]['threshold'] <= number_of_infected_neighbors) +
-                                             self.params['fixed_prob'] * 1.0 *(
-                                             current_network.node[i]['threshold'] > number_of_infected_neighbors))
+                                             self.params['fixed_prob_high'] * 1.0 *
+                                             (current_network.node[i]['threshold'] <= number_of_infected_neighbors) +
+                                             self.params['fixed_prob'] * 1.0 * (
+                                                 (current_network.node[i]['threshold'] >
+                                                  number_of_infected_neighbors)
+                                                 and (number_of_infected_neighbors != 0)) +
+                                             0.0 * 1.0 * (number_of_infected_neighbors == 0))
+
         self.activation_functions_is_set = True
 
 
@@ -786,7 +801,7 @@ class DeterministicLinear(activation):
     Similar to the  linear threshold model except that thresholds are not ratios and are not random. 'thresholds' are
     fixed and they can be set all the same equal to theta.
     """
-    def __init__(self,params):
+    def __init__(self, params):
         super(DeterministicLinear, self).__init__(params)
         self.classification_label = COMPLEX
 
@@ -802,12 +817,15 @@ class DeterministicLinear(activation):
                                                  current_network.node[i][
                                                      'threshold'] <= number_of_infected_neighbors) +
                                              self.params['fixed_prob'] * 1.0 * (
-                                                 current_network.node[i][
-                                                     'threshold'] > number_of_infected_neighbors))
+                                                     (current_network.node[i][
+                                                          'threshold'] > number_of_infected_neighbors)
+                                                     and (number_of_infected_neighbors != 0)) +
+                                             0.0 * 1.0 * (number_of_infected_neighbors == 0))
+
         self.activation_functions_is_set = True
 
 
-class independent_cascade(contagion_model):
+class IndependentCascade(contagion_model):
     """
     Implements an independent cascade model. Each infected neighbor has an independent probability beta of passing on her
     infection, as long as her infection has occurred within the past mem = 1 time steps.
@@ -821,10 +839,12 @@ class independent_cascade(contagion_model):
         current_network = copy.deepcopy(self.params['network'])
         for i in current_network.nodes():
             if current_network.node[i]['state'] == susceptible:
-                assert self.params['network'].node[i]['time_since_infection'] == 0, 'error: time_since_infection mishandle'
+                assert self.params['network'].node[i]['time_since_infection'] == 0, \
+                    'error: time_since_infection mishandle'
                 self.time_since_infection_is_updated = True
                 for j in current_network.neighbors(i):
-                    if current_network.node[j]['state'] == infected  and current_network.node[j]['time_since_infection'] < self.memory:
+                    if (current_network.node[j]['state'] == infected and
+                            current_network.node[j]['time_since_infection'] < self.memory):
                         if RD.random() < self.params['beta']:
                             self.params['network'].node[i]['state'] = infected
                             for k in self.params['network'].neighbors(i):
@@ -845,7 +865,7 @@ class independent_cascade(contagion_model):
                 self.number_of_infected_neighbors_is_updated = True
 
 
-class new_model(contagion_model):
+class NewModel(contagion_model):
     def __init__(self,params):
         super(new_model, self).__init__(params)
         self.classification_label = SIMPLE # or CMOPLEPX
