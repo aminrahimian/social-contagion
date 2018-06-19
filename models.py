@@ -323,10 +323,12 @@ class network_model():
         """
         assert self.missing_params_not_set,'error: missing parameters are already set.'
 
+        if 'zero_at_zero' not in self.fixed_params:
+            self.params['zero_at_zero'] = True
         if 'multiplier' not in self.fixed_params:
             self.params['multiplier'] = 5
         if 'fixed_prob_high' not in self.fixed_params:
-            self.params['fixed_prob_high'] =  1.0
+            self.params['fixed_prob_high'] = 1.0
         if 'fixed_prob' not in self.fixed_params:
             self.params['fixed_prob'] = 0.0
         if 'beta' not in self.fixed_params:
@@ -663,14 +665,23 @@ class SIS_threshold(activation):
         """
         current_network = copy.deepcopy(self.params['network'])
 
-        for i in current_network.nodes():
-            self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-                                             ((1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0 * (
-                                                 current_network.node[i]['threshold'] < number_of_infected_neighbors)) +
-                                             (self.params['fixed_prob']* 1.0 *
-                                             ((current_network.node[i]['threshold'] >= number_of_infected_neighbors)
-                                              and (number_of_infected_neighbors != 0))) +
-                                             0.0 * (number_of_infected_neighbors == 0))
+        if self.params['zero_at_zero']:
+            for i in current_network.nodes():
+                self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
+                                                 ((1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0 * (
+                                                     current_network.node[i]['threshold'] < number_of_infected_neighbors)) +
+                                                 (self.params['fixed_prob']* 1.0 *
+                                                 ((current_network.node[i]['threshold'] >= number_of_infected_neighbors)
+                                                  and (number_of_infected_neighbors != 0))) +
+                                                 0.0 * (number_of_infected_neighbors == 0))
+        else:  # not zero at zero
+            for i in current_network.nodes():
+                self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
+                                                 ((1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0 * (
+                                                     current_network.node[i]['threshold'] < number_of_infected_neighbors)) +
+                                                 (self.params['fixed_prob'] * 1.0 *
+                                                  (current_network.node[i]['threshold'] >=
+                                                   number_of_infected_neighbors)))
 
         self.activation_functions_is_set = True
 
@@ -694,8 +705,11 @@ class SIS_threshold_soft(activation):
             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                              (1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0 * (
                                                  current_network.node[i]['threshold'] < number_of_infected_neighbors) +
-                                             (1 - (1 - (self.params['beta']/self.params['multiplier']))**number_of_infected_neighbors)
-                                             * 1.0 * (current_network.node[i]['threshold'] >= number_of_infected_neighbors))
+                                             (1 - ((1 - (self.params['beta']/self.params['multiplier']))
+                                                   ** number_of_infected_neighbors))
+                                             * 1.0 * (current_network.node[i]['threshold'] >=
+                                                      number_of_infected_neighbors))
+            # this is always zero at zero.
         self.activation_functions_is_set = True
 
 
@@ -715,20 +729,32 @@ class Probit(activation):
         current_network = copy.deepcopy(self.params['network'])
 
         thresholds = NX.get_node_attributes(current_network, 'threshold')
-        if len(set(thresholds.values())) == 1: # all nodes have the same threshold
+        if len(set(thresholds.values())) == 1:  # all nodes have the same threshold
             probit_function = norm(self.params['theta'], self.params['sigma'])
-            self.activation_functions = \
-                [lambda number_of_infected_neighbors:
-                 1.0 * (number_of_infected_neighbors > 0) * probit_function.cdf(number_of_infected_neighbors) +
-                 0.0 * 1.0 * (number_of_infected_neighbors == 0)]*self.params['size']
+            if self.params['zero_at_zero']:
+                self.activation_functions = \
+                    [lambda number_of_infected_neighbors:
+                     1.0 * (number_of_infected_neighbors > 0) * probit_function.cdf(number_of_infected_neighbors) +
+                     0.0 * 1.0 * (number_of_infected_neighbors == 0)]*self.params['size']
+            else:  # not zero at zero:
+                self.activation_functions = \
+                    [lambda number_of_infected_neighbors:
+                     1.0 * probit_function.cdf(number_of_infected_neighbors)] * self.params['size']
 
-        else:
-            for i in current_network.nodes():
-                probit_function = norm(current_network.node[i]['threshold'], self.params['sigma'])
-                self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-                                                 (1.0 * (number_of_infected_neighbors > 0)
-                                                  * probit_function.cdf(number_of_infected_neighbors)) +
-                                                 0.0 * 1.0 * (number_of_infected_neighbors == 0))
+        else:  # heterogeneous thresholds
+            if self.params['zero_at_zero']:
+
+                for i in current_network.nodes():
+                    probit_function = norm(current_network.node[i]['threshold'], self.params['sigma'])
+                    if self.params['zero_at_zero']:
+                        self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
+                                                         (1.0 * (number_of_infected_neighbors > 0)
+                                                          * probit_function.cdf(number_of_infected_neighbors)) +
+                                                         0.0 * 1.0 * (number_of_infected_neighbors == 0))
+                    else:  # not zer_zt_zero
+                        self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
+                                                         (1.0 * probit_function.cdf(number_of_infected_neighbors)))
+
         self.activation_functions_is_set = True
 
 
@@ -748,20 +774,32 @@ class Logit(activation):
 
         thresholds = NX.get_node_attributes(current_network, 'threshold')
         if len(set(thresholds.values())) == 1:  # all nodes have the same threshold
-            self.activation_functions = \
-                [lambda number_of_infected_neighbors: ((1/(1 + np.exp((1 / self.params['sigma']) * (
-                        self.params['theta'] - number_of_infected_neighbors))))
-                                                       * 1.0 * (number_of_infected_neighbors > 0)) +
-                                                      0.0 * 1.0 * (number_of_infected_neighbors == 0)
-                 ]*self.params['size']
-        else:
-            for i in current_network.nodes():
-                self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i :
-                                                 ((1/(1 + np.exp((1 / self.params['sigma']) *
-                                                        (current_network.node[node_index]['threshold'] -
-                                                         number_of_infected_neighbors)))) *
-                                                  1.0 * (number_of_infected_neighbors > 0)) +
-                                                 0.0 * 1.0 * (number_of_infected_neighbors == 0))
+            if self.params['zero_at_zero']:
+                self.activation_functions = \
+                    [lambda number_of_infected_neighbors: ((1/(1 + np.exp((1 / self.params['sigma']) * (
+                            self.params['theta'] - number_of_infected_neighbors))))
+                                                           * 1.0 * (number_of_infected_neighbors > 0)) +
+                                                          0.0 * 1.0 * (number_of_infected_neighbors == 0)
+                     ]*self.params['size']
+            else:  # not zero_at_zero
+                self.activation_functions = \
+                    [lambda number_of_infected_neighbors: (1 / (1 + np.exp((1 / self.params['sigma']) * (
+                            self.params['theta'] - number_of_infected_neighbors))))* 1.0] * self.params['size']
+        else:  # heterogeneous thresholds
+            if self.params['zero_at_zer0']:
+                for i in current_network.nodes():
+                    self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i :
+                                                     ((1/(1 + np.exp((1 / self.params['sigma']) *
+                                                            (current_network.node[node_index]['threshold'] -
+                                                             number_of_infected_neighbors)))) *
+                                                      1.0 * (number_of_infected_neighbors > 0)) +
+                                                     0.0 * 1.0 * (number_of_infected_neighbors == 0))
+            else:  # not zero at zero
+                for i in current_network.nodes():
+                    self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i :
+                                                     (1/(1 + np.exp((1 / self.params['sigma']) *
+                                                            (current_network.node[node_index]['threshold'] -
+                                                             number_of_infected_neighbors)))) * 1.0)
         self.activation_functions_is_set = True
 
 
@@ -783,15 +821,24 @@ class Linear(activation):
         """
         current_network = copy.deepcopy(self.params['network'])
 
-        for i in current_network.nodes():
-            self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i :
-                                             self.params['fixed_prob_high'] * 1.0 *
-                                             (current_network.node[i]['threshold'] <= number_of_infected_neighbors) +
-                                             self.params['fixed_prob'] * 1.0 * (
-                                                 (current_network.node[i]['threshold'] >
-                                                  number_of_infected_neighbors)
-                                                 and (number_of_infected_neighbors != 0)) +
-                                             0.0 * 1.0 * (number_of_infected_neighbors == 0))
+        for i in current_network.nodes():  # thresholds are heterogeneous by definition of the linear threshold model
+            # they are set random uniform (0,1) ratios.
+            if self.params['zero_at_zero']:
+                self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i :
+                                                 self.params['fixed_prob_high'] * 1.0 *
+                                                 (current_network.node[i]['threshold'] <= number_of_infected_neighbors)
+                                                 + self.params['fixed_prob'] * 1.0 * (
+                                                     (current_network.node[i]['threshold'] >
+                                                      number_of_infected_neighbors)
+                                                     and (number_of_infected_neighbors != 0)) +
+                                                 0.0 * 1.0 * (number_of_infected_neighbors == 0))
+            else: # not zero_at_zero
+                self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
+                                                 self.params['fixed_prob_high'] * 1.0 *
+                                                 (current_network.node[i]['threshold'] <= number_of_infected_neighbors)
+                                                 + self.params['fixed_prob'] * 1.0 * (
+                                                         (current_network.node[i]['threshold'] >
+                                                          number_of_infected_neighbors)))
 
         self.activation_functions_is_set = True
 
@@ -812,15 +859,23 @@ class DeterministicLinear(activation):
         current_network = copy.deepcopy(self.params['network'])
 
         for i in current_network.nodes():
-            self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-                                             self.params['fixed_prob_high'] * 1.0 * (
-                                                 current_network.node[i][
-                                                     'threshold'] <= number_of_infected_neighbors) +
-                                             self.params['fixed_prob'] * 1.0 * (
-                                                     (current_network.node[i][
-                                                          'threshold'] > number_of_infected_neighbors)
-                                                     and (number_of_infected_neighbors != 0)) +
-                                             0.0 * 1.0 * (number_of_infected_neighbors == 0))
+            if self.params['zero_at_zero']:
+                self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
+                                                 self.params['fixed_prob_high'] * 1.0 * (
+                                                     current_network.node[i][
+                                                         'threshold'] <= number_of_infected_neighbors) +
+                                                 self.params['fixed_prob'] * 1.0 * (
+                                                         (current_network.node[i][
+                                                              'threshold'] > number_of_infected_neighbors)
+                                                         and (number_of_infected_neighbors != 0)) +
+                                                 0.0 * 1.0 * (number_of_infected_neighbors == 0))
+            else:  # not zero at zero
+                self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
+                                                 self.params['fixed_prob_high'] * 1.0 * (
+                                                         current_network.node[i][
+                                                             'threshold'] <= number_of_infected_neighbors) +
+                                                 self.params['fixed_prob'] * 1.0 * ((current_network.node[i][
+                                                              'threshold'] > number_of_infected_neighbors)))
 
         self.activation_functions_is_set = True
 
