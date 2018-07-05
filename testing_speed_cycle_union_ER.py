@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
     plt.ylabel('Normalized ($\\times n^{-3/4}$) Time to Spread')
     plt.xlabel('Network Size $(n)$')
-    plt.title('Complex Contagions  over $C_{k} \\cup G_{n,p_n}$ with $p_n = (13 - 2k)/n$')
+    plt.title('Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$ with $p_n = (13 - 2k)/n$')
     plt.legend()
     # plt.show()
     plt.savefig('./data/' + 'speed_of_contagion_union_Net_Size.png')
@@ -126,10 +126,11 @@ if __name__ == '__main__':
     speeds_std_1000 = []
 
     for number_of_cycle_edges in k:
+        NET_SIZE = 1000
         params_1000 = {
             'network_model': 'cycle_union_Erdos_Renyi',
-            'size': 1000,  # populationSize,
-            'initial_states': [1] + [1] + [0] * (network_size - 2),  # two initial seeds, next to each other
+            'size': NET_SIZE,  # populationSize,
+            'initial_states': [1] + [1] + [0] * (NET_SIZE - 2),  # two initial seeds, next to each other
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': number_of_cycle_edges,
             'fixed_prob_high': 1.0,
@@ -149,10 +150,11 @@ if __name__ == '__main__':
     speeds_std_3000 = []
 
     for number_of_cycle_edges in k:
+        NET_SIZE = 3000
         params_3000 = {
             'network_model': 'cycle_union_Erdos_Renyi',
-            'size': 3000,  # populationSize,
-            'initial_states': [1] + [1] + [0] * (network_size - 2),  # two initial seeds, next to each other
+            'size': NET_SIZE,  # populationSize,
+            'initial_states': [1] + [1] + [0] * (NET_SIZE - 2),  # two initial seeds, next to each other
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': number_of_cycle_edges,
             'fixed_prob_high': 1.0,
@@ -172,10 +174,11 @@ if __name__ == '__main__':
     speeds_std_5000 = []
 
     for number_of_cycle_edges in k:
+        NET_SIZE = 5000
         params_5000 = {
             'network_model': 'cycle_union_Erdos_Renyi',
-            'size': 5000,  # populationSize,
-            'initial_states': [1] + [1] + [0] * (network_size - 2),  # two initial seeds, next to each other
+            'size': NET_SIZE,  # populationSize,
+            'initial_states': [1] + [1] + [0] * (NET_SIZE - 2),  # two initial seeds, next to each other
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': number_of_cycle_edges,
             'fixed_prob_high': 1.0,
@@ -204,7 +207,7 @@ if __name__ == '__main__':
 
     plt.ylabel('Time to Spread')
     plt.xlabel('Number of Cycle Edges (k)')
-    plt.title('Complex Contagions  over $C_{k} \\cup G_{n,(15-2k)/n}$ with $p_n = (15 - 2k)/n$')
+    plt.title('Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$ with $p_n = (15 - 2k)/n$')
     plt.legend()
     # plt.show()
     plt.savefig('./data/' + 'speed_of_contagion_union_Cycle_Edges.png')
