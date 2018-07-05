@@ -4,6 +4,7 @@ import pandas as pd
 import copy
 import random as RD
 import networkx as NX
+import matplotlib.pyplot as plt
 
 from scipy.stats import norm
 
@@ -185,6 +186,94 @@ def cycle_union_Erdos_Renyi(n, k=2, c=2, seed=None):
 
     return composed
 
+def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed=None):
+    """Return a cycle C_k union G(n,c/n) graph.
+    modified newman_watts_strogatzr_graph() in NetworkX
+
+    Parameters
+    ----------
+    n : int
+        The number of nodes.
+    k : int
+        Each node is joined with its ``k`` nearest neighbors in a ring
+        topology.
+    c : int
+        The probability of a long tie is set to c/n.
+    seed : int, optional
+        The seed for the random number generator (the default is ``None``).
+
+    Notes
+    -----
+    First create a ring over ``n`` nodes.  Then each node in the ring is
+    connected with its ``k`` nearest neighbors (or ``k - 1`` neighbors if ``k``
+    is odd).  Then shortcuts are created by adding new edges as follows: for
+    each node ``u`` in the underlying ``n``-ring with ``k`` nearest
+    neighbors" add p new edges ``(u, w)`` with
+    randomly-chosen existing node ``w``.  In contrast with
+    :func:`watts_strogatz_graph`, no edges are removed.
+
+    See Also
+    --------
+    watts_strogatz_graph()
+
+    References
+    ----------
+    .. [1] M. E. J. Newman and D. J. Watts,
+       Renormalization group analysis of the small-world network model,
+       Physics Letters A, 263, 341, 1999.
+       http://dx.doi.org/10.1016/S0375-9601(99)00757-4
+    """
+    if seed is not None:
+        RD.seed(seed)
+
+    assert len(add_long_ties_exp) == n*(n-1)//2, "add_long_ties_exp has the wrong size"
+    assert len(remove_cycle_edges_exp) == n, "remove_cycle_edges_exp h"
+
+    C_2 = NX.connected_watts_strogatz_graph(n, 4, 0)
+
+    C_2_minus_C_1_edge_index = 0
+    removal_list = []
+
+    # NX.draw_circular(C_2)
+    # plt.show()
+
+    for edge in C_2.edges():
+        print(edge)
+        if abs(edge[0] - edge[1]) == 2 or abs(edge[0] - edge[1]) == n-2: # it is a C_2\C_1 edge
+            if remove_cycle_edges_exp[C_2_minus_C_1_edge_index] < eta:
+                removal_list += [edge]
+            C_2_minus_C_1_edge_index += 1 # index the next C_2\C_1 edge
+    C_2.remove_edges_from(removal_list)
+
+    # NX.draw_circular(C_2)
+    # plt.show()
+    # print(C_2.edges())
+
+    addition_list = []
+
+    K_n = NX.complete_graph(n)
+
+    random_add_edge_index = 0
+
+    for edge in K_n.edges():
+        print(edge)
+        if add_long_ties_exp[random_add_edge_index] < eta:
+            addition_list += [edge]
+        random_add_edge_index += 1 # index the next edge to be considered for addition
+    C_2.add_edges_from(addition_list)
+    # NX.draw_circular(C_2)
+    # plt.show()
+    # print(C_2.edges())
+
+    edge_probability = 1- np.exp(eta/(n**2))
+
+    G_npn = NX.erdos_renyi_graph(n, edge_probability, seed=None, directed=False)
+
+    assert G_npn.nodes() == C_2.nodes(), "node sets are not the same"
+    composed = NX.compose(C_2,G_npn)
+
+    return composed
+
 class network_model():
     """
     implement the initializations and parameter set methods
@@ -244,6 +333,17 @@ class network_model():
                 self.params['nearest_neighbors'] = 2
             self.params['network'] = cycle_union_Erdos_Renyi(self.params['size'], self.params['nearest_neighbors'],
                                                              self.params['c'])
+            # NX.draw_circular(self.params['network'])
+            # plt.show()
+
+        elif self.params['network_model'] == 'c_1_c_2_interpolation':
+            if 'c' not in self.fixed_params:
+                self.params['c'] = 2
+            if 'nearest_neighbors' not in self.fixed_params:
+                self.params['nearest_neighbors'] = 2
+            self.params['network'] = c_1_c_2_interpolation(self.params['size'],self.params['eta'],
+                                                           self.params['add_long_ties_exp'],
+                                                           self.params['remove_cycle_edges_exp'])
             # NX.draw_circular(self.params['network'])
             # plt.show()
         else:
