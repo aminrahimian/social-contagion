@@ -1,14 +1,14 @@
-import numpy as np
+from settings import *
+
 import torch
 import pandas as pd
 import copy
-import random as RD
+
 import networkx as NX
-import matplotlib.pyplot as plt
+
 
 from scipy.stats import norm
 
-# import matplotlib.pyplot as plt
 
 susceptible = 0
 infected = 1
@@ -238,7 +238,7 @@ def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed
     # plt.show()
 
     for edge in C_2.edges():
-        print(edge)
+        # print(edge)
         if abs(edge[0] - edge[1]) == 2 or abs(edge[0] - edge[1]) == n-2: # it is a C_2\C_1 edge
             if remove_cycle_edges_exp[C_2_minus_C_1_edge_index] < eta:
                 removal_list += [edge]
@@ -256,7 +256,7 @@ def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed
     random_add_edge_index = 0
 
     for edge in K_n.edges():
-        print(edge)
+        # print(edge)
         if add_long_ties_exp[random_add_edge_index] < eta:
             addition_list += [edge]
         random_add_edge_index += 1 # index the next edge to be considered for addition
