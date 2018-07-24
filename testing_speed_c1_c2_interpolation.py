@@ -3,17 +3,17 @@
 # does not get infected.
 
 from settings import *
+from models import *
 import settings
 
-
-size_of_dataset = 4
+size_of_dataset = 20
 
 if __name__ == '__main__':
 
     # speeds_alpha_20 = pickle.load(open('./data/speeds_alpha_20.pkl', 'rb'))
     # print(speeds_alpha_20)
 
-    network_size = 1000
+    network_size = 100
 
     speeds_alpha_20 = []
     # speeds_alpha_50 = []
@@ -26,17 +26,26 @@ if __name__ == '__main__':
     speeds_std_alpha_70 = []
     speeds_std_alpha_90 = []
 
-    etas = np.linspace(0,100,10)#-1000000, 0.2,0.25,0.3,0.35,0.4,
+    # etas = np.linspace(0,70,7)#-1000000, 0.2,0.25,0.3,0.35,0.4,
+    etas = np.linspace(0, 250, 10)
     print(etas)
 
     add_long_ties_exp = np.random.exponential(scale=network_size ** 2,
                                               size=int(1.0 * network_size * (network_size - 1)) // 2)
     remove_cycle_edges_exp = np.random.exponential(scale=2 * network_size,
                                                    size=network_size)
+    #
+    # alpha_1 = 0.2
+    # alpha_2 = 0.7
+    # alpha_3 = 0.9
+
+
+    alpha_1 = 0.05
+    alpha_2 = 0.5
+    alpha_3 = 0.7
+
     if settings.do_computations:
         for eta in etas:
-            #
-            alpha_1 = 0.2
 
             params_alpha_20 = {
                 'zero_at_zero': True,
@@ -55,7 +64,10 @@ if __name__ == '__main__':
             print(params_alpha_20['eta'])
 
             dynamics = DeterministicLinear(params_alpha_20)
+
             speed,std,_,_ = dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
+            print(dynamics.params['network'].nodes())
+            print(dynamics.params['network'].edges())
             speeds_alpha_20.append(speed)
             speeds_std_alpha_20.append(std)
             print(speeds_alpha_20)
@@ -107,8 +119,6 @@ if __name__ == '__main__':
             # print(speeds_alpha_60)
             # print(speeds_std_alpha_60)
 
-            alpha_2 = 0.7
-
             params_alpha_70 = {
                 'zero_at_zero': True,
                 'network_model': 'c_1_c_2_interpolation',
@@ -129,8 +139,6 @@ if __name__ == '__main__':
             speeds_std_alpha_70.append(std)
             print(speeds_alpha_70)
             print(speeds_std_alpha_70)
-
-            alpha_3 = 0.9
 
             params_alpha_90 = {
                 'zero_at_zero': True,
@@ -155,24 +163,24 @@ if __name__ == '__main__':
 
 
         if settings.save_computations:
-            pickle.dump(speeds_alpha_20,open( './data/speeds_alpha_20_65to80.pkl','wb'))
-            pickle.dump(speeds_std_alpha_70, open('./data/speeds_alpha_70_65to80.pkl', 'wb'))
-            pickle.dump(speeds_alpha_90, open('./data/speeds_alpha_90_65to80.pkl', 'wb'))
+            pickle.dump(speeds_alpha_20,open( './data/speeds_alpha_20.pkl','wb'))
+            pickle.dump(speeds_alpha_70, open('./data/speeds_alpha_70.pkl', 'wb'))
+            pickle.dump(speeds_alpha_90, open('./data/speeds_alpha_90.pkl', 'wb'))
 
-            pickle.dump(speeds_std_alpha_20,open( './data/speeds_std_alpha_20_65to80.pkl','wb'))
-            pickle.dump(speeds_std_alpha_70, open('./data/speeds_std_alpha_70_65to80.pkl', 'wb'))
-            pickle.dump(speeds_std_alpha_90, open('./data/speeds_std_alpha_90_65to80.pkl', 'wb'))
+            pickle.dump(speeds_std_alpha_20,open( './data/speeds_std_alpha_20.pkl','wb'))
+            pickle.dump(speeds_std_alpha_70, open('./data/speeds_std_alpha_70.pkl', 'wb'))
+            pickle.dump(speeds_std_alpha_90, open('./data/speeds_std_alpha_90.pkl', 'wb'))
 
     if settings.do_plots:
 
         if settings.load_computations:
             speeds_alpha_20 = pickle.load(open('./data/speeds_alpha_20.pkl','rb'))
-            speeds_std_alpha_70 = pickle.load(open('./data/speeds_alpha_70.pkl', 'rb'))
+            speeds_alpha_70 = pickle.load(open('./data/speeds_alpha_70.pkl', 'rb'))
             speeds_alpha_90 = pickle.load(open('./data/speeds_alpha_90.pkl', 'rb'))
 
-            speeds_std_alpha_20 = pickle.load(open( './data/speeds_std_alpha_20_65to80.pkl','rb'))
-            speeds_std_alpha_70 = pickle.load(open('./data/speeds_std_alpha_70_65to80.pkl', 'rb'))
-            speeds_std_alpha_90 = pickle.load(open('./data/speeds_std_alpha_90_65to80.pkl', 'rb'))
+            speeds_std_alpha_20 = pickle.load(open( './data/speeds_std_alpha_20.pkl', 'rb'))
+            speeds_std_alpha_70 = pickle.load(open('./data/speeds_std_alpha_70.pkl', 'rb'))
+            speeds_std_alpha_90 = pickle.load(open('./data/speeds_std_alpha_90.pkl', 'rb'))
 
         plt.figure(1)
 

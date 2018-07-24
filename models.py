@@ -1,4 +1,12 @@
 from settings import *
+import settings
+# if settings.do_plots:
+#     import matplotlib.pyplot as plt
+#     plt.rc('text', usetex=True)
+#     plt.rc('font', family='serif')
+#     from decimal import Decimal
+#     FOURPLACES = Decimal(10) ** -4
+#     ERROR_BAR_TYPE = 'std'
 
 import torch
 import pandas as pd
@@ -237,6 +245,8 @@ def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed
     # NX.draw_circular(C_2)
     # plt.show()
 
+    # print(eta)
+
     for edge in C_2.edges():
         # print(edge)
         if abs(edge[0] - edge[1]) == 2 or abs(edge[0] - edge[1]) == n-2: # it is a C_2\C_1 edge
@@ -244,6 +254,8 @@ def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed
                 removal_list += [edge]
             C_2_minus_C_1_edge_index += 1 # index the next C_2\C_1 edge
     C_2.remove_edges_from(removal_list)
+
+    # print(removal_list)
 
     # NX.draw_circular(C_2)
     # plt.show()
@@ -264,15 +276,18 @@ def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed
     # NX.draw_circular(C_2)
     # plt.show()
     # print(C_2.edges())
+    # print(addition_list)
 
-    edge_probability = 1- np.exp(eta/(n**2))
+    return C_2
 
-    G_npn = NX.erdos_renyi_graph(n, edge_probability, seed=None, directed=False)
-
-    assert G_npn.nodes() == C_2.nodes(), "node sets are not the same"
-    composed = NX.compose(C_2,G_npn)
-
-    return composed
+    # edge_probability = 1- np.exp(eta/(n**2))
+    #
+    # G_npn = NX.erdos_renyi_graph(n, edge_probability, seed=None, directed=False)
+    #
+    # assert G_npn.nodes() == C_2.nodes(), "node sets are not the same"
+    # composed = NX.compose(C_2,G_npn)
+    #
+    # return composed
 
 class network_model():
     """
@@ -492,8 +507,9 @@ class contagion_model(network_model):
             map(lambda node_pointer: 1.0 * self.params['network'].node[node_pointer]['state'],
                 self.params['network'].nodes()))
         total_number_of_infected = np.sum(all_nodes_states)
-        # print('time is',time)
-        # print('total_number_of_infected is',total_number_of_infected)
+        # print('time is', time)
+        # print('total_number_of_infected is', total_number_of_infected)
+        # print('size is', self.params['size'])
         while total_number_of_infected < self.params['size']:
             self.outer_step()
             dummy_network = self.params['network'].copy()
@@ -591,6 +607,7 @@ class contagion_model(network_model):
             count = 1
             while count <= dataset_size:
                 total_spread_time = self.time_the_total_spread()
+                # print('total_spread_time',total_spread_time)
                 if total_spread_time == -1:
                     dataset_size += -1
                     print('The contagion did not spread totally.')
@@ -1002,8 +1019,13 @@ class SimpleOnlyAlongC1(contagion_model):
                     'error: time_since_infection mishandle'
                 self.time_since_infection_is_updated = True
                 # first check if the node can be infected through complex contagion
+                # print('node i', i)
+                # print('current_network.node[i][threshold]', current_network.node[i]['threshold'])
+                # print('.node[i][number_of_infected_neighbors',
+                #       self.params['network'].node[i]['number_of_infected_neighbors'])
                 if (current_network.node[i]['threshold'] <=
-                        self.params['network'].node[i]['number_of_infected_neighbors']):
+                        current_network.node[i]['number_of_infected_neighbors']):
+                    # print('we are here')
                     if RD.random() < self.params['fixed_prob_high']:
                         self.params['network'].node[i]['state'] = infected
                         for k in self.params['network'].neighbors(i):
@@ -1025,7 +1047,8 @@ class SimpleOnlyAlongC1(contagion_model):
                                     self.params['network'].node[k]['number_of_infected_neighbors'] += 1
                                 break
 
-                self.number_of_infected_neighbors_is_updated = True
+                self.number_of_infected_neighbors_is_updated = True # the updating should happen in
+                # self.params['network'] not the current network
 
             # if node i is already infected but recovers
             elif RD.random() < self.params['delta']:
@@ -1083,7 +1106,7 @@ class IndependentCascade(contagion_model):
 
 class NewModel(contagion_model):
     def __init__(self,params):
-        super(new_model, self).__init__(params)
+        super(NewModel, self).__init__(params)
         self.classification_label = SIMPLE # or CMOPLEPX
         # set other model specific flags and handles here
 
