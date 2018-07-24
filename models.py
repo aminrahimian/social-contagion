@@ -465,7 +465,7 @@ class network_model():
 
 class contagion_model(network_model):
     """
-    implements data generation, framing of the datasets (pandas), and interfacing them with torch
+    implements data generation
     """
     def __init__(self,params):
         super(contagion_model,self).__init__()
@@ -772,8 +772,8 @@ class SIS_threshold(activation):
                                                      current_network.node[i]['threshold'] < number_of_infected_neighbors)) +
                                                  (self.params['fixed_prob']* 1.0 *
                                                  ((current_network.node[i]['threshold'] >= number_of_infected_neighbors)
-                                                  and (number_of_infected_neighbors != 0))) +
-                                                 0.0 * (number_of_infected_neighbors == 0))
+                                                  and (not (number_of_infected_neighbors < 1)))) +
+                                                 0.0 * (number_of_infected_neighbors < 0))
         else:  # not zero at zero
             for i in current_network.nodes():
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
@@ -911,7 +911,7 @@ class Linear(activation):
     infection happens with fixed probability 'fixed_prob'. The fixed probabilities can be set to one or zero.
     """
     def __init__(self,params):
-        super(linear, self).__init__(params)
+        super(Linear, self).__init__(params)
         self.classification_label = COMPLEX
         self.isLinearThresholdModel = True
 
@@ -967,8 +967,8 @@ class DeterministicLinear(activation):
                                                  self.params['fixed_prob'] * 1.0 * (
                                                          (current_network.node[i][
                                                               'threshold'] > number_of_infected_neighbors)
-                                                         and (number_of_infected_neighbors != 0)) +
-                                                 0.0 * 1.0 * (number_of_infected_neighbors == 0))
+                                                         and (not (number_of_infected_neighbors < 1))) +
+                                                 0.0 * 1.0 * (number_of_infected_neighbors < 1))
             else:  # not zero at zero
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                  self.params['fixed_prob_high'] * 1.0 * (
@@ -980,13 +980,74 @@ class DeterministicLinear(activation):
         self.activation_functions_is_set = True
 
 
+
+class SimpleOnlyAlongC1(contagion_model):
+    """
+    Implements an a special contagion model that is useful for interpolating C_1 and C_2 when studying the effect
+    of rewiring. It allows complex contagion along all edges. Also allows simple contagion
+    but only along cycle edges.
+    """
+
+    def __init__(self, params):
+        super(SimpleOnlyAlongC1, self).__init__(params)
+        self.classification_label = COMPLEX
+        assert self.params['network_model'] == 'c_1_c_2_interpolation', \
+            "this contagion model is only suitable for c_1_c_2_interpolation"
+
+    def step(self):
+        current_network = copy.deepcopy(self.params['network'])
+        for i in current_network.nodes():
+            if current_network.node[i]['state'] == susceptible:
+                assert self.params['network'].node[i]['time_since_infection'] == 0, \
+                    'error: time_since_infection mishandle'
+                self.time_since_infection_is_updated = True
+                # first check if the node can be infected through complex contagion
+                if (current_network.node[i]['threshold'] <=
+                        self.params['network'].node[i]['number_of_infected_neighbors']):
+                    if RD.random() < self.params['fixed_prob_high']:
+                        self.params['network'].node[i]['state'] = infected
+                        for k in self.params['network'].neighbors(i):
+                            self.params['network'].node[k]['number_of_infected_neighbors'] += 1
+
+                else:  # if the node cannot be infected through complex contagion
+                    # see if it can be infected through simple contagion along cycle edges
+                    for j in current_network.neighbors(i):
+                        # print('i', i)
+                        # print('j', j)
+                        j_is_a_cycle_neighbor = ((abs(i - j) == 1) or
+                                                 (abs(i - j) == (self.params['size'] - 1)))
+                        # print('j_is_a_cycle_neighbor', j_is_a_cycle_neighbor)
+                        if (current_network.node[j]['state'] == infected
+                                and j_is_a_cycle_neighbor):
+                            if RD.random() < self.params['fixed_prob']:
+                                self.params['network'].node[i]['state'] = infected
+                                for k in self.params['network'].neighbors(i):
+                                    self.params['network'].node[k]['number_of_infected_neighbors'] += 1
+                                break
+
+                self.number_of_infected_neighbors_is_updated = True
+
+            # if node i is already infected but recovers
+            elif RD.random() < self.params['delta']:
+                    self.params['network'].node[i]['state'] = susceptible
+                    for k in self.params['network'].neighbors(i):
+                        self.params['network'].node[k]['number_of_infected_neighbors'] -= 1
+                    self.number_of_infected_neighbors_is_updated = True
+                    self.params['network'].node[i]['time_since_infection'] = 0
+                    self.time_since_infection_is_updated = True
+            # if node i is already infected and does not recover
+            else:
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.time_since_infection_is_updated = True
+                self.number_of_infected_neighbors_is_updated = True
+
 class IndependentCascade(contagion_model):
     """
     Implements an independent cascade model. Each infected neighbor has an independent probability beta of passing on her
     infection, as long as her infection has occurred within the past mem = 1 time steps.
     """
     def __init__(self,params,mem = 1):
-        super(independent_cascade, self).__init__(params)
+        super(IndependentCascade, self).__init__(params)
         self.classification_label = SIMPLE
         self.memory = mem
 
@@ -1025,6 +1086,21 @@ class NewModel(contagion_model):
         super(new_model, self).__init__(params)
         self.classification_label = SIMPLE # or CMOPLEPX
         # set other model specific flags and handles here
+
+    def set_activation_functions(self):
+        """
+        sets the linear threshold activation functions with deterministic thresholds for each of the nodes
+        """
+        current_network = copy.deepcopy(self.params['network'])
+
+        for i in current_network.nodes():
+            if self.params['zero_at_zero']:
+                pass
+            else:  # not zero at zero
+                pass
+        self.activation_functions_is_set = True
+
+    # note: do not implement step if you implemented set_activation_functions()
 
     def step(self):
         current_network = copy.deepcopy(self.params['network'])
