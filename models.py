@@ -1,5 +1,7 @@
 from settings import *
+
 import settings
+
 # if settings.do_plots:
 #     import matplotlib.pyplot as plt
 #     plt.rc('text', usetex=True)
@@ -14,13 +16,10 @@ import copy
 
 import networkx as NX
 
-
 from scipy.stats import norm
-
 
 susceptible = 0
 infected = 1
-
 
 SIMPLE = 0
 COMPLEX = 1
@@ -46,6 +45,7 @@ def time_the_cap(fraction_timeseries, cap):
     Returns the first time a time-series of the fractions goes above the cap.
     Extrapolates if too slow, or returns -1 if not-spread
     """
+    time_of_the_cap = None
     total_steps = len(fraction_timeseries)
     if fraction_timeseries[-1] < cap:
         if fraction_timeseries[0] == fraction_timeseries[-1]:  # contagion has not spread
@@ -61,48 +61,16 @@ def time_the_cap(fraction_timeseries, cap):
                     count_steps +=1
     else:
         for i in reversed(range(total_steps)):
-            if fraction_timeseries[i]<cap:
-                time_of_the_cap = i +1
+            if fraction_timeseries[i] < cap:
+                time_of_the_cap = i + 1
                 break
+    assert time_of_the_cap is not None, 'time_of_the_cap is not set'
     return time_of_the_cap
 
 
 def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
-    """Return a Newman–Watts–Strogatz small-world graph. With a fixed (no random) number of edges
-    added to each node. Modified newman_watts_strogatzr_graph() in NetworkX
-
-    Parameters
-    ----------
-    n : int
-        The number of nodes.
-    k : int
-        Each node is joined with its ``k`` nearest neighbors in a ring
-        topology.
-    p : int
-        The number of new edges added for each edge.
-    seed : int, optional
-        The seed for the random number generator (the default is ``None``).
-
-    Notes
-    -----
-    First create a ring over ``n`` nodes.  Then each node in the ring is
-    connected with its ``k`` nearest neighbors (or ``k - 1`` neighbors if ``k``
-    is odd).  Then shortcuts are created by adding new edges as follows: for
-    each node ``u`` in the underlying ``n``-ring with ``k`` nearest
-    neighbors" add p new edges ``(u, w)`` with
-    randomly-chosen existing node ``w``.  In contrast with
-    :func:`watts_strogatz_graph`, no edges are removed.
-
-    See Also
-    --------
-    watts_strogatz_graph()
-
-    References
-    ----------
-    .. [1] M. E. J. Newman and D. J. Watts,
-       Renormalization group analysis of the small-world network model,
-       Physics Letters A, 263, 341, 1999.
-       http://dx.doi.org/10.1016/S0375-9601(99)00757-4
+    """Returns a Newman–Watts–Strogatz small-world graph. With a fixed (not random) number of edges
+    added to each node. Modified newman_watts_strogatzr_graph() in NetworkX.
     """
     if seed is not None:
         RD.seed(seed)
@@ -143,43 +111,10 @@ def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
     return G
 
 
-def cycle_union_Erdos_Renyi(n, k=2, c=2, seed=None):
-    """Return a cycle C_k union G(n,c/n) graph.
-    modified newman_watts_strogatzr_graph() in NetworkX
-
-    Parameters
-    ----------
-    n : int
-        The number of nodes.
-    k : int
-        Each node is joined with its ``k`` nearest neighbors in a ring
-        topology.
-    c : int
-        The probability of a long tie is set to c/n.
-    seed : int, optional
-        The seed for the random number generator (the default is ``None``).
-
-    Notes
-    -----
-    First create a ring over ``n`` nodes.  Then each node in the ring is
-    connected with its ``k`` nearest neighbors (or ``k - 1`` neighbors if ``k``
-    is odd).  Then shortcuts are created by adding new edges as follows: for
-    each node ``u`` in the underlying ``n``-ring with ``k`` nearest
-    neighbors" add p new edges ``(u, w)`` with
-    randomly-chosen existing node ``w``.  In contrast with
-    :func:`watts_strogatz_graph`, no edges are removed.
-
-    See Also
-    --------
-    watts_strogatz_graph()
-
-    References
-    ----------
-    .. [1] M. E. J. Newman and D. J. Watts,
-       Renormalization group analysis of the small-world network model,
-       Physics Letters A, 263, 341, 1999.
-       http://dx.doi.org/10.1016/S0375-9601(99)00757-4
-    """
+def cycle_union_Erdos_Renyi(n, k=4, c=2, seed=None):
+    """Returns a cycle C_k union G(n,c/n) graph by composing
+    NX.connected_watts_strogatz_graph(n, k, 0) and
+    NX.erdos_renyi_graph(n, c/n, seed=None, directed=False)"""
     if seed is not None:
         RD.seed(seed)
 
@@ -195,47 +130,17 @@ def cycle_union_Erdos_Renyi(n, k=2, c=2, seed=None):
     return composed
 
 def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed=None):
-    """Return a cycle C_k union G(n,c/n) graph.
-    modified newman_watts_strogatzr_graph() in NetworkX
-
-    Parameters
-    ----------
-    n : int
-        The number of nodes.
-    k : int
-        Each node is joined with its ``k`` nearest neighbors in a ring
-        topology.
-    c : int
-        The probability of a long tie is set to c/n.
-    seed : int, optional
-        The seed for the random number generator (the default is ``None``).
-
-    Notes
-    -----
-    First create a ring over ``n`` nodes.  Then each node in the ring is
-    connected with its ``k`` nearest neighbors (or ``k - 1`` neighbors if ``k``
-    is odd).  Then shortcuts are created by adding new edges as follows: for
-    each node ``u`` in the underlying ``n``-ring with ``k`` nearest
-    neighbors" add p new edges ``(u, w)`` with
-    randomly-chosen existing node ``w``.  In contrast with
-    :func:`watts_strogatz_graph`, no edges are removed.
-
-    See Also
-    --------
-    watts_strogatz_graph()
-
-    References
-    ----------
-    .. [1] M. E. J. Newman and D. J. Watts,
-       Renormalization group analysis of the small-world network model,
-       Physics Letters A, 263, 341, 1999.
-       http://dx.doi.org/10.1016/S0375-9601(99)00757-4
+    """Return graph that interpolates C_1 and C_2.
+    Those edges having add_long_ties_exp < eta are added.
+    Those edges having remove_cycle_edges_exp < eta are removed.
+    len(add_long_ties_exp) = n*(n-1)//2
+    len(remove_cycle_edges_exp) = n
     """
     if seed is not None:
         RD.seed(seed)
 
     assert len(add_long_ties_exp) == n*(n-1)//2, "add_long_ties_exp has the wrong size"
-    assert len(remove_cycle_edges_exp) == n, "remove_cycle_edges_exp h"
+    assert len(remove_cycle_edges_exp) == n, "remove_cycle_edges_exp has the wrong size"
 
     C_2 = NX.connected_watts_strogatz_graph(n, 4, 0)
 
@@ -277,17 +182,7 @@ def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed
     # plt.show()
     # print(C_2.edges())
     # print(addition_list)
-
     return C_2
-
-    # edge_probability = 1- np.exp(eta/(n**2))
-    #
-    # G_npn = NX.erdos_renyi_graph(n, edge_probability, seed=None, directed=False)
-    #
-    # assert G_npn.nodes() == C_2.nodes(), "node sets are not the same"
-    # composed = NX.compose(C_2,G_npn)
-    #
-    # return composed
 
 class network_model():
     """
@@ -300,73 +195,93 @@ class network_model():
         """
         initializes the network interconnections based on the params
         """
-        if self.params['network_model'] == 'erdos_renyi':
-            if 'linkProbability' not in self.fixed_params:  # erdos-renyi link probability
-                self.params['linkProbability'] = 2 * np.log(self.params['size']) / self.params[
-                    'size']  # np.random.beta(1, 1, None)*20*np.log(self.params['size'])/self.params['size']
-            self.params['network'] = NX.erdos_renyi_graph(self.params['size'], self.params['linkProbability'])
-            if not NX.is_connected(self.params['network']):
+        if 'network' not in self.fixed_params:
+            if self.params['network_model'] == 'erdos_renyi':
+                if 'linkProbability' not in self.fixed_params:  # erdos-renyi link probability
+                    self.params['linkProbability'] = 2 * np.log(self.params['size']) / self.params[
+                        'size']  # np.random.beta(1, 1, None)*20*np.log(self.params['size'])/self.params['size']
                 self.params['network'] = NX.erdos_renyi_graph(self.params['size'], self.params['linkProbability'])
+                if not NX.is_connected(self.params['network']):
+                    self.params['network'] = NX.erdos_renyi_graph(self.params['size'], self.params['linkProbability'])
 
-        elif self.params['network_model'] == 'watts_strogatz':
-            if 'nearest_neighbors' not in self.fixed_params:
-                self.params['nearest_neighbors'] = 3
-            if 'rewiring_probability' not in self.fixed_params:
-                self.params['rewiring_probability'] = 0.000000005
-            self.params['network'] = NX.connected_watts_strogatz_graph(self.params['size'], self.params['nearest_neighbors'],
-                                                             self.params['rewiring_probability'])
-        elif self.params['network_model'] == 'grid':
-            if 'number_grid_rows' not in self.fixed_params:
-                if 'number_grid_columns' not in self.fixed_params:
-                    (self.params['number_grid_columns'],self.params['number_grid_rows']) = random_factor_pair(self.params['size'])
+            elif self.params['network_model'] == 'watts_strogatz':
+                if 'nearest_neighbors' not in self.fixed_params:
+                    self.params['nearest_neighbors'] = 3
+                if 'rewiring_probability' not in self.fixed_params:
+                    self.params['rewiring_probability'] = 0.000000005
+                self.params['network'] = NX.connected_watts_strogatz_graph(self.params['size'], self.params['nearest_neighbors'],
+                                                                 self.params['rewiring_probability'])
+            elif self.params['network_model'] == 'grid':
+                if 'number_grid_rows' not in self.fixed_params:
+                    if 'number_grid_columns' not in self.fixed_params:
+                        (self.params['number_grid_columns'],self.params['number_grid_rows']) = random_factor_pair(self.params['size'])
+                    else:
+                        self.params['number_grid_rows'] = self.params['size'] // self.params['number_grid_columns']
+                        self.params['number_grid_columns'] = self.params['size'] // self.params['number_grid_rows']
+                elif 'number_grid_columns' in self.fixed_params:
+                    assert self.params['number_grid_columns']*self.params['number_grid_rows'] == self.params['size'], \
+                        'incompatible size and grid dimensions'
                 else:
-                    self.params['number_grid_rows'] = self.params['size'] // self.params['number_grid_columns']
                     self.params['number_grid_columns'] = self.params['size'] // self.params['number_grid_rows']
-            elif 'number_grid_columns' in self.fixed_params:
-                assert self.params['number_grid_columns']*self.params['number_grid_rows'] == self.params['size'], \
-                    'incompatible size and grid dimensions'
-            else:
-                self.params['number_grid_columns'] = self.params['size'] // self.params['number_grid_rows']
-                self.params['number_grid_rows'] = self.params['size'] // self.params['number_grid_columns']
-            self.params['network'] = NX.grid_2d_graph(self.params['number_grid_rows'],
-                                                      self.params['number_grid_columns'])
-        elif self.params['network_model'] == 'random_regular':
-            if 'degree' not in self.fixed_params:
-                self.params['degree'] = np.random.randint(1, 6)
-            self.params['network'] = NX.random_regular_graph(self.params['degree'], self.params['size'], seed=None)
-        elif self.params['network_model'] == 'newman_watts_fixed_number':
-            if 'fixed_number_edges_added' not in self.fixed_params:
-                self.params['fixed_number_edges_added'] = 2
-            if 'nearest_neighbors' not in self.fixed_params:
-                self.params['nearest_neighbors'] = 2
-            self.params['network'] = newman_watts_add_fixed_number_graph(self.params['size'], self.params['nearest_neighbors']
-                                                                         , self.params['fixed_number_edges_added'])
-        elif self.params['network_model'] == 'cycle_union_Erdos_Renyi':
-            if 'c' not in self.fixed_params:
-                self.params['c'] = 2
-            if 'nearest_neighbors' not in self.fixed_params:
-                self.params['nearest_neighbors'] = 2
-            self.params['network'] = cycle_union_Erdos_Renyi(self.params['size'], self.params['nearest_neighbors'],
-                                                             self.params['c'])
-            # NX.draw_circular(self.params['network'])
-            # plt.show()
+                    self.params['number_grid_rows'] = self.params['size'] // self.params['number_grid_columns']
+                self.params['network'] = NX.grid_2d_graph(self.params['number_grid_rows'],
+                                                          self.params['number_grid_columns'])
+            elif self.params['network_model'] == 'random_regular':
+                if 'degree' not in self.fixed_params:
+                    self.params['degree'] = np.random.randint(1, 6)
+                self.params['network'] = NX.random_regular_graph(self.params['degree'], self.params['size'], seed=None)
+            elif self.params['network_model'] == 'newman_watts_fixed_number':
+                if 'fixed_number_edges_added' not in self.fixed_params:
+                    self.params['fixed_number_edges_added'] = 2
+                if 'nearest_neighbors' not in self.fixed_params:
+                    self.params['nearest_neighbors'] = 2
+                self.params['network'] = newman_watts_add_fixed_number_graph(self.params['size'], self.params['nearest_neighbors']
+                                                                             , self.params['fixed_number_edges_added'])
+            elif self.params['network_model'] == 'cycle_union_Erdos_Renyi':
+                if 'c' not in self.fixed_params:
+                    self.params['c'] = 2
+                if 'nearest_neighbors' not in self.fixed_params:
+                    self.params['nearest_neighbors'] = 2
+                self.params['network'] = cycle_union_Erdos_Renyi(self.params['size'], self.params['nearest_neighbors'],
+                                                                 self.params['c'])
+                # NX.draw_circular(self.params['network'])
+                # plt.show()
 
-        elif self.params['network_model'] == 'c_1_c_2_interpolation':
-            if 'c' not in self.fixed_params:
-                self.params['c'] = 2
-            if 'nearest_neighbors' not in self.fixed_params:
-                self.params['nearest_neighbors'] = 2
-            self.params['network'] = c_1_c_2_interpolation(self.params['size'],self.params['eta'],
-                                                           self.params['add_long_ties_exp'],
-                                                           self.params['remove_cycle_edges_exp'])
-            # NX.draw_circular(self.params['network'])
-            # plt.show()
-        else:
-            assert False, 'undefined network type'
-        if 'maslov_sneppen'  not in self.fixed_params:
+            elif self.params['network_model'] == 'c_1_c_2_interpolation':
+                if 'c' not in self.fixed_params:
+                    self.params['c'] = 2
+                if 'nearest_neighbors' not in self.fixed_params:
+                    self.params['nearest_neighbors'] = 2
+                self.params['network'] = c_1_c_2_interpolation(self.params['size'],self.params['eta'],
+                                                               self.params['add_long_ties_exp'],
+                                                               self.params['remove_cycle_edges_exp'])
+                # NX.draw_circular(self.params['network'])
+                # plt.show()
+            else:
+                assert False, 'undefined network type'
+
+        print('we are here')
+        # print(self.fixed_params)
+        if 'maslov_sneppen' not in self.fixed_params:
             self.params['maslov_sneppen'] = False
+            print('we did not rewire!')
         if self.params['maslov_sneppen']:
-            self.maslov_sneppen_rewiring()
+            if 'num_steps_for_maslov_sneppen_rewriring' not in self.fixed_params:
+                self.params['num_steps_for_maslov_sneppen_rewriring'] = \
+                    0.1 * self.params['network'].number_of_edges()  # rewire 10% of edges
+            rewired_network = self.maslov_sneppen_rewiring(num_steps=
+                                                           int(np.floor(
+                                                               self.params['num_steps_for_maslov'
+                                                                           '_sneppen_rewriring'])))
+            print('we rewired!')
+            while (not NX.is_connected(rewired_network)):
+                rewired_network = self.maslov_sneppen_rewiring(num_steps=
+                                             int(np.floor(self.params['num_steps_for_maslov_sneppen_rewriring'])))
+                print('we rewired!')
+
+            self.params['network'] = rewired_network
+
+            print(NX.is_connected(self.params['network']))
 
     def init_network_states(self):
         """
@@ -412,9 +327,13 @@ class network_model():
         ``4*graph.num_edges()`` steps.
         The code is adopted from: https://github.com/araichev/graph_dynamics/blob/master/graph_dynamics.py
         """
+
+        rewired_network = self.params['network']
         assert 'network' in self.params, 'error: network is not yet not set.'
         if num_steps is SENTINEL:
             num_steps = 10 * self.params['network'].number_of_edges()
+            # completely rewire everything
+
         for i in range(num_steps):
             chosen_edges = RD.sample(self.params['network'].edges(),2)
             e1 = chosen_edges[0]
@@ -425,10 +344,13 @@ class network_model():
                     self.params['network'].has_edge(*new_e1) or self.params['network'].has_edge(*new_e2):
                 # Not allowed to rewire e1 and e2. Skip.
                 continue
-            self.params['network'].remove_edge(*e1)
-            self.params['network'].remove_edge(*e2)
-            self.params['network'].add_edge(*new_e1)
-            self.params['network'].add_edge(*new_e2)
+
+            rewired_network.remove_edge(*e1)
+            rewired_network.remove_edge(*e2)
+            rewired_network.add_edge(*new_e1)
+            rewired_network.add_edge(*new_e2)
+
+        return rewired_network
 
     def setRandomParams(self):
         """
@@ -459,11 +381,10 @@ class network_model():
                 self.params['size'] = 100  # np.random.randint(50, 500)
         if 'network_model' not in self.fixed_params:
             self.params['network_model'] = RD.choice(['erdos_renyi','watts_strogatz','grid','random_regular'])
-        if 'network' not in self.fixed_params:
-            self.init_network()
+
         if 'initial_infection_probability' not in self.fixed_params:
             self.params['initial_infection_probability'] = 0.1
-        if  'thresholds' not in self.fixed_params:
+        if 'thresholds' not in self.fixed_params:
             if hasattr(self,'isLinearThresholdModel'):
                 relative_thresholds = list(np.random.uniform(size=self.params['size']))
                 all_degrees = self.params['network'].degree()
@@ -473,6 +394,8 @@ class network_model():
         if 'initial_states' not in self.fixed_params:
             self.params['initial_states'] = np.random.binomial(1,[self.params['initial_infection_probability']]*
                                                                self.params['size'])
+
+        self.init_network()
         self.init_network_states()
 
         self.missing_params_not_set = False
@@ -490,7 +413,7 @@ class contagion_model(network_model):
         self.number_of_infected_neighbors_is_updated = False
         self.time_since_infection_is_updated = False
 
-    def time_the_total_spread(self, get_network_time_series = False):
+    def time_the_total_spread(self, get_network_time_series = False, verbose = False):
         time = 0
         network_time_series = []
 
@@ -507,9 +430,10 @@ class contagion_model(network_model):
             map(lambda node_pointer: 1.0 * self.params['network'].node[node_pointer]['state'],
                 self.params['network'].nodes()))
         total_number_of_infected = np.sum(all_nodes_states)
-        # print('time is', time)
-        # print('total_number_of_infected is', total_number_of_infected)
-        # print('size is', self.params['size'])
+        if verbose:
+            print('time is', time)
+            print('total_number_of_infected is', total_number_of_infected)
+            print('total size is', self.params['size'])
         while total_number_of_infected < self.params['size']:
             self.outer_step()
             dummy_network = self.params['network'].copy()
@@ -519,8 +443,11 @@ class contagion_model(network_model):
                 map(lambda node_pointer: 1.0 * self.params['network'].node[node_pointer]['state'],
                     self.params['network'].nodes()))
             total_number_of_infected = np.sum(all_nodes_states)
-            # print('time is',time)
-            # print('total_number_of_infected is', total_number_of_infected)
+
+            if verbose:
+                print('time is', time)
+                print('total_number_of_infected is', total_number_of_infected)
+                print('total size is', self.params['size'])
 
             if time > self.params['size']**3:
                 time = -1
@@ -532,7 +459,12 @@ class contagion_model(network_model):
         else:
             return time
 
-    def generateTimeseries(self): #  conditioned on the fixed_params
+    def generateTimeseries(self):
+        # conditioned on the fixed_params
+        # returns the time series from fraction of infected nodes.
+        total_time = self.time_the_total_spread()
+        # print(total_time)
+
         time = 0
         self.missing_params_not_set = True
         self.setRandomParams()
@@ -540,25 +472,28 @@ class contagion_model(network_model):
             self.set_activation_functions()
         network_timeseries = []
 
-        while time < self.params['timeseries_length']:
+
+
+        while time < total_time:
             dummy_network = self.params['network'].copy()
             network_timeseries.append(dummy_network)
             self.outer_step()
             time += 1
 
-        all_nodes_states = list(map(lambda node_pointer: list(map(lambda network: 1.0*(network.node[node_pointer]['state']),
-                               network_timeseries)),self.params['network'].nodes()))
+        all_nodes_states = list(map(lambda node_pointer:
+                                    list(map(lambda network: 1.0*(network.node[node_pointer]['state']),
+                                             network_timeseries)), self.params['network'].nodes()))
 
         fractions_timeseies = np.sum(all_nodes_states, 0)/self.params['size']
 
         df = pd.DataFrame(fractions_timeseies)
+        # print(df)
         #df = pd.DataFrame(np.transpose(all_nodes_states))
         return df
 
-
     def genTorchSample(self):
         df = self.generateTimeseries()
-        data = torch.FloatTensor(df.values[:, 0:self.params['feature_length']])  # [:,0:feature_length] pass on the fraction of infected people
+        data = torch.FloatTensor(df.values[:, 0:1])  # [:,0:feature_length] pass on the fraction of infected people
         label_of_data = torch.LongTensor([self.classification_label])
         return label_of_data, data
 
@@ -569,7 +504,10 @@ class contagion_model(network_model):
             simulation_results.append((label_of_data, data))
         return simulation_results
 
-    def avg_speed_of_spread(self , dataset_size=1000,cap=0.9 , mode='max'):
+    def avg_speed_of_spread(self , dataset_size=1000,cap=0.9, mode='max'):
+        # avg time to spread over the dataset.
+        # The time to spread is measured in one of the modes:
+        # integral, max, and total.
         if mode == 'integral':
             dataset = self.genTorchDataset(dataset_size)
             integrals = []
@@ -582,13 +520,14 @@ class contagion_model(network_model):
             speed_std = np.std(integrals)
             speed_max = np.max(integrals)
             speed_min = np.min(integrals)
+            speed_samples = np.asarray(integrals)
 
         elif mode == 'max':
             dataset = self.genTorchDataset(dataset_size)
             cap_times = []
             sum_of_cap_times = 0
             for i in range(dataset_size):
-                cap_time = time_the_cap(dataset[i][1][:,0],cap)
+                cap_time = time_the_cap(dataset[i][1][:,0], cap)
                 if cap_time == -1:
                     dataset_size += -1
                     continue
@@ -601,6 +540,7 @@ class contagion_model(network_model):
                 speed_std = np.std(cap_times)
                 speed_max = np.max(cap_times)
                 speed_min = np.min(cap_times)
+                speed_samples = np.asarray(cap_times)
         elif mode == 'total':
             total_spread_times = []
             sum_of_total_spread_times = 0
@@ -622,11 +562,12 @@ class contagion_model(network_model):
                 speed_std = np.std(total_spread_times)
                 speed_max = np.max(total_spread_times)
                 speed_min = np.min(total_spread_times)
+                speed_samples = np.asarray(total_spread_times)
 
 
         else:
             assert False, 'undefined mode for avg_speed_of_spread'
-        return avg_speed,speed_std,speed_max,speed_min
+        return avg_speed,speed_std,speed_max,speed_min,speed_samples
 
     def outer_step(self):
         assert hasattr(self, 'classification_label'), 'classification_label not set'
@@ -648,8 +589,6 @@ class activation(contagion_model):
     """
     def __init__(self,params,externally_set_activation_functions=SENTINEL,externally_set_classification_label = SENTINEL):
 
-
-
         super(activation, self).__init__(params)
 
         assert not (
@@ -663,6 +602,15 @@ class activation(contagion_model):
         self.activation_functions = []
         self.activation_functions_is_set = False
 
+        print(self.params)
+
+        if 'size' not in self.params:
+            if 'network' in self.params:
+                self.params['size'] = NX.number_of_nodes(self.params['network'])
+            else:
+                assert False, 'neither network size nor size are defined'
+
+        assert 'size' in self.params.keys(), 'the network size should be set at this stage'
         self.activation_probabilities = list(range(self.params['size']))
         self.activation_probabilities_is_set = False
 
