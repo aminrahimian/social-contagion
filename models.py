@@ -260,11 +260,11 @@ class network_model():
             else:
                 assert False, 'undefined network type'
 
-        print('we are here')
+        # print('we are here')
         # print(self.fixed_params)
         if 'maslov_sneppen' not in self.fixed_params:
             self.params['maslov_sneppen'] = False
-            print('we did not rewire!')
+            # print('we did not rewire!')
         if self.params['maslov_sneppen']:
             if 'num_steps_for_maslov_sneppen_rewriring' not in self.fixed_params:
                 self.params['num_steps_for_maslov_sneppen_rewriring'] = \
@@ -273,15 +273,15 @@ class network_model():
                                                            int(np.floor(
                                                                self.params['num_steps_for_maslov'
                                                                            '_sneppen_rewriring'])))
-            print('we rewired!')
-            while (not NX.is_connected(rewired_network)):
-                rewired_network = self.maslov_sneppen_rewiring(num_steps=
-                                             int(np.floor(self.params['num_steps_for_maslov_sneppen_rewriring'])))
-                print('we rewired!')
+            # print('we rewired!')
+            # while (not NX.is_connected(rewired_network)):
+            #     rewired_network = self.maslov_sneppen_rewiring(num_steps=
+            #                                  int(np.floor(self.params['num_steps_for_maslov_sneppen_rewriring'])))
+            #     print('we rewired!')
 
             self.params['network'] = rewired_network
 
-            print(NX.is_connected(self.params['network']))
+            # print(NX.is_connected(self.params['network']))
 
     def init_network_states(self):
         """
@@ -314,7 +314,7 @@ class network_model():
         assert self.number_of_infected_neighbors_is_updated and self.time_since_infection_is_updated, \
             'error: number_of_infected_neighbors or time_since_infection mishandle'
 
-    def maslov_sneppen_rewiring(self, num_steps = SENTINEL):
+    def maslov_sneppen_rewiring(self, num_steps = SENTINEL, return_connected = True):
         """
         Rewire the network graph according to the Maslov and
         Sneppen method for degree-preserving random rewiring of a complex network,
@@ -328,12 +328,14 @@ class network_model():
         The code is adopted from: https://github.com/araichev/graph_dynamics/blob/master/graph_dynamics.py
         """
 
-        rewired_network = self.params['network']
+
         assert 'network' in self.params, 'error: network is not yet not set.'
+
         if num_steps is SENTINEL:
             num_steps = 10 * self.params['network'].number_of_edges()
             # completely rewire everything
 
+        rewired_network = self.params['network']
         for i in range(num_steps):
             chosen_edges = RD.sample(self.params['network'].edges(),2)
             e1 = chosen_edges[0]
@@ -349,6 +351,24 @@ class network_model():
             rewired_network.remove_edge(*e2)
             rewired_network.add_edge(*new_e1)
             rewired_network.add_edge(*new_e2)
+
+        while (not NX.is_connected(rewired_network)):
+            rewired_network = self.params['network']
+            for i in range(num_steps):
+                chosen_edges = RD.sample(self.params['network'].edges(), 2)
+                e1 = chosen_edges[0]
+                e2 = chosen_edges[1]
+                new_e1 = (e1[0], e2[1])
+                new_e2 = (e2[0], e1[1])
+                if new_e1[0] == new_e1[1] or new_e2[0] == new_e2[1] or \
+                        self.params['network'].has_edge(*new_e1) or self.params['network'].has_edge(*new_e2):
+                    # Not allowed to rewire e1 and e2. Skip.
+                    continue
+
+                rewired_network.remove_edge(*e1)
+                rewired_network.remove_edge(*e2)
+                rewired_network.add_edge(*new_e1)
+                rewired_network.add_edge(*new_e2)
 
         return rewired_network
 

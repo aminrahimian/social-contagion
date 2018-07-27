@@ -9,8 +9,8 @@ import numpy as np
 import pickle
 
 
-RD.seed(0)
-np.random.seed(0)
+RD.seed()
+np.random.seed()
 
 do_computations = True
 save_computations = True
@@ -20,6 +20,20 @@ assert (not save_computations) or do_computations, "do_computations should be tr
 do_plots = True
 
 save_plots = True
+
+show_plots = False
+
+assert show_plots is not save_plots, "you can either save plots or show plots not both"
+
+simulator_mode = False
+
+layout = 'spring'  # layout could be circular, spring
+
+if simulator_mode:
+    import matplotlib
+    matplotlib.use('TkAgg')
+    import matplotlib.pyplot as plt
+    import pickle
 
 if do_plots:
     import matplotlib.pyplot as plt
