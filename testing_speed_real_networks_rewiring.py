@@ -20,6 +20,11 @@ if __name__ == '__main__':
         G = NX.read_edgelist(fh)
 
         print(NX.is_connected(G))
+        # print(type(G))
+        #
+        # add_edges(G, number_of_edges_to_be_added=10, mode='triadic_closures', seed=None)
+        #
+        # exit()
 
         network_size = NX.number_of_nodes(G)
 
@@ -28,6 +33,7 @@ if __name__ == '__main__':
         params = {
             'network': G,
             'size': network_size,
+            'add_edges': False,
             'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'fixed_prob_high': 1.0,
@@ -43,6 +49,7 @@ if __name__ == '__main__':
         params_rewired = {
             'network': G,
             'size': network_size,
+            'add_edges': False,
             'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
             'delta': 0.0000000000000001,
             'fixed_prob_high': 1.0,
