@@ -184,6 +184,99 @@ def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed
     # print(addition_list)
     return C_2
 
+
+def add_edges(G, number_of_edges_to_be_added=10, mode='random', seed=None):
+    """Add number_of_edges_to_be_added edges to the NetworkX object G.
+    Two modes: 'random' or 'triadic_closures'
+    """
+    if seed is not None:
+        RD.seed(seed)
+
+    number_of_edges_to_be_added = int(np.floor(number_of_edges_to_be_added))
+
+    assert type(G) is NX.classes.graph.Graph, "input should be a NetworkX graph object"
+
+    fat_network = copy.deepcopy(G)
+
+    # print('original number of edges',len(fat_network.edges()))
+
+    unformed_edges = list(NX.non_edges(fat_network))
+
+    if len(unformed_edges) < number_of_edges_to_be_added:
+        print("There are not that many edges left ot be added")
+        fat_network.add_edges_from(unformed_edges)  # add all the edges that are left
+        return fat_network
+
+    if mode is 'random':
+        addition_list = RD.sample(unformed_edges, number_of_edges_to_be_added)
+        fat_network.add_edges_from(addition_list)
+        return fat_network
+
+    # NX.draw_circular(C_2)
+    # plt.show()
+
+    # print(eta)
+
+    if mode is 'triadic_closures':
+        weights = []
+        for non_edge in unformed_edges:
+            weights += [len(list(NX.common_neighbors(G, non_edge[0], non_edge[1])))]
+        # print('weights',weights)
+        total_sum = sum(weights)
+        # print('total_sum',total_sum)
+        normalized_weights = [weight/total_sum for weight in weights]
+
+        # print('normalized_weights', normalized_weights)
+
+        # print('unformed_edges', unformed_edges)
+
+        addition_list = np.random.choice(range(len(unformed_edges)),
+                                         number_of_edges_to_be_added,
+                                         replace=False,
+                                         p=normalized_weights)
+
+        addition_list = addition_list.astype(int)
+
+        # print(addition_list)
+
+        addition_list = [unformed_edges[ii] for ii in list(addition_list)]
+        # print('addition_list', addition_list)
+        fat_network.add_edges_from(addition_list)
+        # print(fat_network.edges())
+        return fat_network
+
+    # for edge in C_2.edges():
+    #     # print(edge)
+    #     if abs(edge[0] - edge[1]) == 2 or abs(edge[0] - edge[1]) == n-2: # it is a C_2\C_1 edge
+    #         if remove_cycle_edges_exp[C_2_minus_C_1_edge_index] < eta:
+    #             removal_list += [edge]
+    #         C_2_minus_C_1_edge_index += 1 # index the next C_2\C_1 edge
+    # C_2.remove_edges_from(removal_list)
+    #
+    # # print(removal_list)
+    #
+    # # NX.draw_circular(C_2)
+    # # plt.show()
+    # # print(C_2.edges())
+    #
+    # addition_list = []
+    #
+    # K_n = NX.complete_graph(n)
+    #
+    # random_add_edge_index = 0
+    #
+    # for edge in K_n.edges():
+    #     # print(edge)
+    #     if add_long_ties_exp[random_add_edge_index] < eta:
+    #         addition_list += [edge]
+    #     random_add_edge_index += 1 # index the next edge to be considered for addition
+    # C_2.add_edges_from(addition_list)
+    # # NX.draw_circular(C_2)
+    # # plt.show()
+    # # print(C_2.edges())
+    # # print(addition_list)
+    # return C_2
+
 class network_model():
     """
     implement the initializations and parameter set methods
@@ -195,7 +288,9 @@ class network_model():
         """
         initializes the network interconnections based on the params
         """
-        if 'network' not in self.fixed_params:
+        if 'network' in self.fixed_params:
+            self.params['network'] = self.fixed_params['network']
+        elif 'network' not in self.fixed_params:
             if self.params['network_model'] == 'erdos_renyi':
                 if 'linkProbability' not in self.fixed_params:  # erdos-renyi link probability
                     self.params['linkProbability'] = 2 * np.log(self.params['size']) / self.params[
@@ -262,6 +357,10 @@ class network_model():
 
         # print('we are here')
         # print(self.fixed_params)
+
+        # additional modifications to the network topology which include rewiring
+        # and edge additions
+
         if 'maslov_sneppen' not in self.fixed_params:
             self.params['maslov_sneppen'] = False
             # print('we did not rewire!')
@@ -282,6 +381,30 @@ class network_model():
             self.params['network'] = rewired_network
 
             # print(NX.is_connected(self.params['network']))
+
+        if 'add_edges' not in self.fixed_params:
+            self.params['add_edges'] = False
+
+        if self.params['add_edges']:
+            if 'edge_addition_mode' not in self.fixed_params:
+                self.params['edge_addition_mode'] = 'triadic_closures'
+            if 'number_of_edges_to_be_added' not in self.fixed_params:
+                self.params['number_of_edges_to_be_added'] = \
+                    int(np.floor(0.15 * self.params['network'].number_of_edges()))  # add 15% more edges
+
+            fattened_network = add_edges(self.params['network'],
+                                         self.params['number_of_edges_to_be_added'],
+                                         self.params['edge_addition_mode'])
+
+            # print('we fat!')
+                # while (not NX.is_connected(rewired_network)):
+                #     rewired_network = self.maslov_sneppen_rewiring(num_steps=
+                #                                  int(np.floor(self.params['num_steps_for_maslov_sneppen_rewriring'])))
+                #     print('we rewired!')
+
+            self.params['network'] = fattened_network
+
+                # print(NX.is_connected(self.params['network']))
 
     def init_network_states(self):
         """
@@ -427,7 +550,7 @@ class contagion_model(network_model):
     """
     def __init__(self,params):
         super(contagion_model,self).__init__()
-        self.fixed_params =  copy.deepcopy(params)
+        self.fixed_params = copy.deepcopy(params)
         self.params = params
         self.missing_params_not_set = True
         self.number_of_infected_neighbors_is_updated = False
@@ -584,9 +707,12 @@ class contagion_model(network_model):
                 speed_min = np.min(total_spread_times)
                 speed_samples = np.asarray(total_spread_times)
 
-
         else:
             assert False, 'undefined mode for avg_speed_of_spread'
+
+        if type(avg_speed) is torch.Tensor:
+            avg_speed = avg_speed.item()
+
         return avg_speed,speed_std,speed_max,speed_min,speed_samples
 
     def outer_step(self):
