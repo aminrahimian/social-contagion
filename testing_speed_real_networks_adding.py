@@ -9,7 +9,7 @@ from models import *
 
 size_of_dataset = 200
 
-ID = 'cai_edgelist_8'
+ID = 'cai_edgelist_10'
 
 percent_more_edges = 15
 
@@ -33,7 +33,9 @@ if __name__ == '__main__':
             'add_edges': True,
             'edge_addition_mode': 'random',
             'number_of_edges_to_be_added': int(np.floor(0.01*percent_more_edges * G.number_of_edges())),
-            'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
+            # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
+            'initialization_mode': 'fixed_number_initial_infection',
+            'initial_infection_number': 2,
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'fixed_prob_high': 1.0,
             'fixed_prob': 0.05,
@@ -60,7 +62,9 @@ if __name__ == '__main__':
             'add_edges': True,
             'edge_addition_mode': 'triadic_closures',
             'number_of_edges_to_be_added': int(np.floor(0.01 * percent_more_edges * G.number_of_edges())),
-            'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
+            # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
+            'initialization_mode': 'fixed_number_initial_infection',
+            'initial_infection_number': 2,
             'delta': 0.0000000000000001,
             'fixed_prob_high': 1.0,
             'fixed_prob': 0.05,
@@ -109,7 +113,7 @@ if __name__ == '__main__':
                   + str(Decimal(speed_add_triad).quantize(TWOPLACES))
                   + '(SD=' + str(Decimal(std_add_triad).quantize(TWOPLACES)) + '),' +
                    '\\vspace{-10pt}  \\begin{center}  in the two networks with ' + str(percent_more_edges)
-                  + '\% more random or triad closing edges. \\end{center}')
+                  + '\% additional random or triad closing edges. \\end{center}')
         plt.legend()
         if settings.show_plots:
             plt.show()

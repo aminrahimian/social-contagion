@@ -7,9 +7,11 @@ import settings
 
 from models import *
 
-size_of_dataset = 100
+size_of_dataset = 200
 
-ID = 'cai_edgelist_10'
+ID = 'cai_edgelist_4'
+
+rewiring_percentage = 30
 
 if __name__ == '__main__':
 
@@ -30,34 +32,47 @@ if __name__ == '__main__':
 
         initial_seeds = 2
 
-        params = {
+        params_original = {
             'network': G,
             'size': network_size,
             'add_edges': False,
-            'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
+            # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
+            'initialization_mode': 'fixed_number_initial_infection',
+            'initial_infection_number': 2,
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'fixed_prob_high': 1.0,
             'fixed_prob': 0.05,
             'theta': 2,
+            'maslov_sneppen': False,
+            'num_steps_for_maslov_sneppen_rewriring': None,
+            # rewire 15% of edges
         }
 
-        dynamics = DeterministicLinear(params)
-        speed,std,_,_,speed_samples = dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, cap=0.9, mode='max')
-        print(speed,std)
-        print(speed_samples)
+        dynamics_original = DeterministicLinear(params_original)
+        speed_original,std_original, _, _, speed_samples_original = \
+            dynamics_original.avg_speed_of_spread(
+                dataset_size=size_of_dataset,
+                cap=0.9,
+                mode='max')
+        print(speed_original, std_original)
+        print(speed_samples_original)
+
+        print(type(speed_original))
 
         params_rewired = {
             'network': G,
             'size': network_size,
             'add_edges': False,
-            'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
+            # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
+            'initialization_mode': 'fixed_number_initial_infection',
+            'initial_infection_number': 2,
             'delta': 0.0000000000000001,
             'fixed_prob_high': 1.0,
             'fixed_prob': 0.05,
             'theta': 2,
             'maslov_sneppen': True,
-            'num_steps_for_maslov_sneppen_rewriring': 0.1 * params['network'].number_of_edges(),
-            # rewire 10% of edges
+            'num_steps_for_maslov_sneppen_rewriring': 0.01*rewiring_percentage * G.number_of_edges(),
+            # rewire 15% of edges
         }
 
         dynamics_rewired = DeterministicLinear(params_rewired)
@@ -73,23 +88,36 @@ if __name__ == '__main__':
     if settings.save_computations:
 
         pickle.dump(speed_samples_rewired, open('./data/speed_samples_rewired_'+ID+'.pkl', 'wb'))
+        pickle.dump(speed_samples_original, open('./data/speed_samples_original_' + ID + '.pkl', 'wb'))
 
     if settings.load_computations:
+
         speed_samples_rewired = pickle.load(open('./data/speed_samples_rewired_' + ID + '.pkl', 'rb'))
+        speed_samples_original = pickle.load(open('./data/speed_samples_original_' + ID + '.pkl', 'rb'))
+
 
     if settings.do_plots:
 
         plt.figure()
 
-        plt.hist([speed_samples, speed_samples_rewired], label=['original', 'rewired'])
+        plt.hist([speed_samples_original, speed_samples_rewired], label=['original', 'rewired'])
         # plt.hist(speed_samples_rewired, label='rewired')
 
         plt.ylabel('Frequency')
+
         plt.xlabel('Time to Spread')
-        # plt.title('\centering Complex Contagion over $\mathcal{C}_1 \\cup \mathcal{G}_{\eta} \\cup \mathcal{D}_{\eta},n = 1000$'
-        #           '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions $(q_n)$ '
-        #           'and Rewiring $(\eta)$   \\end{center}')
+
+        plt.title('\centering The mean spread times are '
+                  + str(Decimal(speed_original).quantize(TWOPLACES))
+                  + '(SD=' + str(Decimal(std_original).quantize(TWOPLACES)) + ')'
+                  + ' and '
+                  + str(Decimal(speed_rewired).quantize(TWOPLACES))
+                  + '(SD=' + str(Decimal(std_rewired).quantize(TWOPLACES)) + '),' +
+                   '\\vspace{-10pt}  \\begin{center}  in the original and ' + str(rewiring_percentage)
+                  + '\% rewired network. \\end{center}')
+
         plt.legend()
+
         if settings.show_plots:
             plt.show()
             # if settings.layout == 'circular':
@@ -105,4 +133,4 @@ if __name__ == '__main__':
             #         vmin=0,
             #         vmax=1)
         if settings.save_plots:
-            plt.savefig('./data/' + 'speed_samples_histogram_' + ID + '.png')
+            plt.savefig('./data/' + 'speed_samples_histogram_rewiring_' + ID + '.png')

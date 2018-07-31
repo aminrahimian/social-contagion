@@ -41,6 +41,7 @@ if do_plots:
     plt.rc('font', family='serif')
     from decimal import Decimal
     FOURPLACES = Decimal(10) ** -4
+    TWOPLACES = Decimal(10) ** -2
     ERROR_BAR_TYPE = 'std'
 
 def combine(list_of_names,output_name):

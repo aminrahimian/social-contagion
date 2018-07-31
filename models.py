@@ -415,6 +415,43 @@ class network_model():
         self.number_of_infected_neighbors_is_updated = False
         self.time_since_infection_is_updated = False
 
+        if 'thresholds' not in self.fixed_params:
+            if hasattr(self,'isLinearThresholdModel'):
+                relative_thresholds = list(np.random.uniform(size=self.params['size']))
+                all_degrees = self.params['network'].degree()
+                self.params['thresholds'] = list(map(lambda x, y: float(x[1]) * y, all_degrees, relative_thresholds))
+            else:
+                self.params['thresholds'] = [self.params['theta']] * self.params['size']
+
+        if 'initial_states' not in self.fixed_params:
+            if 'initialization_mode' not in self.fixed_params:
+                self.params['initialization_mode'] = 'fixed_probability_initial_infection'
+                print('warning: The initialization_mode not supplied, '
+                      'set to default fixed_probability_initial_infection')
+            if self.params['initialization_mode'] is 'fixed_probability_initial_infection':
+                # 'initial_infection_probability' should be specified.
+                if 'initial_infection_probability' not in self.fixed_params:
+                    self.params['initial_infection_probability'] = 0.1
+                    print('warning: The initial_infection_probability not supplied, set to default 0.1')
+
+                self.params['initial_states'] = np.random.binomial(1, [self.params['initial_infection_probability']]*
+                                                                   self.params['size'])
+            elif self.params['initialization_mode'] is 'fixed_number_initial_infection':
+
+                if 'initial_infection_number' not in self.fixed_params:
+                    self.params['initial_infection_number'] = 2
+                    print('warning: The initial_infection_not supplied, set to default 2.')
+
+                initially_infected_node_indexes = np.random.choice(range(self.params['size']),
+                                                                   self.params['initial_infection_number'],
+                                                                   replace=False)
+                self.params['initial_states'] = 1.0*np.zeros(self.params['size'])
+                self.params['initial_states'][initially_infected_node_indexes] = 1.0
+                self.params['initial_states'] = list(self.params['initial_states'])
+                # print(self.params['initial_states'])
+            else:
+                assert False, "undefined initialization_mode"
+
         count_nodes = 0
         for i in self.params['network'].nodes():
             self.params['network'].node[i]['number_of_infected_neighbors'] = 0
@@ -450,23 +487,21 @@ class network_model():
         ``4*graph.num_edges()`` steps.
         The code is adopted from: https://github.com/araichev/graph_dynamics/blob/master/graph_dynamics.py
         """
-
-
         assert 'network' in self.params, 'error: network is not yet not set.'
 
         if num_steps is SENTINEL:
             num_steps = 10 * self.params['network'].number_of_edges()
             # completely rewire everything
 
-        rewired_network = self.params['network']
+        rewired_network = copy.deepcopy(self.params['network'])
         for i in range(num_steps):
-            chosen_edges = RD.sample(self.params['network'].edges(),2)
+            chosen_edges = RD.sample(rewired_network.edges(), 2)
             e1 = chosen_edges[0]
             e2 = chosen_edges[1]
             new_e1 = (e1[0], e2[1])
             new_e2 = (e2[0], e1[1])
             if new_e1[0] == new_e1[1] or new_e2[0] == new_e2[1] or \
-                    self.params['network'].has_edge(*new_e1) or self.params['network'].has_edge(*new_e2):
+                    rewired_network.has_edge(*new_e1) or rewired_network.has_edge(*new_e2):
                 # Not allowed to rewire e1 and e2. Skip.
                 continue
 
@@ -475,16 +510,16 @@ class network_model():
             rewired_network.add_edge(*new_e1)
             rewired_network.add_edge(*new_e2)
 
-        while (not NX.is_connected(rewired_network)):
-            rewired_network = self.params['network']
+        while not NX.is_connected(rewired_network):
+            rewired_network = copy.deepcopy(self.params['network'])
             for i in range(num_steps):
-                chosen_edges = RD.sample(self.params['network'].edges(), 2)
+                chosen_edges = RD.sample(rewired_network.edges(), 2)
                 e1 = chosen_edges[0]
                 e2 = chosen_edges[1]
                 new_e1 = (e1[0], e2[1])
                 new_e2 = (e2[0], e1[1])
                 if new_e1[0] == new_e1[1] or new_e2[0] == new_e2[1] or \
-                        self.params['network'].has_edge(*new_e1) or self.params['network'].has_edge(*new_e2):
+                        rewired_network.has_edge(*new_e1) or rewired_network.has_edge(*new_e2):
                     # Not allowed to rewire e1 and e2. Skip.
                     continue
 
@@ -502,21 +537,26 @@ class network_model():
         parameters which are not fixed.
         """
         assert self.missing_params_not_set,'error: missing parameters are already set.'
-
+        # no spontaneous adoptions
         if 'zero_at_zero' not in self.fixed_params:
             self.params['zero_at_zero'] = True
+        # below threshold adoption rate is divided by the self.params['multiplier']
         if 'multiplier' not in self.fixed_params:
             self.params['multiplier'] = 5
+        # the high probability in complex contagion
         if 'fixed_prob_high' not in self.fixed_params:
             self.params['fixed_prob_high'] = 1.0
+        # the low probability in complex contagion
         if 'fixed_prob' not in self.fixed_params:
             self.params['fixed_prob'] = 0.0
+        # SI infection rate
         if 'beta' not in self.fixed_params:
             self.params['beta'] =  RD.choice([0.2,0.3,0.4,0.5])#0.1 * np.random.beta(1, 1, None)#0.2 * np.random.beta(1, 1, None)
         if 'sigma' not in self.fixed_params:
             self.params['sigma'] = RD.choice([0.1, 0.3, 0.5, 0.7,1])
+        # complex contagion threshold
         if 'theta' not in self.fixed_params:
-            self.params['theta'] = RD.choice([1, 2 , 3, 4])#np.random.randint(1, 4)
+            self.params['theta'] = RD.choice([1, 2, 3, 4])#np.random.randint(1, 4)
         if 'size' not in self.fixed_params:
             if 'network' in self.fixed_params:
                 self.params['size'] = NX.number_of_nodes(self.params['network'])
@@ -525,18 +565,7 @@ class network_model():
         if 'network_model' not in self.fixed_params:
             self.params['network_model'] = RD.choice(['erdos_renyi','watts_strogatz','grid','random_regular'])
 
-        if 'initial_infection_probability' not in self.fixed_params:
-            self.params['initial_infection_probability'] = 0.1
-        if 'thresholds' not in self.fixed_params:
-            if hasattr(self,'isLinearThresholdModel'):
-                relative_thresholds = list(np.random.uniform(size=self.params['size']))
-                all_degrees = self.params['network'].degree()
-                self.params['thresholds'] = list(map(lambda x, y: float(x[1]) * y, all_degrees, relative_thresholds))
-            else:
-                self.params['thresholds'] = [self.params['theta']] * self.params['size']
-        if 'initial_states' not in self.fixed_params:
-            self.params['initial_states'] = np.random.binomial(1,[self.params['initial_infection_probability']]*
-                                                               self.params['size'])
+
 
         self.init_network()
         self.init_network_states()
