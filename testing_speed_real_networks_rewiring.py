@@ -11,7 +11,7 @@ size_of_dataset = 200
 
 ID = 'cai_edgelist_4'
 
-rewiring_percentage = 30
+rewiring_percentage = 5
 
 if __name__ == '__main__':
 
@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
         network_size = NX.number_of_nodes(G)
 
-        initial_seeds = 2
+        number_initial_seeds = 2
 
         params_original = {
             'network': G,
@@ -38,13 +38,14 @@ if __name__ == '__main__':
             'add_edges': False,
             # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
             'initialization_mode': 'fixed_number_initial_infection',
-            'initial_infection_number': 2,
+            'initial_infection_number': number_initial_seeds,
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'fixed_prob_high': 1.0,
             'fixed_prob': 0.05,
             'theta': 2,
-            'maslov_sneppen': False,
-            'num_steps_for_maslov_sneppen_rewriring': None,
+            'rewire': False,
+            'rewiring_mode': 'random_random',
+            'num_edges_for_random_random_rewiring': None,
             # rewire 15% of edges
         }
 
@@ -65,13 +66,14 @@ if __name__ == '__main__':
             'add_edges': False,
             # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
             'initialization_mode': 'fixed_number_initial_infection',
-            'initial_infection_number': 2,
+            'initial_infection_number': number_initial_seeds,
             'delta': 0.0000000000000001,
             'fixed_prob_high': 1.0,
             'fixed_prob': 0.05,
             'theta': 2,
-            'maslov_sneppen': True,
-            'num_steps_for_maslov_sneppen_rewriring': 0.01*rewiring_percentage * G.number_of_edges(),
+            'rewire': True,
+            'rewiring_mode': 'random_random',
+            'num_edges_for_random_random_rewiring': 0.01*rewiring_percentage * G.number_of_edges(),
             # rewire 15% of edges
         }
 
@@ -87,12 +89,14 @@ if __name__ == '__main__':
 
     if settings.save_computations:
 
-        pickle.dump(speed_samples_rewired, open('./data/speed_samples_rewired_'+ID+'.pkl', 'wb'))
+        pickle.dump(speed_samples_rewired, open('./data/speed_samples_' + str(rewiring_percentage) +
+                                                '_percent_rewiring_'+ID+'.pkl', 'wb'))
         pickle.dump(speed_samples_original, open('./data/speed_samples_original_' + ID + '.pkl', 'wb'))
 
     if settings.load_computations:
 
-        speed_samples_rewired = pickle.load(open('./data/speed_samples_rewired_' + ID + '.pkl', 'rb'))
+        speed_samples_rewired = pickle.load(open('./data/speed_samples_' + str(rewiring_percentage) +
+                                                 '_percent_rewiring_'+ID+'.pkl', 'rb'))
         speed_samples_original = pickle.load(open('./data/speed_samples_original_' + ID + '.pkl', 'rb'))
 
 
@@ -133,4 +137,4 @@ if __name__ == '__main__':
             #         vmin=0,
             #         vmax=1)
         if settings.save_plots:
-            plt.savefig('./data/' + 'speed_samples_histogram_rewiring_' + ID + '.png')
+            plt.savefig('./data/' + 'speed_samples_histogram_'+str(rewiring_percentage)+'_percent_rewiring_' + ID +  '.png')

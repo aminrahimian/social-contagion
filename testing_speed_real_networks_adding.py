@@ -40,8 +40,7 @@ if __name__ == '__main__':
             'fixed_prob_high': 1.0,
             'fixed_prob': 0.05,
             'theta': 2,
-            'maslov_sneppen': False,
-            'num_steps_for_maslov_sneppen_rewriring': None,
+            'rewire': False,
         }
 
         dynamics_add_random = DeterministicLinear(params_add_random)
@@ -69,8 +68,7 @@ if __name__ == '__main__':
             'fixed_prob_high': 1.0,
             'fixed_prob': 0.05,
             'theta': 2,
-            'maslov_sneppen': False,
-            'num_steps_for_maslov_sneppen_rewriring': None,
+            'rewire': False,
             # rewire 10% of edges
         }
 

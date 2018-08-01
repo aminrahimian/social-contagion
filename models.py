@@ -361,24 +361,54 @@ class network_model():
         # additional modifications to the network topology which include rewiring
         # and edge additions
 
-        if 'maslov_sneppen' not in self.fixed_params:
-            self.params['maslov_sneppen'] = False
-            # print('we did not rewire!')
-        if self.params['maslov_sneppen']:
-            if 'num_steps_for_maslov_sneppen_rewriring' not in self.fixed_params:
-                self.params['num_steps_for_maslov_sneppen_rewriring'] = \
-                    0.1 * self.params['network'].number_of_edges()  # rewire 10% of edges
-            rewired_network = self.maslov_sneppen_rewiring(num_steps=
-                                                           int(np.floor(
-                                                               self.params['num_steps_for_maslov'
-                                                                           '_sneppen_rewriring'])))
+
+        if 'rewire' not in self.fixed_params:
+            self.params['rewire'] = False
+            print('warning: the network will not be rewired!')
+
+        if self.params['rewire']:
+
+            if 'rewiring_mode' not in self.fixed_params:
+                self.params['rewiring_mode'] = 'maslov_sneppen'
+                print('warning: the rewiring mode is set to maslov_sneppen')
+            if self.params['rewiring_mode'] == 'maslov_sneppen':
+                if 'num_steps_for_maslov_sneppen_rewiring' not in self.fixed_params:
+                    self.params['num_steps_for_maslov_sneppen_rewiring'] = \
+                        0.1 * self.params['network'].number_of_edges()  # rewire 10% of edges
+                    print('Warning: num_steps_for_maslov_sneppen_rewiring is set to default 10%')
+                rewired_network = \
+                    self.maslov_sneppen_rewiring(
+                        num_steps=int(np.floor(self.params['num_steps_for_maslov_sneppen_rewiring'])))
+            elif self.params['rewiring_mode'] == 'random_random':
+                if 'num_edges_for_random_random_rewiring' not in self.fixed_params:
+                    self.params['num_edges_for_random_random_rewiring'] = \
+                        0.1 * self.params['network'].number_of_edges()  # rewire 10% of edges
+                    print('warning: num_edges_for_random_random_rewiring is set to default 10%')
+
+                rewired_network = \
+                    self.random_random_rewiring(
+                        num_edges=int(np.floor(self.params['num_edges_for_random_random_rewiring'])))
+
+        # if 'maslov_sneppen' not in self.fixed_params:
+        #     self.params['maslov_sneppen'] = False
+        #     # print('we did not rewire!')
+        # if self.params['maslov_sneppen']:
+        #     if 'num_steps_for_maslov_sneppen_rewiring' not in self.fixed_params:
+        #         self.params['num_steps_for_maslov_sneppen_rewiring'] = \
+        #             0.1 * self.params['network'].number_of_edges()  # rewire 10% of edges
+        #     rewired_network = self.maslov_sneppen_rewiring(num_steps=
+        #                                                    int(np.floor(
+        #                                                        self.params['num_steps_for_maslov'
+        #                                                                    '_sneppen_rewiring'])))
+
             # print('we rewired!')
             # while (not NX.is_connected(rewired_network)):
             #     rewired_network = self.maslov_sneppen_rewiring(num_steps=
-            #                                  int(np.floor(self.params['num_steps_for_maslov_sneppen_rewriring'])))
+            #                                  int(np.floor(self.params['num_steps_for_maslov_sneppen_rewiring'])))
             #     print('we rewired!')
 
             self.params['network'] = rewired_network
+            # print(self.params['network'].number_of_edges())
 
             # print(NX.is_connected(self.params['network']))
 
@@ -399,7 +429,7 @@ class network_model():
             # print('we fat!')
                 # while (not NX.is_connected(rewired_network)):
                 #     rewired_network = self.maslov_sneppen_rewiring(num_steps=
-                #                                  int(np.floor(self.params['num_steps_for_maslov_sneppen_rewriring'])))
+                #                                  int(np.floor(self.params['num_steps_for_maslov_sneppen_rewiring'])))
                 #     print('we rewired!')
 
             self.params['network'] = fattened_network
@@ -510,23 +540,93 @@ class network_model():
             rewired_network.add_edge(*new_e1)
             rewired_network.add_edge(*new_e2)
 
-        while not NX.is_connected(rewired_network):
-            rewired_network = copy.deepcopy(self.params['network'])
-            for i in range(num_steps):
-                chosen_edges = RD.sample(rewired_network.edges(), 2)
-                e1 = chosen_edges[0]
-                e2 = chosen_edges[1]
-                new_e1 = (e1[0], e2[1])
-                new_e2 = (e2[0], e1[1])
-                if new_e1[0] == new_e1[1] or new_e2[0] == new_e2[1] or \
-                        rewired_network.has_edge(*new_e1) or rewired_network.has_edge(*new_e2):
-                    # Not allowed to rewire e1 and e2. Skip.
-                    continue
+        if return_connected:
+            while not NX.is_connected(rewired_network):
+                rewired_network = copy.deepcopy(self.params['network'])
+                for i in range(num_steps):
+                    chosen_edges = RD.sample(rewired_network.edges(), 2)
+                    e1 = chosen_edges[0]
+                    e2 = chosen_edges[1]
+                    new_e1 = (e1[0], e2[1])
+                    new_e2 = (e2[0], e1[1])
+                    if new_e1[0] == new_e1[1] or new_e2[0] == new_e2[1] or \
+                            rewired_network.has_edge(*new_e1) or rewired_network.has_edge(*new_e2):
+                        # Not allowed to rewire e1 and e2. Skip.
+                        continue
 
-                rewired_network.remove_edge(*e1)
-                rewired_network.remove_edge(*e2)
-                rewired_network.add_edge(*new_e1)
-                rewired_network.add_edge(*new_e2)
+                    rewired_network.remove_edge(*e1)
+                    rewired_network.remove_edge(*e2)
+                    rewired_network.add_edge(*new_e1)
+                    rewired_network.add_edge(*new_e2)
+
+        return rewired_network
+
+    def random_random_rewiring(self, num_edges=SENTINEL, return_connected=True):
+        """
+        Rewire the network graph.
+        Choose num_edges randomly from the existing edges and remove them.
+        Choose num_edges randomly from the non-existing edges and add them.
+        """
+        assert 'network' in self.params, 'error: network is not yet not set.'
+
+        if num_edges is SENTINEL:
+            num_edges = self.params['network'].number_of_edges()
+            print('Warning: number of edges to rewire not supplied, all edges will be rewired.')
+            # completely rewire everything
+
+        rewired_network = copy.deepcopy(self.params['network'])
+
+        unformed_edges = list(NX.non_edges(rewired_network))
+
+        formed_edges = list(NX.edges(rewired_network))
+
+        addition_list = np.random.choice(range(len(unformed_edges)),
+                                         num_edges,
+                                         replace=False)
+
+        addition_list = addition_list.astype(int)
+
+        addition_list = [unformed_edges[ii] for ii in list(addition_list)]
+
+        rewired_network.add_edges_from(addition_list)
+
+        removal_list = np.random.choice(range(len(formed_edges)),
+                                        num_edges,
+                                        replace=False)
+
+        removal_list = removal_list.astype(int)
+
+        removal_list = [formed_edges[ii] for ii in list(removal_list)]
+
+        rewired_network.add_edges_from(removal_list)
+
+        if return_connected:
+            while not NX.is_connected(rewired_network):
+                rewired_network = copy.deepcopy(self.params['network'])
+
+                unformed_edges = list(NX.non_edges(rewired_network))
+
+                formed_edges = list(NX.edges(rewired_network))
+
+                addition_list = np.random.choice(range(len(unformed_edges)),
+                                                 num_edges,
+                                                 replace=False)
+
+                addition_list = addition_list.astype(int)
+
+                addition_list = [unformed_edges[ii] for ii in list(addition_list)]
+
+                rewired_network.add_edges_from(addition_list)
+
+                removal_list = np.random.choice(range(len(formed_edges)),
+                                                num_edges,
+                                                replace=False)
+
+                removal_list = removal_list.astype(int)
+
+                removal_list = [formed_edges[ii] for ii in list(removal_list)]
+
+                rewired_network.remove_edges_from(removal_list)
 
         return rewired_network
 
@@ -742,7 +842,7 @@ class contagion_model(network_model):
         if type(avg_speed) is torch.Tensor:
             avg_speed = avg_speed.item()
 
-        return avg_speed,speed_std,speed_max,speed_min,speed_samples
+        return avg_speed, speed_std, speed_max, speed_min, speed_samples
 
     def outer_step(self):
         assert hasattr(self, 'classification_label'), 'classification_label not set'
