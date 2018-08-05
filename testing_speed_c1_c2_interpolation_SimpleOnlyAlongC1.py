@@ -167,8 +167,7 @@ if __name__ == '__main__':
 
         plt.ylabel('Time to Spread')
         plt.xlabel('Edges Rewired ($\\eta$)')
-        plt.title('\centering Complex Contagion over $\mathcal{C}_1 \\cup \mathcal{G}_{\eta} '
-                  '\\cup \mathcal{D}_{\eta},n = 200$'
+        plt.title('\centering Complex Contagion over $\mathcal{C}_2^{\eta}, n = 200$'
                   '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions $(q_n)$ '
                   'and Rewiring $(\eta)$   \\end{center}')
         plt.legend()

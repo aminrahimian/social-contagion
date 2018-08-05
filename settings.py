@@ -12,9 +12,9 @@ import pickle
 RD.seed()
 np.random.seed()
 
-do_computations = True
-save_computations = True
-load_computations = False
+do_computations = False
+save_computations = False
+load_computations = True
 assert (not save_computations) or do_computations, "do_computations should be true to save_computations"
 
 do_plots = True
