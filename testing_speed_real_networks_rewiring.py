@@ -16,7 +16,7 @@ from models import *
 
 size_of_dataset = 200
 
-prefix = 'cai_edgelist_'
+network_group = 'cai_edgelist_'
 
 root_data_address = './data/cai-data/'
 
@@ -31,9 +31,9 @@ except OSError as e:
         raise
 
 
-ID_list = list(np.linspace(1,11,11))
+network_id_list = list(np.linspace(1,11,11))
 
-ID_list = [str(int(ID)) for ID in ID_list]
+network_id_list = [str(int(id)) for id in network_id_list]
 
 
 rewiring_percentage = 5
@@ -42,32 +42,35 @@ rewiring_percentage = 5
 if __name__ == '__main__':
 
     if data_dump:
+        generating_new_dump = False
         try:
-            df = pd.read_csv(output_directory_address + prefix + 'data_dump.csv')
+            df = pd.read_csv(output_directory_address + network_group + 'data_dump.csv')
+            print('read_csv',df)
         except FileNotFoundError:
-            df = pd.DataFrame(dtype='float')
-            # df = pd.DataFrame(columns=['network_group', 'network_id', 'intervention_type',
-            #                            'intervention_size', 'time_to_spread'], dtype='float')
-            print('New ' + prefix + 'data_dump file will be generated.')
 
-    for ID in ID_list:
+            df = pd.DataFrame(columns=['network_group', 'network_id', 'network_size',
+                                       'number_edges', 'intervention_type',
+                                       'intervention_size', 'sample_id', 'time_to_spread'], dtype='float')
+            print('New ' + network_group + 'data_dump file will be generated.')
+            generating_new_dump = True
 
-        print(ID)
+    for network_id in network_id_list:
+
+        print(network_id)
+
+        #  load in the network and extract preliminary data
+
+        fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
+
+        G = NX.read_edgelist(fh)
+
+        print(NX.is_connected(G))
+
+        network_size = NX.number_of_nodes(G)
+
+        number_edges = G.number_of_edges()
 
         if settings.do_computations:
-
-            fh = open(edgelist_directory_address + prefix + ID + '.txt', 'rb')
-
-            G = NX.read_edgelist(fh)
-
-            print(NX.is_connected(G))
-            # print(type(G))
-            #
-            # add_edges(G, number_of_edges_to_be_added=10, mode='triadic_closures', seed=None)
-            #
-            # exit()
-
-            network_size = NX.number_of_nodes(G)
 
             number_initial_seeds = 2
 
@@ -129,16 +132,16 @@ if __name__ == '__main__':
         if settings.save_computations:
 
             pickle.dump(speed_samples_rewired, open(output_directory_address + 'speed_samples_' + str(rewiring_percentage) +
-                                                    '_percent_rewiring_' + prefix + ID + '.pkl', 'wb'))
+                                                    '_percent_rewiring_' + network_group + network_id + '.pkl', 'wb'))
             pickle.dump(speed_samples_original, open(output_directory_address + 'speed_samples_original_'
-                                                     + prefix + ID + '.pkl', 'wb'))
+                                                     + network_group + network_id + '.pkl', 'wb'))
 
         if settings.load_computations:
 
             speed_samples_rewired = pickle.load(open(output_directory_address + 'speed_samples_' + str(rewiring_percentage) +
-                                                     '_percent_rewiring_' + prefix + ID + '.pkl', 'rb'))
+                                                     '_percent_rewiring_' + network_group + network_id + '.pkl', 'rb'))
             speed_samples_original = pickle.load(open(output_directory_address + 'speed_samples_original_'
-                                                      + prefix + ID + '.pkl', 'rb'))
+                                                      + network_group + network_id + '.pkl', 'rb'))
 
             speed_original = np.mean(speed_samples_original)
 
@@ -186,7 +189,7 @@ if __name__ == '__main__':
                 #         vmax=1)
             if settings.save_plots:
                 plt.savefig(output_directory_address + 'speed_samples_histogram_'+str(rewiring_percentage)
-                            + '_percent_rewiring_' + prefix + ID + '.png')
+                            + '_percent_rewiring_' + network_group + network_id + '.png')
 
         if settings.data_dump:
             print('we are in data_dump mode')
@@ -200,13 +203,73 @@ if __name__ == '__main__':
             # print(speed_samples_rewired)
 
             # data = [speed_samples_original, speed_samples_rewired]
+            # print(df)
+            # df.loc[0] = [network_group, network_id, network_size, number_edges, 'none', 0.0,
+            #                      speed_samples_original[0]]
 
-            df[prefix + ID + '_original'] = pd.Series(speed_samples_original)
-            df[prefix + ID + '_rewired_' + str(rewiring_percentage) + '_percent'] = pd.Series(speed_samples_rewired)
+            # dataset = [[network_group, network_id, network_size, number_edges,
+            #             'none', 0.0, int(ii), speed_samples_original[ii]]
+            #            for ii in range(len(speed_samples_original))]
+
+            df_common_part_original = pd.DataFrame(data=[[network_group, network_id, network_size,
+                               number_edges, 'none', 0.0]]*len(speed_samples_original),
+                                          columns=['network_group', 'network_id', 'network_size',
+                                                   'number_edges', 'intervention_type',
+                                                   'intervention_size'])
+
+            df_sample_ids_original = pd.Series(list(range(len(speed_samples_original))),name='sample_id')
+
+            df_time_to_spreads_original = pd.Series(speed_samples_original,name='time_to_spread')
+
+            new_df_original = pd.concat([df_common_part_original, df_sample_ids_original, df_time_to_spreads_original], axis=1)
+
+            print(new_df_original)
+
+            # new_df = pd.DataFrame(data=dataset, columns=['network_group', 'network_id', 'network_size',
+            #                                              'number_edges', 'intervention_type',
+            #                                              'intervention_size', 'sample_id', 'time_to_spread'])
+
+            # print(new_df)
+
+            df_common_part_rewired = pd.DataFrame(data=[[network_group, network_id, network_size,
+                                                          number_edges, 'rewired', rewiring_percentage]] * len(speed_samples_rewired),
+                                                   columns=['network_group', 'network_id', 'network_size',
+                                                            'number_edges', 'intervention_type',
+                                                            'intervention_size'])
+
+            df_sample_ids_rewired = pd.Series(list(range(len(speed_samples_rewired))), name='sample_id')
+
+            df_time_to_spreads_rewired = pd.Series(speed_samples_rewired, name='time_to_spread')
+
+            new_df_rewired = pd.concat([df_common_part_rewired, df_sample_ids_rewired, df_time_to_spreads_rewired],
+                                        axis=1)
+
+            print(new_df_rewired)
+
+            extended_frame = [df, new_df_original, new_df_rewired]
+
+            df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(drop=True)
+
+            # df.drop_duplicates().reset_index(drop=True)
+
+
+
+            # for ii in range(len(speed_samples_original)):
+            #
+            #     # new_df = pd.DataFrame(data=[[network_group, network_id, network_size, number_edges,
+            #     #                               'none', 0.0, speed_samples_original[ii]]],
+            #     #                       columns=['network_group', 'network_id', 'network_size',
+            #     #                                'number_edges', 'intervention_type',
+            #     #                                'intervention_size', 'time_to_spread'])
+            #     # print(new_df)
+            #     top_index = df.idxmax(axis=0, skipna=True)
+            #     df.loc[top_index] = [network_group, network_id, network_size, number_edges, 'none', 0.0, speed_samples_original[ii]]
+            #     # df.concat(new_df,ignore_index=True)
+            # # df[network_group + network_id + '_rewired_' + str(rewiring_percentage) + '_percent'] = pd.Series(speed_samples_rewired)
             print(df)
 
     if settings.data_dump:
-        df.to_csv(output_directory_address + prefix + 'data_dump.csv', index=False)#  , index=False
+        df.to_csv(output_directory_address + network_group + 'data_dump.csv', index=False)#  , index=False
 
 
             # with open(output_directory_address + 'names.csv', 'w') as csvfile:

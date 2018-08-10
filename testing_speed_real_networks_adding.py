@@ -14,7 +14,7 @@ from models import *
 
 size_of_dataset = 200
 
-prefix = 'cai_edgelist_'
+network_group = 'cai_edgelist_'
 
 root_data_address = './data/cai-data/'
 
@@ -29,9 +29,9 @@ except OSError as e:
         raise
 
 
-ID_list = list(np.linspace(1,11,11))
+network_id_list = list(np.linspace(1,11,11))
 
-ID_list = [str(int(ID)) for ID in ID_list]
+network_id_list = [str(int(id)) for id in network_id_list]
 
 percent_more_edges = 15
 
@@ -39,24 +39,30 @@ if __name__ == '__main__':
 
     if data_dump:
         try:
-            df = pd.read_csv(output_directory_address + prefix + 'data_dump.csv')
+            df = pd.read_csv(output_directory_address + network_group + 'data_dump.csv')
         except FileNotFoundError:
             df = pd.DataFrame(dtype='float')
-            print('New ' + prefix + 'data_dump file will be generated.')
+            print('New ' + network_group + 'data_dump file will be generated.')
 
-    for ID in ID_list:
+    for network_id in network_id_list:
 
-        print(ID)
+        print(network_id)
+
+        #  load in the network and extract preliminary data
+
+        fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
+
+        G = NX.read_edgelist(fh)
+
+        print(NX.is_connected(G))
+
+        network_size = NX.number_of_nodes(G)
+
+        number_edges = G.number_of_edges()
+
+        original_average_clustering = NX.average_clustering(G)
 
         if settings.do_computations:
-
-            fh = open(edgelist_directory_address + prefix + ID + '.txt', 'rb')
-
-            G = NX.read_edgelist(fh)
-
-            print(NX.is_connected(G))
-
-            network_size = NX.number_of_nodes(G)
 
             initial_seeds = 2
 
@@ -122,16 +128,16 @@ if __name__ == '__main__':
         if settings.save_computations:
 
             pickle.dump(speed_samples_add_random, open(output_directory_address + 'speed_samples_' + 'add_random_'
-                                                       + prefix + ID + '.pkl', 'wb'))
+                                                       + network_group + network_id + '.pkl', 'wb'))
             pickle.dump(speed_samples_add_triad, open(output_directory_address + 'speed_samples_' + 'add_triad_'
-                                                      + prefix + ID + '.pkl', 'wb'))
+                                                      + network_group + network_id + '.pkl', 'wb'))
 
 
         if settings.load_computations:
             speed_samples_add_random = pickle.load(open(output_directory_address + 'speed_samples_' + 'add_random_'
-                                                        + prefix + ID + '.pkl', 'rb'))
+                                                        + network_group + network_id + '.pkl', 'rb'))
             speed_samples_add_triad = pickle.load(open(output_directory_address + 'speed_samples_' + 'add_triad_'
-                                                       + prefix + ID + '.pkl', 'rb'))
+                                                       + network_group + network_id + '.pkl', 'rb'))
 
             speed_add_triad = np.mean(speed_samples_add_triad)
 
@@ -176,8 +182,12 @@ if __name__ == '__main__':
             if settings.save_plots:
                 plt.savefig(output_directory_address + 'speed_samples_histogram_'
                             + str(percent_more_edges) + '_edge_additions_'
-                            + prefix + ID + '.png')
+                            + network_group + network_id + '.png')
         if settings.data_dump:
+            # print('we are in data_dump mode')
+            # df[network_group + network_id + '_add_random_' + str(percent_more_edges) + '_percent'] = pd.Series(speed_samples_add_random)
+            # df[network_group + network_id + '_add_triad_' + str(percent_more_edges) + '_percent'] = pd.Series(speed_samples_add_triad)
+            # print(df)
             print('we are in data_dump mode')
 
             # speed_samples_original = [str(samples) for samples in speed_samples_original]
@@ -189,13 +199,63 @@ if __name__ == '__main__':
             # print(speed_samples_rewired)
 
             # data = [speed_samples_original, speed_samples_rewired]
+            # print(df)
+            # df.loc[0] = [network_group, network_id, network_size, number_edges, 'none', 0.0,
+            #                      speed_samples_original[0]]
 
-            df[prefix + ID + '_add_random_' + str(percent_more_edges) + '_percent'] = pd.Series(speed_samples_add_random)
-            df[prefix + ID + '_add_triad_' + str(percent_more_edges) + '_percent'] = pd.Series(speed_samples_add_triad)
+            # dataset = [[network_group, network_id, network_size, number_edges,
+            #             'none', 0.0, int(ii), speed_samples_original[ii]]
+            #            for ii in range(len(speed_samples_original))]
+
+            df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size,
+                                                          number_edges, 'random_addition', percent_more_edges]]
+                                                          * len(speed_samples_add_random),
+                                                   columns=['network_group', 'network_id', 'network_size',
+                                                            'number_edges', 'intervention_type',
+                                                            'intervention_size'])
+
+            df_sample_ids_add_random = pd.Series(list(range(len(speed_samples_add_random))), name='sample_id')
+
+            df_time_to_spreads_add_random = pd.Series(speed_samples_add_random, name='time_to_spread')
+
+            new_df_add_random = pd.concat([df_common_part_add_random, df_sample_ids_add_random,
+                                           df_time_to_spreads_add_random],
+                                          axis=1)
+
+            print(new_df_add_random)
+
+            # new_df = pd.DataFrame(data=dataset, columns=['network_group', 'network_id', 'network_size',
+            #                                              'number_edges', 'intervention_type',
+            #                                              'intervention_size', 'sample_id', 'time_to_spread'])
+
+            # print(new_df)
+
+            df_common_part_add_triad = pd.DataFrame(data=[[network_group, network_id, network_size,
+                                                           number_edges, 'triad_addition', percent_more_edges]]
+                                                         *len(speed_samples_add_triad),
+                                                    columns=['network_group', 'network_id', 'network_size',
+                                                             'number_edges', 'intervention_type',
+                                                             'intervention_size'])
+
+            df_sample_ids_add_triad = pd.Series(list(range(len(speed_samples_add_triad))), name='sample_id')
+
+            df_time_to_spreads_add_triad = pd.Series(speed_samples_add_triad, name='time_to_spread')
+
+            new_df_add_triad = pd.concat([df_common_part_add_triad, df_sample_ids_add_triad,
+                                          df_time_to_spreads_add_triad],
+                                         axis=1)
+
+            print(new_df_add_triad)
+
+            extended_frame = [df, new_df_add_random, new_df_add_triad]
+
+            df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(
+                drop=True)
+
             print(df)
 
     if settings.data_dump:
-        df.to_csv(output_directory_address + prefix + 'data_dump.csv', index=False)#  , index=False
+        df.to_csv(output_directory_address + network_group + 'data_dump.csv', index=False)#  , index=False
 
 
             # with open(output_directory_address + 'names.csv', 'w') as csvfile:
