@@ -31,7 +31,7 @@ except OSError as e:
         raise
 
 
-network_id_list = list(np.linspace(1,11,11))
+network_id_list = list(np.linspace(1,151,151))  # cannot do 152
 
 network_id_list = [str(int(id)) for id in network_id_list]
 

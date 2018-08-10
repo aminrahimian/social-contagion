@@ -744,8 +744,6 @@ class contagion_model(network_model):
             self.set_activation_functions()
         network_timeseries = []
 
-
-
         while time < total_time:
             dummy_network = self.params['network'].copy()
             network_timeseries.append(dummy_network)
@@ -776,7 +774,19 @@ class contagion_model(network_model):
             simulation_results.append((label_of_data, data))
         return simulation_results
 
-    def avg_speed_of_spread(self , dataset_size=1000,cap=0.9, mode='max'):
+    def measure_avg_clustering(self, dataset_size=200):
+
+        avg_clustering_samples = []
+
+        for i in range(dataset_size):
+            self.missing_params_not_set = True
+            self.setRandomParams()
+            avg_clustering_samples += [NX.average_clustering(self.params['network'])]
+
+        return avg_clustering_samples
+
+
+    def avg_speed_of_spread(self, dataset_size=1000, cap=0.9, mode='max'):
         # avg time to spread over the dataset.
         # The time to spread is measured in one of the modes:
         # integral, max, and total.
@@ -799,7 +809,7 @@ class contagion_model(network_model):
             cap_times = []
             sum_of_cap_times = 0
             for i in range(dataset_size):
-                cap_time = time_the_cap(dataset[i][1][:,0], cap)
+                cap_time = time_the_cap(dataset[i][1][:, 0], cap)
                 if cap_time == -1:
                     dataset_size += -1
                     continue
@@ -855,6 +865,8 @@ class contagion_model(network_model):
 
     def step(self):
         pass
+
+
 
 
 class activation(contagion_model):

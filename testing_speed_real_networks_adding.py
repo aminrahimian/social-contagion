@@ -29,7 +29,7 @@ except OSError as e:
         raise
 
 
-network_id_list = list(np.linspace(1,11,11))
+network_id_list = list(np.linspace(1,151,151))  # cannot do 152
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
         number_edges = G.number_of_edges()
 
-        original_average_clustering = NX.average_clustering(G)
+        # original_average_clustering = NX.average_clustering(G)
 
         if settings.do_computations:
 
@@ -222,7 +222,7 @@ if __name__ == '__main__':
                                            df_time_to_spreads_add_random],
                                           axis=1)
 
-            print(new_df_add_random)
+            # print(new_df_add_random)
 
             # new_df = pd.DataFrame(data=dataset, columns=['network_group', 'network_id', 'network_size',
             #                                              'number_edges', 'intervention_type',
@@ -252,7 +252,7 @@ if __name__ == '__main__':
             df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(
                 drop=True)
 
-            print(df)
+            # print(df)
 
     if settings.data_dump:
         df.to_csv(output_directory_address + network_group + 'data_dump.csv', index=False)#  , index=False
