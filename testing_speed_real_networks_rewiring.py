@@ -12,17 +12,36 @@ import errno
 
 # assert settings.data_dump, "we should be in data_dump mode!"
 
+
 from models import *
 
 size_of_dataset = 200
 
-network_group = 'cai_edgelist_'
+######################################################################
+# # cai edgelists:
+#
+# network_group = 'cai_edgelist_'
+#
+# root_data_address = './data/cai-data/'
+#
+# edgelist_directory_address = root_data_address + 'edgelists/'
+#
+# output_directory_address = root_data_address + 'output/'
+#
+# DELIMITER = ' '
 
-root_data_address = './data/cai-data/'
+#####################################################################
+# chami edgelists:
+
+network_group = 'chami_edgelist_'
+
+root_data_address = './data/chami-friendship-data/'
 
 edgelist_directory_address = root_data_address + 'edgelists/'
 
 output_directory_address = root_data_address + 'output/'
+
+DELIMITER = ','
 
 try:
     os.makedirs(output_directory_address)
@@ -30,14 +49,11 @@ except OSError as e:
     if e.errno != errno.EEXIST:
         raise
 
-
-network_id_list = list(np.linspace(1,151,151))  # cannot do 152
+network_id_list = list(np.linspace(1,17,17))  # cannot do 152
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
-
 rewiring_percentage = 5
-
 
 if __name__ == '__main__':
 
@@ -62,9 +78,15 @@ if __name__ == '__main__':
 
         fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
 
-        G = NX.read_edgelist(fh)
 
-        print(NX.is_connected(G))
+        G = NX.read_edgelist(fh,delimiter=DELIMITER)
+
+        print('original size ',len(G.nodes()))
+
+        if not NX.is_connected(G):
+            G = max(NX.connected_component_subgraphs(G), key=len)
+            print('largest connected component extracted with size ', len(G.nodes()))
+
 
         network_size = NX.number_of_nodes(G)
 

@@ -14,13 +14,31 @@ from models import *
 
 size_of_dataset = 200
 
-network_group = 'cai_edgelist_'
+######################################################################
+# # cai edgelists:
+#
+# network_group = 'cai_edgelist_'
+#
+# root_data_address = './data/cai-data/'
+#
+# edgelist_directory_address = root_data_address + 'edgelists/'
+#
+# output_directory_address = root_data_address + 'output/'
+#
+# DELIMITER = ' '
 
-root_data_address = './data/cai-data/'
+#####################################################################
+# chami edgelists:
+
+network_group = 'chami_edgelist_'
+
+root_data_address = './data/chami-friendship-data/'
 
 edgelist_directory_address = root_data_address + 'edgelists/'
 
 output_directory_address = root_data_address + 'output/'
+
+DELIMITER = ','
 
 try:
     os.makedirs(output_directory_address)
@@ -28,8 +46,7 @@ except OSError as e:
     if e.errno != errno.EEXIST:
         raise
 
-
-network_id_list = list(np.linspace(1,175,175))
+network_id_list = list(np.linspace(1,17,17))
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
@@ -45,7 +62,7 @@ if __name__ == '__main__':
         except FileNotFoundError:
             df = pd.DataFrame(columns=['network_group', 'network_id', 'network_size',
                                                          'number_edges', 'intervention_type',
-                                                         'intervention_size', 'avg_clustering'],dtype='float')
+                                                         'intervention_size', 'avg_clustering'], dtype='float')
             print('New ' + network_group + 'clustering_data_dump file will be generated.')
 
     avg_clustering_add_random = []
@@ -66,9 +83,13 @@ if __name__ == '__main__':
 
         fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
 
-        G = NX.read_edgelist(fh)
+        G = NX.read_edgelist(fh, delimiter=DELIMITER)
 
-        print(NX.is_connected(G))
+        print('original size ', len(G.nodes()))
+
+        if not NX.is_connected(G):
+            G = max(NX.connected_component_subgraphs(G), key=len)
+            print('largest connected component extracted with size ', len(G.nodes()))
 
         network_size = NX.number_of_nodes(G)
 
@@ -340,4 +361,3 @@ if __name__ == '__main__':
 
     if settings.data_dump:
         df.to_csv(output_directory_address + network_group + 'clustering_data_dump.csv', index=False)#  , index=False
-

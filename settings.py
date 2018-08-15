@@ -29,6 +29,8 @@ assert (not save_computations) or do_computations, "do_computations should be tr
 
 assert (not (save_plots or show_plots)) or do_plots, "do_plots should be true to save_plots or show_plots"
 
+assert (not (save_plots or show_plots)) or do_plots, "do_plots should be true to save_plots or show_plots"
+
 assert not (load_computations and save_computations), "cannot both save_computations and load_computations"
 
 assert not (load_computations and do_computations), "cannot both do_computations and load_computations"
