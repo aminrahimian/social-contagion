@@ -12,7 +12,7 @@ import errno
 
 from models import *
 
-size_of_dataset = 1
+size_of_dataset = 200
 
 
 ######################################################################
@@ -29,12 +29,26 @@ size_of_dataset = 1
 # DELIMITER = ' '
 # TOP_ID = 151 # cannot do 152
 
+# #####################################################################
+# # chami friendship edgelists:
+#
+# network_group = 'chami_friendship_edgelist_'
+#
+# root_data_address = './data/chami-friendship-data/'
+#
+# edgelist_directory_address = root_data_address + 'edgelists/'
+#
+# output_directory_address = root_data_address + 'output/'
+#
+# DELIMITER = ','
+#
+# TOP_ID = 17
 #####################################################################
-# chami friendship edgelists:
+# chami advice edgelists:
 
-network_group = 'chami_friendship_edgelist_'
+network_group = 'chami_advice_edgelist_'
 
-root_data_address = './data/chami-friendship-data/'
+root_data_address = './data/chami-advice-data/'
 
 edgelist_directory_address = root_data_address + 'edgelists/'
 
@@ -43,7 +57,6 @@ output_directory_address = root_data_address + 'output/'
 DELIMITER = ','
 
 TOP_ID = 17
-
 try:
     os.makedirs(output_directory_address)
 except OSError as e:
@@ -55,7 +68,7 @@ network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
-percent_more_edges_list = [13]
+percent_more_edges_list = [5,10]
 
 if __name__ == '__main__':
 
