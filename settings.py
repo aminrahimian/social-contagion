@@ -12,15 +12,60 @@ import pickle
 RD.seed()
 np.random.seed()
 
+network_group = 'chami_friendship_edgelist_'
+
+####################################################################
+# cai edgelists:
+
+if network_group == 'cai_edgelist_':
+
+    root_data_address = './data/cai-data/'
+
+    edgelist_directory_address = root_data_address + 'edgelists/'
+
+    output_directory_address = root_data_address + 'output/'
+
+    DELIMITER = ' '
+
+    TOP_ID = 175
+
+#####################################################################
+# chami friendship edgelists:
+elif network_group == 'chami_friendship_edgelist_':
+
+    root_data_address = './data/chami-friendship-data/'
+
+    edgelist_directory_address = root_data_address + 'edgelists/'
+
+    output_directory_address = root_data_address + 'output/'
+
+    DELIMITER = ','
+
+    TOP_ID = 17
+
+####################################################################
+# chami advice edgelists:
+elif network_group == 'chami_advice_edgelist_':
+
+    root_data_address = './data/chami-advice-data/'
+
+    edgelist_directory_address = root_data_address + 'edgelists/'
+
+    output_directory_address = root_data_address + 'output/'
+
+    DELIMITER = ','
+
+    TOP_ID = 17
+
 #  different modes of operation
 
-do_computations = False
-save_computations = False
-load_computations = True
-do_plots = False
-save_plots = False
+do_computations = True
+save_computations = True
+load_computations = False
+do_plots = True
+save_plots = True
 show_plots = False
-data_dump = True
+data_dump = False
 simulator_mode = False
 
 #  check that different modes are set consistently
@@ -29,7 +74,7 @@ assert (not save_computations) or do_computations, "do_computations should be tr
 
 assert (not (save_plots or show_plots)) or do_plots, "do_plots should be true to save_plots or show_plots"
 
-assert (not (save_plots or show_plots)) or do_plots, "do_plots should be true to save_plots or show_plots"
+assert (not do_plots) or save_plots or show_plots, "when do_plots should either save_plots or show_plots"
 
 assert not (load_computations and save_computations), "cannot both save_computations and load_computations"
 

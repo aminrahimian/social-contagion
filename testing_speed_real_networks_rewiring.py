@@ -17,44 +17,7 @@ from models import *
 
 size_of_dataset = 200
 
-######################################################################
-# # cai edgelists:
-#
-# network_group = 'cai_edgelist_'
-#
-# root_data_address = './data/cai-data/'
-#
-# edgelist_directory_address = root_data_address + 'edgelists/'
-#
-# output_directory_address = root_data_address + 'output/'
-#
-# DELIMITER = ' '
 
-# #####################################################################
-# # chami friendship edgelists:
-#
-# network_group = 'chami_friendship_edgelist_'
-#
-# root_data_address = './data/chami-friendship-data/'
-#
-# edgelist_directory_address = root_data_address + 'edgelists/'
-#
-# output_directory_address = root_data_address + 'output/'
-#
-# DELIMITER = ','
-
-#####################################################################
-# chami advice edgelists:
-
-network_group = 'chami_advice_edgelist_'
-
-root_data_address = './data/chami-advice-data/'
-
-edgelist_directory_address = root_data_address + 'edgelists/'
-
-output_directory_address = root_data_address + 'output/'
-
-DELIMITER = ','
 
 try:
     os.makedirs(output_directory_address)
@@ -62,21 +25,18 @@ except OSError as e:
     if e.errno != errno.EEXIST:
         raise
 
-network_id_list = list(np.linspace(1, 17, 17))  # cannot do 152
+network_id_list = list(np.linspace(1, 17, TOP_ID))  # cannot do 152
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
 
-rewiring_percentage_list = [5,10,15,20,25]
+rewiring_percentage_list = [5,10,15,20]
 loop_mode = (len(rewiring_percentage_list) > 1)
 print(loop_mode)
 
 
 def check_type(obj):
-    print(type(obj))
     if isinstance(obj, np.generic):
-        print(np.asscalar(obj))
-        print(type(np.asscalar(obj)))
         return np.asscalar(obj)
     else:
         return obj
