@@ -41,10 +41,10 @@ size_of_dataset = 20
 
 
 
-
-network_id_list = list(np.linspace(1,17,17))
-
-network_id_list = [str(int(id)) for id in network_id_list]
+#
+# network_id_list = list(np.linspace(1,17,17))
+#
+# network_id_list = [str(int(id)) for id in network_id_list]
 
 intervention_size_list = [5,10,15,20,25]
 

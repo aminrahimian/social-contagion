@@ -13,9 +13,9 @@ from models import *
 
 size_of_dataset = 200
 
-network_id_list = list(np.linspace(1, 17, TOP_ID))  # cannot do 152
-
-network_id_list = [str(int(id)) for id in network_id_list]
+# network_id_list = list(np.linspace(1, 17, TOP_ID))  # cannot do 152
+#
+# network_id_list = [str(int(id)) for id in network_id_list]
 
 rewiring_percentage_list = [5,10,15,20,25]
 loop_mode = (len(rewiring_percentage_list) > 1)

@@ -12,7 +12,7 @@ import errno
 RD.seed()
 np.random.seed()
 
-network_group = 'chami_advice_edgelist_'
+network_group = 'banerjee_combined_edgelist_'
 
 if network_group == 'cai_edgelist_':
 
@@ -38,6 +38,14 @@ elif network_group == 'chami_advice_edgelist_':
 
     TOP_ID = 17
 
+elif network_group == 'banerjee_combined_edgelist_':
+
+    root_data_address = './data/banerjee-combined-data/'
+
+    DELIMITER = ' '
+
+    TOP_ID = 77
+
 edgelist_directory_address = root_data_address + 'edgelists/'
 
 output_directory_address = root_data_address + 'output/'
@@ -56,15 +64,23 @@ except OSError as e:
     if e.errno != errno.EEXIST:
         raise
 
+
+network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
+
+if network_group == 'banerjee_combined_edgelist_':
+    del network_id_list[12]
+
+network_id_list = [str(int(id)) for id in network_id_list]
+
 #  different modes of operation
 
-do_computations = False
-save_computations = False
-load_computations = True
-do_plots = False
-save_plots = False
+do_computations = True
+save_computations = True
+load_computations = False
+do_plots = True
+save_plots = True
 show_plots = False
-data_dump = True
+data_dump = False
 simulator_mode = False
 
 #  check that different modes are set consistently
