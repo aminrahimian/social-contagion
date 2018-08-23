@@ -5,8 +5,7 @@
 
 from settings import *
 import settings
-import os
-import errno
+
 
 # assert settings.data_dump, "we should be in data_dump mode!"
 
@@ -40,11 +39,8 @@ size_of_dataset = 20
 #
 # DELIMITER = ','
 
-try:
-    os.makedirs(output_directory_address)
-except OSError as e:
-    if e.errno != errno.EEXIST:
-        raise
+
+
 
 network_id_list = list(np.linspace(1,17,17))
 
@@ -239,29 +235,29 @@ if __name__ == '__main__':
 
             if settings.save_computations:
 
-                pickle.dump(clustering_samples_add_random, open(output_directory_address + 'clustering_samples_'
+                pickle.dump(clustering_samples_add_random, open(pickled_samples_directory_address + 'clustering_samples_'
                                                                 + str(intervention_size) + '_percent_' + 'add_random_'
                                                                 + network_group + network_id + '.pkl', 'wb'))
-                pickle.dump(clustering_samples_add_triad, open(output_directory_address + 'clustering_samples_'
+                pickle.dump(clustering_samples_add_triad, open(pickled_samples_directory_address + 'clustering_samples_'
                                                                + str(intervention_size) + '_percent_' + 'add_triad_'
                                                                + network_group + network_id + '.pkl', 'wb'))
 
                 pickle.dump(clustering_samples_rewired,
-                            open(output_directory_address + 'clustering_samples_'
+                            open(pickled_samples_directory_address + 'clustering_samples_'
                                  + str(intervention_size) + '_percent_' + 'rewiring_'
                                  + network_group + network_id + '.pkl', 'wb'))
 
             if settings.load_computations:
 
-                clustering_samples_add_random = pickle.load(open(output_directory_address + 'clustering_samples_'
+                clustering_samples_add_random = pickle.load(open(pickled_samples_directory_address + 'clustering_samples_'
                                                                  + str(intervention_size) + '_percent_' + 'add_random_'
                                                                  + network_group + network_id + '.pkl', 'rb'))
 
-                clustering_samples_add_triad = pickle.load(open(output_directory_address + 'clustering_samples_'
+                clustering_samples_add_triad = pickle.load(open(pickled_samples_directory_address + 'clustering_samples_'
                                                                 + str(intervention_size) + '_percent_' + 'add_triad_'
                                                                 + network_group + network_id + '.pkl', 'rb'))
 
-                clustering_samples_rewired = pickle.load(open(output_directory_address + 'clustering_samples_'
+                clustering_samples_rewired = pickle.load(open(pickled_samples_directory_address + 'clustering_samples_'
                                                               + str(intervention_size) + '_percent_' + 'rewiring_'
                                                               + network_group + network_id + '.pkl', 'rb'))
 

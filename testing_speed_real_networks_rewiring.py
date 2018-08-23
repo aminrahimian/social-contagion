@@ -4,36 +4,22 @@
 # to rewire the network
 # uses avg_speed_of_spread(dataset_size=1000,cap=0.9, mode='max') to measure the rate of spread
 
-
 from settings import *
 import settings
-import os
-import errno
 
 # assert settings.data_dump, "we should be in data_dump mode!"
-
 
 from models import *
 
 size_of_dataset = 200
 
-
-
-try:
-    os.makedirs(output_directory_address)
-except OSError as e:
-    if e.errno != errno.EEXIST:
-        raise
-
 network_id_list = list(np.linspace(1, 17, TOP_ID))  # cannot do 152
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
-
-rewiring_percentage_list = [5,10,15,20]
+rewiring_percentage_list = [5,10,15,20,25]
 loop_mode = (len(rewiring_percentage_list) > 1)
 print(loop_mode)
-
 
 def check_type(obj):
     if isinstance(obj, np.generic):
@@ -41,9 +27,7 @@ def check_type(obj):
     else:
         return obj
 
-
 number_initial_seeds = 2
-
 
 if __name__ == '__main__':
 
@@ -115,7 +99,7 @@ if __name__ == '__main__':
             # pickle.dump(speed_samples_rewired,
             #             open(output_directory_address + 'speed_samples_' + str(rewiring_percentage) +
             #                  '_percent_rewiring_' + network_group + network_id + '.pkl', 'wb'))
-            pickle.dump(speed_samples_original, open(output_directory_address + 'speed_samples_original_'
+            pickle.dump(speed_samples_original, open(pickled_samples_directory_address + 'speed_samples_original_'
                                                      + network_group + network_id + '.pkl', 'wb'))
 
         if settings.load_computations:
@@ -123,7 +107,7 @@ if __name__ == '__main__':
             # speed_samples_rewired = pickle.load(
             #     open(output_directory_address + 'speed_samples_' + str(rewiring_percentage) +
             #          '_percent_rewiring_' + network_group + network_id + '.pkl', 'rb'))
-            speed_samples_original = pickle.load(open(output_directory_address + 'speed_samples_original_'
+            speed_samples_original = pickle.load(open(pickled_samples_directory_address + 'speed_samples_original_'
                                                       + network_group + network_id + '.pkl', 'rb'))
 
             speed_original = np.mean(speed_samples_original)
@@ -258,14 +242,14 @@ if __name__ == '__main__':
 
             if settings.save_computations:
 
-                pickle.dump(speed_samples_rewired, open(output_directory_address + 'speed_samples_' + str(rewiring_percentage) +
+                pickle.dump(speed_samples_rewired, open(pickled_samples_directory_address + 'speed_samples_' + str(rewiring_percentage) +
                                                         '_percent_rewiring_' + network_group + network_id + '.pkl', 'wb'))
                 # pickle.dump(speed_samples_original, open(output_directory_address + 'speed_samples_original_'
                 #                                          + network_group + network_id + '.pkl', 'wb'))
 
             if settings.load_computations:
 
-                speed_samples_rewired = pickle.load(open(output_directory_address + 'speed_samples_' + str(rewiring_percentage) +
+                speed_samples_rewired = pickle.load(open(pickled_samples_directory_address + 'speed_samples_' + str(rewiring_percentage) +
                                                          '_percent_rewiring_' + network_group + network_id + '.pkl', 'rb'))
                 # speed_samples_original = pickle.load(open(output_directory_address + 'speed_samples_original_'
                 #                                           + network_group + network_id + '.pkl', 'rb'))

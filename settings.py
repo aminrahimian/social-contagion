@@ -1,71 +1,70 @@
 # Params and other settings are set here
 # Settings are for the generative model as well as the inference engine
 
-
 # The generative model settings
 
 import random as RD
 import numpy as np
 import pickle
-
+import os
+import errno
 
 RD.seed()
 np.random.seed()
 
-network_group = 'chami_friendship_edgelist_'
-
-####################################################################
-# cai edgelists:
+network_group = 'chami_advice_edgelist_'
 
 if network_group == 'cai_edgelist_':
 
     root_data_address = './data/cai-data/'
 
-    edgelist_directory_address = root_data_address + 'edgelists/'
-
-    output_directory_address = root_data_address + 'output/'
-
     DELIMITER = ' '
 
     TOP_ID = 175
 
-#####################################################################
-# chami friendship edgelists:
 elif network_group == 'chami_friendship_edgelist_':
 
     root_data_address = './data/chami-friendship-data/'
 
-    edgelist_directory_address = root_data_address + 'edgelists/'
-
-    output_directory_address = root_data_address + 'output/'
-
     DELIMITER = ','
 
     TOP_ID = 17
 
-####################################################################
-# chami advice edgelists:
 elif network_group == 'chami_advice_edgelist_':
 
     root_data_address = './data/chami-advice-data/'
 
-    edgelist_directory_address = root_data_address + 'edgelists/'
-
-    output_directory_address = root_data_address + 'output/'
-
     DELIMITER = ','
 
     TOP_ID = 17
 
+edgelist_directory_address = root_data_address + 'edgelists/'
+
+output_directory_address = root_data_address + 'output/'
+
+pickled_samples_directory_address = root_data_address + 'pickled_samples/'
+
+try:
+    os.makedirs(output_directory_address)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
+
+try:
+    os.makedirs(pickled_samples_directory_address)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
+
 #  different modes of operation
 
-do_computations = True
-save_computations = True
-load_computations = False
-do_plots = True
-save_plots = True
+do_computations = False
+save_computations = False
+load_computations = True
+do_plots = False
+save_plots = False
 show_plots = False
-data_dump = False
+data_dump = True
 simulator_mode = False
 
 #  check that different modes are set consistently

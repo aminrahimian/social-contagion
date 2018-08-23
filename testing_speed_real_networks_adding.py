@@ -5,8 +5,6 @@
 
 from settings import *
 import settings
-import os
-import errno
 
 # assert settings.data_dump, "we should be in data_dump mode!"
 
@@ -14,63 +12,11 @@ from models import *
 
 size_of_dataset = 200
 
-
-# ######################################################################
-# # # cai edgelists:
-# #
-# # network_group = 'cai_edgelist_'
-# #
-# # root_data_address = './data/cai-data/'
-# #
-# # edgelist_directory_address = root_data_address + 'edgelists/'
-# #
-# # output_directory_address = root_data_address + 'output/'
-# #
-# # DELIMITER = ' '
-# # TOP_ID = 151 # cannot do 152
-#
-# # #####################################################################
-# # # chami friendship edgelists:
-# #
-# # network_group = 'chami_friendship_edgelist_'
-# #
-# # root_data_address = './data/chami-friendship-data/'
-# #
-# # edgelist_directory_address = root_data_address + 'edgelists/'
-# #
-# # output_directory_address = root_data_address + 'output/'
-# #
-# # DELIMITER = ','
-# #
-# # TOP_ID = 17
-# #####################################################################
-# # chami advice edgelists:
-#
-# network_group = 'chami_advice_edgelist_'
-#
-# root_data_address = './data/chami-advice-data/'
-#
-# edgelist_directory_address = root_data_address + 'edgelists/'
-#
-# output_directory_address = root_data_address + 'output/'
-#
-# DELIMITER = ','
-#
-#
-# TOP_ID = 17
-
-try:
-    os.makedirs(output_directory_address)
-except OSError as e:
-    if e.errno != errno.EEXIST:
-        raise
-
-
 network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
-percent_more_edges_list = [10,20]
+percent_more_edges_list = [5,10,15,20,25]
 
 if __name__ == '__main__':
 
@@ -169,20 +115,20 @@ if __name__ == '__main__':
 
             if settings.save_computations:
 
-                pickle.dump(speed_samples_add_random, open(output_directory_address + 'speed_samples_'
+                pickle.dump(speed_samples_add_random, open(pickled_samples_directory_address + 'speed_samples_'
                                                            + str(percent_more_edges) + '_percent_' + 'add_random_'
                                                            + network_group + network_id + '.pkl', 'wb'))
-                pickle.dump(speed_samples_add_triad, open(output_directory_address + 'speed_samples_'
+                pickle.dump(speed_samples_add_triad, open(pickled_samples_directory_address + 'speed_samples_'
                                                           + str(percent_more_edges) + '_percent_' + 'add_triad_'
                                                           + network_group + network_id + '.pkl', 'wb'))
 
 
             if settings.load_computations:
 
-                speed_samples_add_random = pickle.load(open(output_directory_address + 'speed_samples_'
+                speed_samples_add_random = pickle.load(open(pickled_samples_directory_address + 'speed_samples_'
                                                             + str(percent_more_edges) + '_percent_' + 'add_random_'
                                                             + network_group + network_id + '.pkl', 'rb'))
-                speed_samples_add_triad = pickle.load(open(output_directory_address + 'speed_samples_'
+                speed_samples_add_triad = pickle.load(open(pickled_samples_directory_address + 'speed_samples_'
                                                            + str(percent_more_edges) + '_percent_' + 'add_triad_'
                                                            + network_group + network_id + '.pkl', 'rb'))
 
