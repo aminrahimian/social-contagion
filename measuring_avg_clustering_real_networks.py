@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     if data_dump:
         try:
-            df = pd.read_csv(output_directory_address + network_group + 'clustering_data_dump.csv')
+            df = pd.read_csv(output_directory_address + network_group + 'properties_data_dump.csv')
         except FileNotFoundError:
             df = pd.DataFrame(columns=['network_group', 'network_id', 'network_size',
                                        'number_edges', 'intervention_type',
@@ -328,4 +328,4 @@ if __name__ == '__main__':
                             + 'intervention_size_' + str(intervention_size)+'.png')
 
     if settings.data_dump:
-        df.to_csv(output_directory_address + network_group + 'clustering_data_dump.csv', index=False)#  , index=False
+        df.to_csv(output_directory_address + network_group + 'properties_data_dump.csv', index=False)#  , index=False

@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     if data_dump:
         try:
-            df = pd.read_csv(output_directory_address + network_group + 'data_dump.csv')
+            df = pd.read_csv(output_directory_address + network_group + 'spreading_data_dump.csv')
         except FileNotFoundError:
             df = pd.DataFrame(dtype='float')
             print('New ' + network_group + 'data_dump file will be generated.')
@@ -118,7 +118,6 @@ if __name__ == '__main__':
                 pickle.dump(speed_samples_add_triad, open(pickled_samples_directory_address + 'speed_samples_'
                                                           + str(percent_more_edges) + '_percent_' + 'add_triad_'
                                                           + network_group + network_id + '.pkl', 'wb'))
-
 
             if settings.load_computations:
 
@@ -245,7 +244,7 @@ if __name__ == '__main__':
                 # print(df)
 
     if settings.data_dump:
-        df.to_csv(output_directory_address + network_group + 'data_dump.csv', index=False)#  , index=False
+        df.to_csv(output_directory_address + network_group + 'spreading_data_dump.csv', index=False)#  , index=False
 
 
             # with open(output_directory_address + 'names.csv', 'w') as csvfile:

@@ -34,7 +34,7 @@ if __name__ == '__main__':
     if data_dump:
         generating_new_dump = False
         try:
-            df = pd.read_csv(output_directory_address + network_group + 'data_dump.csv')
+            df = pd.read_csv(output_directory_address + network_group + 'spreading_data_dump.csv')
             print('read_csv',df)
         except FileNotFoundError:
 
@@ -349,7 +349,7 @@ if __name__ == '__main__':
                 print(df)
 
     if settings.data_dump:
-        df.to_csv(output_directory_address + network_group + 'data_dump.csv', index=False)#  , index=False
+        df.to_csv(output_directory_address + network_group + 'spreading_data_dump.csv', index=False)#  , index=False
 
 
             # with open(output_directory_address + 'names.csv', 'w') as csvfile:
