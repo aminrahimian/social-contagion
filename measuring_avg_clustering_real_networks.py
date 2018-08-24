@@ -13,39 +13,6 @@ from models import *
 
 size_of_dataset = 20
 
-######################################################################
-# # cai edgelists:
-#
-# network_group = 'cai_edgelist_'
-#
-# root_data_address = './data/cai-data/'
-#
-# edgelist_directory_address = root_data_address + 'edgelists/'
-#
-# output_directory_address = root_data_address + 'output/'
-#
-# DELIMITER = ' '
-
-#####################################################################
-# # chami friendship edgelists:
-#
-# network_group = 'chami_friendship_edgelist_'
-#
-# root_data_address = './data/chami-friendship-data/'
-#
-# edgelist_directory_address = root_data_address + 'edgelists/'
-#
-# output_directory_address = root_data_address + 'output/'
-#
-# DELIMITER = ','
-
-
-
-#
-# network_id_list = list(np.linspace(1,17,17))
-#
-# network_id_list = [str(int(id)) for id in network_id_list]
-
 intervention_size_list = [5,10,15,20,25]
 
 if __name__ == '__main__':

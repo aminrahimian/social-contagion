@@ -12,7 +12,7 @@ import errno
 RD.seed()
 np.random.seed()
 
-network_group = 'banerjee_combined_edgelist_'
+network_group = 'chami_friendship_edgelist_' #'banerjee_combined_edgelist_'
 
 if network_group == 'cai_edgelist_':
 
@@ -74,13 +74,13 @@ network_id_list = [str(int(id)) for id in network_id_list]
 
 #  different modes of operation
 
-do_computations = True
-save_computations = True
-load_computations = False
-do_plots = True
-save_plots = True
+do_computations = False
+save_computations = False
+load_computations = True
+do_plots = False
+save_plots = False
 show_plots = False
-data_dump = False
+data_dump = True
 simulator_mode = False
 
 #  check that different modes are set consistently
