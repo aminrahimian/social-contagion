@@ -17,7 +17,7 @@ size_of_dataset = 200
 #
 # network_id_list = [str(int(id)) for id in network_id_list]
 
-rewiring_percentage_list = [5,10,15,20]
+rewiring_percentage_list = [5, 10, 15, 20, 25]
 loop_mode = (len(rewiring_percentage_list) > 1)
 print(loop_mode)
 
@@ -27,9 +27,6 @@ def check_type(obj):
     else:
         return obj
 
-number_initial_seeds = 2
-
-MODEL = '(0.05,1)'
 
 if __name__ == '__main__':
 
@@ -75,8 +72,8 @@ if __name__ == '__main__':
                 'initialization_mode': 'fixed_number_initial_infection',
                 'initial_infection_number': number_initial_seeds,
                 'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
-                'fixed_prob_high': 1.0,
-                'fixed_prob': 0.05,
+                'fixed_prob_high': fixed_prob_high,
+                'fixed_prob': fixed_prob_low,
                 'theta': 2,
                 'rewire': False,
                 'rewiring_mode': 'random_random',
@@ -97,12 +94,14 @@ if __name__ == '__main__':
         if settings.save_computations:
 
             pickle.dump(speed_samples_original, open(pickled_samples_directory_address + 'speed_samples_original_'
-                                                     + network_group + network_id + '.pkl', 'wb'))
+                                                     + network_group + network_id
+                                                     + model_id + '.pkl', 'wb'))
 
         if settings.load_computations:
 
             speed_samples_original = pickle.load(open(pickled_samples_directory_address + 'speed_samples_original_'
-                                                      + network_group + network_id + '.pkl', 'rb'))
+                                                      + network_group + network_id
+                                                      + model_id + '.pkl', 'rb'))
 
             speed_original = np.mean(speed_samples_original)
 
@@ -145,8 +144,8 @@ if __name__ == '__main__':
                     'initialization_mode': 'fixed_number_initial_infection',
                     'initial_infection_number': number_initial_seeds,
                     'delta': 0.0000000000000001,
-                    'fixed_prob_high': 1.0,
-                    'fixed_prob': 0.05,
+                    'fixed_prob_high': fixed_prob_high,
+                    'fixed_prob': fixed_prob_low,
                     'theta': 2,
                     'rewire': True,
                     'rewiring_mode': 'random_random',
@@ -167,13 +166,15 @@ if __name__ == '__main__':
 
                 pickle.dump(speed_samples_rewired, open(pickled_samples_directory_address + 'speed_samples_'
                                                         + str(rewiring_percentage) +
-                                                        '_percent_rewiring_' + network_group + network_id + '.pkl', 'wb'))
+                                                        '_percent_rewiring_' + network_group + network_id
+                                                        + model_id + '.pkl', 'wb'))
 
             if settings.load_computations:
 
                 speed_samples_rewired = pickle.load(open(pickled_samples_directory_address + 'speed_samples_'
                                                          + str(rewiring_percentage) +
-                                                         '_percent_rewiring_' + network_group + network_id + '.pkl', 'rb'))
+                                                         '_percent_rewiring_' + network_group + network_id
+                                                         + model_id + '.pkl', 'rb'))
 
                 speed_rewired = np.mean(speed_samples_rewired)
 
@@ -205,7 +206,8 @@ if __name__ == '__main__':
 
                 if settings.save_plots:
                     plt.savefig(output_directory_address + 'speed_samples_histogram_'+str(rewiring_percentage)
-                                + '_percent_rewiring_' + network_group + network_id + '.png')
+                                + '_percent_rewiring_' + network_group + network_id
+                                + model_id + '.png')
 
             if settings.data_dump:
                 print('we are in data_dump mode')
@@ -234,4 +236,3 @@ if __name__ == '__main__':
 
     if settings.data_dump:
         df.to_csv(output_directory_address + network_group + 'spreading_data_dump.csv', index=False)#  , index=False
-

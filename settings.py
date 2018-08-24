@@ -65,7 +65,7 @@ except OSError as e:
         raise
 
 
-network_id_list = list(np.linspace(23,TOP_ID,TOP_ID))
+network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
 
 if network_group == 'banerjee_combined_edgelist_':
     del network_id_list[12]
@@ -73,7 +73,28 @@ if network_group == 'banerjee_combined_edgelist_':
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
-#  different modes of operation
+
+#  different models:
+model_id = '_model_1'
+
+if model_id == '_model_1':
+    MODEL = '(0.05,1)'
+    fixed_prob_high = 1.0
+    fixed_prob_low = 0.05
+elif model_id == '_model_2':
+    MODEL = '(0.05,0.5)'
+    fixed_prob_high = 0.5
+    fixed_prob_low = 0.05
+elif model_id == '_model_3':
+    MODEL = '(SIRI(0.5,0.05),1)'
+    fixed_prob_high = 1.0
+else:
+    print('model_id is not valid')
+    exit()
+
+number_initial_seeds = 2
+
+#  different modes of operation:
 
 do_computations = True
 save_computations = True

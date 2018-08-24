@@ -12,9 +12,8 @@ from models import *
 
 size_of_dataset = 200
 
-percent_more_edges_list = [5,10,15,20,25]
+percent_more_edges_list = [5, 10, 15, 20, 25]
 
-MODEL = '(0.05,1)'
 
 if __name__ == '__main__':
 
@@ -60,10 +59,10 @@ if __name__ == '__main__':
                     'number_of_edges_to_be_added': int(np.floor(0.01*percent_more_edges * G.number_of_edges())),
                     # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
                     'initialization_mode': 'fixed_number_initial_infection',
-                    'initial_infection_number': 2,
+                    'initial_infection_number': number_initial_seeds,
                     'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
-                    'fixed_prob_high': 1.0,
-                    'fixed_prob': 0.05,
+                    'fixed_prob_high': fixed_prob_high,
+                    'fixed_prob': fixed_prob_low,
                     'theta': 2,
                     'rewire': False,
                 }
@@ -88,10 +87,10 @@ if __name__ == '__main__':
                     'number_of_edges_to_be_added': int(np.floor(0.01 * percent_more_edges * G.number_of_edges())),
                     # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
                     'initialization_mode': 'fixed_number_initial_infection',
-                    'initial_infection_number': 2,
+                    'initial_infection_number': number_initial_seeds,
                     'delta': 0.0000000000000001,
-                    'fixed_prob_high': 1.0,
-                    'fixed_prob': 0.05,
+                    'fixed_prob_high': fixed_prob_high,
+                    'fixed_prob': fixed_prob_low,
                     'theta': 2,
                     'rewire': False,
                 }
@@ -114,19 +113,23 @@ if __name__ == '__main__':
 
                 pickle.dump(speed_samples_add_random, open(pickled_samples_directory_address + 'speed_samples_'
                                                            + str(percent_more_edges) + '_percent_' + 'add_random_'
-                                                           + network_group + network_id + '.pkl', 'wb'))
+                                                           + network_group + network_id
+                                                           + model_id + '.pkl', 'wb'))
                 pickle.dump(speed_samples_add_triad, open(pickled_samples_directory_address + 'speed_samples_'
                                                           + str(percent_more_edges) + '_percent_' + 'add_triad_'
-                                                          + network_group + network_id + '.pkl', 'wb'))
+                                                          + network_group + network_id
+                                                          + model_id + '.pkl', 'wb'))
 
             if settings.load_computations:
 
                 speed_samples_add_random = pickle.load(open(pickled_samples_directory_address + 'speed_samples_'
                                                             + str(percent_more_edges) + '_percent_' + 'add_random_'
-                                                            + network_group + network_id + '.pkl', 'rb'))
+                                                            + network_group + network_id
+                                                            + model_id + '.pkl', 'rb'))
                 speed_samples_add_triad = pickle.load(open(pickled_samples_directory_address + 'speed_samples_'
                                                            + str(percent_more_edges) + '_percent_' + 'add_triad_'
-                                                           + network_group + network_id + '.pkl', 'rb'))
+                                                           + network_group + network_id
+                                                           + model_id + '.pkl', 'rb'))
 
                 speed_add_triad = np.mean(speed_samples_add_triad)
 
@@ -159,7 +162,8 @@ if __name__ == '__main__':
                 if settings.save_plots:
                     plt.savefig(output_directory_address + 'speed_samples_histogram_'
                                 + str(percent_more_edges) + '_edge_additions_'
-                                + network_group + network_id + '.png')
+                                + network_group + network_id
+                                + model_id + '.png')
             if settings.data_dump:
 
                 print('we are in data_dump mode')
@@ -179,7 +183,6 @@ if __name__ == '__main__':
                 new_df_add_random = pd.concat([df_common_part_add_random, df_sample_ids_add_random,
                                                df_time_to_spreads_add_random],
                                               axis=1)
-
 
                 df_common_part_add_triad = pd.DataFrame(data=[[network_group, network_id, network_size,
                                                                number_edges, 'triad_addition', percent_more_edges,
