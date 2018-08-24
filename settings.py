@@ -12,7 +12,7 @@ import errno
 RD.seed()
 np.random.seed()
 
-network_group = 'chami_friendship_edgelist_' #'banerjee_combined_edgelist_'
+network_group = 'banerjee_combined_edgelist_' #'banerjee_combined_edgelist_'
 
 if network_group == 'cai_edgelist_':
 
@@ -65,22 +65,23 @@ except OSError as e:
         raise
 
 
-network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
+network_id_list = list(np.linspace(23,TOP_ID,TOP_ID))
 
 if network_group == 'banerjee_combined_edgelist_':
     del network_id_list[12]
+    del network_id_list[21]
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
 #  different modes of operation
 
-do_computations = False
-save_computations = False
-load_computations = True
+do_computations = True
+save_computations = True
+load_computations = False
 do_plots = False
 save_plots = False
 show_plots = False
-data_dump = True
+data_dump = False
 simulator_mode = False
 
 #  check that different modes are set consistently
