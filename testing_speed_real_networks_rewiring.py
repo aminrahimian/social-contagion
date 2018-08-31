@@ -74,6 +74,8 @@ if __name__ == '__main__':
                 'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
                 'fixed_prob_high': fixed_prob_high,
                 'fixed_prob': fixed_prob_low,
+                'alpha': alpha,
+                'gamma': gamma,
                 'theta': 2,
                 'rewire': False,
                 'rewiring_mode': 'random_random',
@@ -146,6 +148,8 @@ if __name__ == '__main__':
                     'delta': 0.0000000000000001,
                     'fixed_prob_high': fixed_prob_high,
                     'fixed_prob': fixed_prob_low,
+                    'alpha': alpha,
+                    'gamma': gamma,
                     'theta': 2,
                     'rewire': True,
                     'rewiring_mode': 'random_random',

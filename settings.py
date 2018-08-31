@@ -8,11 +8,12 @@ import numpy as np
 import pickle
 import os
 import errno
+import networkx as NX
 
 RD.seed()
 np.random.seed()
 
-network_group = 'banerjee_combined_edgelist_' #'banerjee_combined_edgelist_'
+network_group = 'banerjee_combined_edgelist_'#'chami_advice_edgelist_'  #'banerjee_combined_edgelist_'
 
 if network_group == 'cai_edgelist_':
 
@@ -67,27 +68,34 @@ except OSError as e:
 
 network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
 
+# networks 13 and 22 are missing form banerjee data set:
 if network_group == 'banerjee_combined_edgelist_':
     del network_id_list[12]
-    del network_id_list[21]
+    del network_id_list[20]
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
-
 #  different models:
-model_id = '_model_1'
+model_id = '_model_3'
 
 if model_id == '_model_1':
     MODEL = '(0.05,1)'
     fixed_prob_high = 1.0
     fixed_prob_low = 0.05
+    alpha = 1.0
+    gamma = 0.0
 elif model_id == '_model_2':
     MODEL = '(0.05,0.5)'
     fixed_prob_high = 0.5
     fixed_prob_low = 0.05
+    alpha = 1.0
+    gamma = 0.0
 elif model_id == '_model_3':
-    MODEL = '(SIRI(0.5,0.05),1)'
+    MODEL = '(0.05,1(0.05,0.5))'
     fixed_prob_high = 1.0
+    fixed_prob_low = 0.05
+    alpha = 0.05
+    gamma = 0.5
 else:
     print('model_id is not valid')
     exit()
@@ -143,6 +151,53 @@ if simulator_mode:
     import matplotlib.pyplot as plt
     import pickle
 
+    simulator_ID = 'cai_edgelist_1'
+
+    root_data_address = './data/cai-data/'
+
+    edgelist_directory_address = root_data_address + 'edgelists/'
+
+    pickled_samples_directory_address = root_data_address + 'pickled_samples/'
+
+    output_directory_address = root_data_address + 'output/'
+
+    try:
+        os.makedirs(output_directory_address)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+    try:
+        os.makedirs(pickled_samples_directory_address)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+    fh = open(edgelist_directory_address + simulator_ID + '.txt', 'rb')
+
+    G = NX.read_edgelist(fh)
+
+    print(NX.is_connected(G))
+
+    network_size = NX.number_of_nodes(G)
+
+    initial_seeds = 2
+
+    simulator_params = {
+        'network': G,
+        # 'size': network_size,  # populationSize,
+        'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
+        # two initial seeds, next to each other
+        'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+        # 'nearest_neighbors': 4,
+        # 'fixed_number_edges_added': 2,
+        'fixed_prob_high': 1.0,
+        'fixed_prob': 0.05,
+        'theta': 2,
+        'alpha': 0.05,
+        'gamma': 0.5,
+    }
+
 if do_plots:
     import matplotlib.pyplot as plt
     plt.rc('text', usetex=True)
@@ -153,7 +208,7 @@ if do_plots:
     ERROR_BAR_TYPE = 'std'
 
 def combine(list_of_names,output_name):
-    '''Useful for combining outputs from cluster computations.'''
+    '''Useful for combining pickle files from cluster computations.'''
     original = pickle.load(open('./data/' + list_of_names[0] + '.pkl', 'rb'))
     for ii in range(1, len(list_of_names)):
         additional = pickle.load(open('./data/' + list_of_names[ii] + '.pkl', 'rb'))
