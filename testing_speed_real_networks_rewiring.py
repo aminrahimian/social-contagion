@@ -40,7 +40,7 @@ if __name__ == '__main__':
             df = pd.DataFrame(columns=['network_group', 'network_id', 'network_size',
                                        'number_edges', 'intervention_type',
                                        'intervention_size', 'sample_id', 'time_to_spread', 'model'], dtype='float')
-            print('New ' + network_group + 'data_dump file will be generated.')
+            print('New ' + network_group + 'spreading_data_dump file will be generated.')
             generating_new_dump = True
 
     for network_id in network_id_list:
@@ -55,9 +55,17 @@ if __name__ == '__main__':
 
         print('original size ', len(G.nodes()))
 
+        #  get the largest connected component:
         if not NX.is_connected(G):
             G = max(NX.connected_component_subgraphs(G), key=len)
             print('largest connected component extracted with size ', len(G.nodes()))
+
+        #  remove self loops:
+        if len(list(G.selfloop_edges())) > 0:
+            print('warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
+            print('number of edges before self loop removal: ', G.size())
+            G.remove_edges_from(G.selfloop_edges())
+            print('number of edges before self loop removal: ', G.size())
 
         network_size = NX.number_of_nodes(G)
 
@@ -234,7 +242,7 @@ if __name__ == '__main__':
 
                 extended_frame = [df, new_df_rewired]
 
-                df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(drop=True)
+                df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False)#.drop_duplicates().reset_index(drop=True)
 
                 print(df)
 

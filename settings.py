@@ -13,7 +13,10 @@ import networkx as NX
 RD.seed()
 np.random.seed()
 
-network_group = 'banerjee_combined_edgelist_'#'chami_advice_edgelist_'  #'banerjee_combined_edgelist_'
+network_group = 'banerjee_combined_edgelist_'
+#'chami_friendship_edgelist_'
+#'chami_advice_edgelist_'
+#'cai_edgelist_'
 
 if network_group == 'cai_edgelist_':
 
@@ -65,7 +68,6 @@ except OSError as e:
     if e.errno != errno.EEXIST:
         raise
 
-
 network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
 
 # networks 13 and 22 are missing form banerjee data set:
@@ -76,7 +78,7 @@ if network_group == 'banerjee_combined_edgelist_':
 network_id_list = [str(int(id)) for id in network_id_list]
 
 #  different models:
-model_id = '_model_3'
+model_id = '_model_1'
 
 if model_id == '_model_1':
     MODEL = '(0.05,1)'
@@ -105,7 +107,7 @@ number_initial_seeds = 2
 #  different modes of operation:
 
 do_computations = True
-save_computations = True
+save_computations = False
 load_computations = False
 do_plots = False
 save_plots = False

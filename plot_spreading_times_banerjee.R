@@ -92,7 +92,7 @@ overall_ecdf_plot <- ggplot(
   aes(x = time_to_spread,
       color = intervention_type
   ),
-  data = st_1 %>% filter(model == MODEL_2)
+  data = st_1 %>% filter(model == MODEL_1)
 ) +
   scale_color_manual(values = intervention_colors) +
   stat_ecdf(lwd = .6) +
@@ -115,11 +115,11 @@ many_ecdf_plot = ggplot(
       group = paste(intervention_type, intervention_size, network_id)
   ),
   data = st_1 %>% filter(intervention_size %in% c(0, 25),
-                         model == MODEL_2)
+                         model == MODEL_1)
 ) +
   scale_x_log10(breaks = c(.1, .5, 1, 2, 10), limits = c(.09, 10.2)) +
   scale_color_manual(values = intervention_colors) +
-  stat_ecdf(alpha = .5, lwd = .3) +
+  stat_ecdf(alpha = .7, lwd = .3) +
   ylab("ECDF") +
   xlab("ratio of time to global spread") +
   theme(legend.position = c(0.8, 0.3)) +
@@ -130,6 +130,11 @@ many_ecdf_plot = ggplot(
 #guides(colour = guide_legend(override.aes = list(alpha = .7)))
 many_ecdf_plot
 
+
+ggsave('figures/banerjee_combined/time_to_spread_many_ecdfs.pdf',
+       many_ecdf_plot, width = 8, height = 6)
+
+
 many_ecdf_plot_facet_by_size = ggplot(
   aes(x = time_to_spread / time_to_spread_null_mean,
       color = intervention_type,
@@ -137,7 +142,7 @@ many_ecdf_plot_facet_by_size = ggplot(
   ),
   data = st_1 %>% filter(
     intervention_type != "none",
-    model == MODEL_2)
+    model == MODEL_1)
 ) +
   scale_x_log10(breaks = c(.1, .5, 1, 2, 10), limits = c(.09, 10.2)) +
   scale_color_manual(values = intervention_colors) +
@@ -145,7 +150,7 @@ many_ecdf_plot_facet_by_size = ggplot(
     alpha = .5, lwd = .3,
     data = st_1 %>% filter(
         intervention_type == "none",
-        model == MODEL_2
+        model == MODEL_1
     ) %>%
       select(-intervention_size)
   ) +
@@ -202,7 +207,7 @@ many_diff_in_ecdf_plot = ggplot(
 ) +
   scale_color_manual(values = intervention_colors) +
   geom_hline(yintercept = 0, lwd = .3, lty = 2, alpha = .5) +
-  geom_line(alpha = .1, lwd = .3) +
+  geom_line(alpha = .2, lwd = .4) +
   ylab(expression(ECDF[random] - ECDF[triadic])) +
   xlab("time to spread") +
   theme(legend.position = "none") +
@@ -292,3 +297,4 @@ ggplot(
   geom_point(aes(shape = intervention_type, color = intervention_type)) +
   scale_color_manual(values = intervention_colors) +
   scale_shape_manual(values = intervention_shapes)
+

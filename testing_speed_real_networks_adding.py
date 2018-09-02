@@ -12,8 +12,7 @@ from models import *
 
 size_of_dataset = 200
 
-percent_more_edges_list = [5, 10, 15, 20, 25]
-
+percent_more_edges_list = [5,10,15,20,25]
 
 if __name__ == '__main__':
 
@@ -22,7 +21,7 @@ if __name__ == '__main__':
             df = pd.read_csv(output_directory_address + network_group + 'spreading_')
         except FileNotFoundError:
             df = pd.DataFrame(dtype='float')
-            print('New ' + network_group + 'data_dump file will be generated.')
+            print('New ' + network_group + 'spreading_data_dump file will be generated.')
 
     for percent_more_edges in percent_more_edges_list:
         for network_id in network_id_list:
@@ -37,9 +36,17 @@ if __name__ == '__main__':
 
             print('original size ', len(G.nodes()))
 
+            #  get the largest connected component:
             if not NX.is_connected(G):
                 G = max(NX.connected_component_subgraphs(G), key=len)
                 print('largest connected component extracted with size ', len(G.nodes()))
+
+            #  remove self loops:
+            if len(list(G.selfloop_edges())) > 0:
+                print('warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
+                print('number of edges before self loop removal: ', G.size())
+                G.remove_edges_from(G.selfloop_edges())
+                print('number of edges before self loop removal: ', G.size())
 
             network_size = NX.number_of_nodes(G)
 
@@ -207,8 +214,7 @@ if __name__ == '__main__':
 
                 extended_frame = [df, new_df_add_random, new_df_add_triad]
 
-                df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(
-                    drop=True)
+                df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False)#.drop_duplicates().reset_index(drop=True)
 
     if settings.data_dump:
         df.to_csv(output_directory_address + network_group + 'spreading_data_dump.csv', index=False)#  , index=False
