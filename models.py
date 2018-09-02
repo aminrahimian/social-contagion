@@ -92,7 +92,8 @@ def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
     return G
 
 
-def cycle_union_Erdos_Renyi(n, k=4, c=2, seed=None):
+def cycle_union_Erdos_Renyi(n, k=4, c=2, seed=None, color_the_edges=False,
+                            cycle_edge_color='k', random_edge_color='b'):
     """Returns a cycle C_k union G(n,c/n) graph by composing
     NX.connected_watts_strogatz_graph(n, k, 0) and
     NX.erdos_renyi_graph(n, c/n, seed=None, directed=False)"""
@@ -102,11 +103,21 @@ def cycle_union_Erdos_Renyi(n, k=4, c=2, seed=None):
     if k >= n:
         raise NX.NetworkXError("k>=n, choose smaller k or larger n")
     C_k = NX.connected_watts_strogatz_graph(n, k, 0)
+    if color_the_edges:
+        # cycle_edge_colors = dict.fromkeys(C_k.edges(), cycle_edge_color)
+        NX.set_edge_attributes(C_k, cycle_edge_color, 'color')
+        NX.set_edge_attributes(C_k, 4, 'weight')
 
     G_npn = NX.erdos_renyi_graph(n, c/n, seed=None, directed=False)
+    if color_the_edges:
+        # random_edge_colors = dict.fromkeys(G_npn.edges(), random_edge_color)
+        NX.set_edge_attributes(G_npn, random_edge_color, 'color')
+        NX.set_edge_attributes(G_npn,  4, 'weight')
 
     assert G_npn.nodes() == C_k.nodes(), "node sets are not the same"
-    composed = NX.compose(C_k,G_npn)
+    composed = NX.compose(G_npn,C_k)
+
+    print(composed.edges.data())
 
     return composed
 
