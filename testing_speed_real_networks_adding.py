@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     if data_dump:
         try:
-            df = pd.read_csv(output_directory_address + network_group + 'spreading_')
+            df = pd.read_csv(output_directory_address + network_group + 'spreading_data_dump.csv')
         except FileNotFoundError:
             df = pd.DataFrame(dtype='float')
             print('New ' + network_group + 'spreading_data_dump file will be generated.')

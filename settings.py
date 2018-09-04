@@ -67,7 +67,7 @@ try:
 except OSError as e:
     if e.errno != errno.EEXIST:
         raise
-
+#
 network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
 
 # networks 13 and 22 are missing form banerjee data set:
@@ -106,13 +106,13 @@ number_initial_seeds = 2
 
 #  different modes of operation:
 
-do_computations = True
+do_computations = False
 save_computations = False
-load_computations = False
+load_computations = True
 do_plots = False
 save_plots = False
 show_plots = False
-data_dump = False
+data_dump = True
 simulator_mode = False
 
 #  check that different modes are set consistently
