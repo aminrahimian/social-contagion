@@ -6,8 +6,6 @@ import torch
 import pandas as pd
 import copy
 
-
-
 from scipy.stats import norm
 
 susceptible = 0.0
@@ -21,6 +19,14 @@ COMPLEX = 1
 
 SENTINEL = object()
 
+
+def measure_avg_clustering(network_intervention_dataset):
+    avg_clustering_samples = []
+
+    for network_intervention in network_intervention_dataset:
+        avg_clustering_samples += [NX.average_clustering(network_intervention)]
+
+    return avg_clustering_samples
 
 def random_factor_pair(value):
     """
@@ -687,16 +693,16 @@ class contagion_model(network_model):
             simulation_results.append((label_of_data, data))
         return simulation_results
 
-    def measure_avg_clustering(self, dataset_size=200):
+    def generate_network_intervention_dataset(self, dataset_size=200):
 
-        avg_clustering_samples = []
+        interventioned_networks = []
 
         for i in range(dataset_size):
             self.missing_params_not_set = True
             self.setRandomParams()
-            avg_clustering_samples += [NX.average_clustering(self.params['network'])]
+            interventioned_networks += [self.params['network']]
 
-        return avg_clustering_samples
+        return interventioned_networks
 
     def avg_speed_of_spread(self, dataset_size=1000, cap=0.9, mode='max'):
         # avg time to spread over the dataset.
