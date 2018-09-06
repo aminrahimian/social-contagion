@@ -27,7 +27,6 @@ def check_type(obj):
     else:
         return obj
 
-
 if __name__ == '__main__':
 
     if data_dump:

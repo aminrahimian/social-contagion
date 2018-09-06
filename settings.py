@@ -106,13 +106,13 @@ number_initial_seeds = 2
 
 #  different modes of operation:
 
-do_computations = False
-save_computations = False
-load_computations = True
+do_computations = True
+save_computations = True
+load_computations = False
 do_plots = False
 save_plots = False
 show_plots = False
-data_dump = True
+data_dump = False
 simulator_mode = False
 
 #  check that different modes are set consistently

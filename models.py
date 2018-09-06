@@ -20,13 +20,29 @@ COMPLEX = 1
 SENTINEL = object()
 
 
-def measure_avg_clustering(network_intervention_dataset):
-    avg_clustering_samples = []
+def measure_property( network_intervention_dataset, property='avg_clustering'):
+
+    property_samples = []
 
     for network_intervention in network_intervention_dataset:
-        avg_clustering_samples += [NX.average_clustering(network_intervention)]
+        if property is 'average_clustering':
+            property_sample = NX.average_clustering(network_intervention)
 
-    return avg_clustering_samples
+        elif property is 'average_shortest_path_length':
+            property_sample = NX.average_shortest_path_length(network_intervention)
+
+        elif property is 'diameter':
+            property_sample = NX.diameter(network_intervention)
+
+        elif property is 'size_2_core':
+            sample_2_core = NX.k_core(network_intervention, k=2)
+            property_sample = sample_2_core.number_of_nodes()
+        else:
+            assert False, 'property not supported.'
+
+        property_samples += [property_sample]
+
+    return property_samples
 
 def random_factor_pair(value):
     """
