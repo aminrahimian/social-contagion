@@ -37,7 +37,7 @@ if __name__ == '__main__':
         except FileNotFoundError:
 
             df = pd.DataFrame(columns=['network_group', 'network_id', 'network_size',
-                                       'number_edges', 'intervention_type',
+                                       'intervention_type',
                                        'intervention_size', 'sample_id', 'time_to_spread', 'model'], dtype='float')
             print('New ' + network_group + 'spreading_data_dump file will be generated.')
             generating_new_dump = True
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
         network_size = NX.number_of_nodes(G)
 
-        number_edges = G.number_of_edges()
+        # number_edges = G.number_of_edges()
 
         if settings.do_computations:
 
@@ -120,9 +120,9 @@ if __name__ == '__main__':
             print('we are in data_dump mode')
 
             df_common_part_original = pd.DataFrame(data=[[network_group, network_id, network_size,
-                                                          number_edges, 'none', 0.0, MODEL]] * len(speed_samples_original),
+                                                          'none', 0.0, MODEL]] * len(speed_samples_original),
                                                    columns=['network_group', 'network_id', 'network_size',
-                                                            'number_edges', 'intervention_type',
+                                                            'intervention_type',
                                                             'intervention_size','model'])
 
             df_sample_ids_original = pd.Series(list(range(len(speed_samples_original))), name='sample_id')
@@ -224,10 +224,10 @@ if __name__ == '__main__':
                 print('we are in data_dump mode')
 
                 df_common_part_rewired = pd.DataFrame(data=[[network_group, network_id, network_size,
-                                                             number_edges, 'rewired', rewiring_percentage, MODEL]]
+                                                             'rewired', rewiring_percentage, MODEL]]
                                                            * len(speed_samples_rewired),
                                                       columns=['network_group', 'network_id', 'network_size',
-                                                               'number_edges', 'intervention_type',
+                                                               'intervention_type',
                                                                'intervention_size','model'])
 
                 df_sample_ids_rewired = pd.Series(list(range(len(speed_samples_rewired))), name='sample_id')

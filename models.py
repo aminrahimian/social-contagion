@@ -25,20 +25,56 @@ def measure_property( network_intervention_dataset, property='avg_clustering'):
     property_samples = []
 
     for network_intervention in network_intervention_dataset:
-        if property is 'average_clustering':
+        if property is 'avg_clustering':
             property_sample = NX.average_clustering(network_intervention)
-
         elif property is 'average_shortest_path_length':
             property_sample = NX.average_shortest_path_length(network_intervention)
-
         elif property is 'diameter':
             property_sample = NX.diameter(network_intervention)
-
         elif property is 'size_2_core':
             sample_2_core = NX.k_core(network_intervention, k=2)
             property_sample = sample_2_core.number_of_nodes()
+        elif property is 'avg_degree':
+            degree_sequence = [d for n, d in network_intervention.degree()]
+            sum_of_edges = sum(degree_sequence)
+            property_sample = sum_of_edges/network_intervention.number_of_nodes()
+        elif property is 'diam_2_core':
+            sample_2_core = NX.k_core(network_intervention, k=2)
+            property_sample = NX.diameter(sample_2_core)
+        elif property is 'max_degree':
+            degree_sequence = sorted([d for n, d in network_intervention.degree()], reverse=True)
+            property_sample = max(degree_sequence)
+        elif property is 'min_degree':
+            degree_sequence = sorted([d for n, d in network_intervention.degree()], reverse=True)
+            property_sample = min(degree_sequence)
+        elif property is 'max_degree_2_core':
+            sample_2_core = NX.k_core(network_intervention, k=2)
+            degree_sequence = sorted([d for n, d in sample_2_core.degree()], reverse=True)
+            property_sample = max(degree_sequence)
+        elif property is 'min_degree_2_core':
+            sample_2_core = NX.k_core(network_intervention, k=2)
+            degree_sequence = sorted([d for n, d in sample_2_core.degree()], reverse=True)
+            property_sample = min(degree_sequence)
+        elif property is 'avg_degree_2_core':
+            sample_2_core = NX.k_core(network_intervention, k=2)
+            degree_sequence = [d for n, d in sample_2_core.degree()]
+            sum_of_edges = sum(degree_sequence)
+            property_sample = sum_of_edges / sample_2_core.number_of_nodes()
+        elif property is 'number_edges':
+            property_sample = network_intervention.number_of_edges()
+        elif property is 'number_edges_2_core':
+            sample_2_core = NX.k_core(network_intervention, k=2)
+            property_sample = sample_2_core.number_of_edges()
+        elif property is 'avg_clustering_2_core':
+            sample_2_core = NX.k_core(network_intervention, k=2)
+            property_sample = NX.average_clustering(sample_2_core)
+        elif property is 'transitivity':
+            property_sample = NX.transitivity(network_intervention)
+        elif property is 'transitivity_2_core':
+            sample_2_core = NX.k_core(network_intervention, k=2)
+            property_sample = NX.transitivity(sample_2_core)
         else:
-            assert False, 'property not supported.'
+            assert False, property + ' property not supported.'
 
         property_samples += [property_sample]
 

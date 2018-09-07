@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
             network_size = NX.number_of_nodes(G)
 
-            number_edges = G.number_of_edges()
+            # number_edges = G.number_of_edges()
 
             # original_average_clustering = NX.average_clustering(G)
 
@@ -180,11 +180,10 @@ if __name__ == '__main__':
                 print('we are in data_dump mode')
 
                 df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size,
-                                                              number_edges, 'random_addition', percent_more_edges,
-                                                                MODEL]]
-                                                              * len(speed_samples_add_random),
+                                                                'random_addition', percent_more_edges,
+                                                                MODEL]] * len(speed_samples_add_random),
                                                        columns=['network_group', 'network_id', 'network_size',
-                                                                'number_edges', 'intervention_type',
+                                                                'intervention_type',
                                                                 'intervention_size', 'model'])
 
                 df_sample_ids_add_random = pd.Series(list(range(len(speed_samples_add_random))), name='sample_id')
@@ -196,10 +195,10 @@ if __name__ == '__main__':
                                               axis=1)
 
                 df_common_part_add_triad = pd.DataFrame(data=[[network_group, network_id, network_size,
-                                                               number_edges, 'triad_addition', percent_more_edges,
+                                                               'triad_addition', percent_more_edges,
                                                                MODEL]] * len(speed_samples_add_triad),
                                                         columns=['network_group', 'network_id', 'network_size',
-                                                                 'number_edges', 'intervention_type',
+                                                                 'intervention_type',
                                                                  'intervention_size', 'model'])
 
                 df_sample_ids_add_triad = pd.Series(list(range(len(speed_samples_add_triad))), name='sample_id')

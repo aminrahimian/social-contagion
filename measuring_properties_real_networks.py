@@ -15,15 +15,25 @@ size_of_dataset = 200
 
 intervention_size_list = [5, 10, 15, 20, 25]
 
-included_properties = ['avg_clustering', 'average_shortest_path_length', 'diameter', 'size_2_core']
-    # ['size_2_core']#['average_shortest_path_length','diameter']#['avg_clustering', 'average_shortest_path_length', 'diameter', 'size_2_core']
+
+old_properties = ['avg_clustering', 'average_shortest_path_length', 'diameter', 'size_2_core']
+
+new_properties = ['avg_degree','diam_2_core', 'max_degree', 'min_degree',
+                  'max_degree_2_core', 'min_degree_2_core',
+                  'avg_degree_2_core', 'number_edges','number_edges_2_core',
+                  'avg_clustering_2_core', 'transitivity', 'transitivity_2_core']
+
+all_properties = old_properties + new_properties
+
+included_properties = new_properties
 
 generate_network_intervention_dataset = False
 
 use_separate_address_for_pickled_networks = True  # pickled_networks take a lot of space.
 # Some may need to put them else where away from other pickled samples.
 
-separate_address_for_pickled_networks = '/home/amin/Desktop/pickled_networks/'
+separate_address_for_pickled_networks = '/home/rahimian/contagion/data/pickled_networks/'
+#  '/home/amin/Desktop/pickled_networks/'
 
 assert (generate_network_intervention_dataset is None) or settings.do_computations, \
     'generate_network_intervention_dataset cannot be set (True or False)  when not do_computations'
@@ -39,7 +49,7 @@ if __name__ == '__main__':
             df = pd.read_csv(output_directory_address + network_group + 'properties_data_dump.csv')
         except FileNotFoundError:
             df = pd.DataFrame(columns=['network_group', 'network_id', 'network_size',
-                                       'number_edges', 'intervention_type',
+                                       'intervention_type',
                                        'intervention_size']+included_properties, dtype='float')
             print('New ' + network_group + 'clustering_data_dump file will be generated.')
 
@@ -73,7 +83,7 @@ if __name__ == '__main__':
 
         network_size = NX.number_of_nodes(G)
 
-        number_edges = G.number_of_edges()
+        # number_edges = G.number_of_edges()
 
         G_list = [G]
         for included_property in included_properties:
@@ -88,11 +98,11 @@ if __name__ == '__main__':
             print('we are in data_dump mode')
 
             dataset = [[network_group, network_id, network_size,
-                        number_edges, 'none', 0.0]
+                        'none', 0.0]
                        + [this_property[network_id_list.index(network_id)] for this_property in original_properties]]
 
             new_df = pd.DataFrame(data=dataset, columns=['network_group', 'network_id', 'network_size',
-                                                         'number_edges', 'intervention_type',
+                                                         'intervention_type',
                                                          'intervention_size'] + included_properties)
 
             print(new_df)
@@ -142,7 +152,7 @@ if __name__ == '__main__':
 
             network_size = NX.number_of_nodes(G)
 
-            number_edges = G.number_of_edges()
+            # number_edges = G.number_of_edges()
 
             if settings.do_computations:
 
@@ -412,7 +422,6 @@ if __name__ == '__main__':
                     std_properties_rewired[included_properties.index(included_property)] \
                         += [np.std(properties_sample_rewired[-1])]
 
-
                     print('loaded ' + included_property + '_'
                           + str(intervention_size) + '_percent_' + 'interventions_'
                           + network_group + network_id)
@@ -469,20 +478,20 @@ if __name__ == '__main__':
                 print('we are in data_dump mode')
 
                 dataset = [[network_group, network_id, network_size,
-                            number_edges, 'random_addition', intervention_size]
+                            'random_addition', intervention_size]
                            + [this_property[network_id_list.index(network_id)]
                               for this_property in mean_properties_add_random],
                            [network_group, network_id, network_size,
-                            number_edges, 'triad_addition', intervention_size]
+                            'triad_addition', intervention_size]
                            + [this_property[network_id_list.index(network_id)]
                               for this_property in mean_properties_add_triad],
                            [network_group, network_id, network_size,
-                            number_edges, 'rewiring', intervention_size]
+                            'rewiring', intervention_size]
                            + [this_property[network_id_list.index(network_id)]
                               for this_property in mean_properties_rewired]]
 
                 new_df = pd.DataFrame(data=dataset, columns=['network_group', 'network_id', 'network_size',
-                                                             'number_edges', 'intervention_type',
+                                                             'intervention_type',
                                                              'intervention_size'] + included_properties)
 
                 print(new_df)
@@ -510,8 +519,8 @@ if __name__ == '__main__':
                                 str(intervention_size) + ' \% rewiring'])
 
                 plt.ylabel('Frequency')
-                plt.xlabel(included_property)
-                plt.title(included_property + ' under Various Interventions, Intervention Size: '
+                plt.xlabel(included_property.replace("_", " "))
+                plt.title(included_property.replace("_", " ") + ' under Various Interventions, Intervention Size: '
                           + str(intervention_size) + '%')
                 plt.legend()
                 if settings.show_plots:
