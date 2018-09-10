@@ -21,18 +21,18 @@ rewiring_percentage_list = [5, 10, 15, 20, 25]
 # loop_mode = (len(rewiring_percentage_list) > 1)
 # print(loop_mode)
 
-include_original_networks_comptations = True
+include_original_networks_computations = True
 
-assert (include_original_networks_comptations is None) or settings.do_computations, \
-    'include_original_networks_comptations cannot be set (True or False)  when not do_computations'
-
-
-assert (not (include_original_networks_comptations is None)) or (not settings.do_computations), \
-    'include_original_networks_comptations should not be None (set True or False) when do_computations'
+assert (include_original_networks_computations is None) or settings.do_computations, \
+    'include_original_networks_computations cannot be set (True or False)  when not do_computations'
 
 
-assert (not (include_original_networks_comptations is False)) or (not settings.do_plots), \
-    'include_original_networks_comptations cannot be False (set True or None) when do_plots'
+assert (not (include_original_networks_computations is None)) or (not settings.do_computations), \
+    'include_original_networks_computations should not be None (set True or False) when do_computations'
+
+
+assert (not (include_original_networks_computations is False)) or (not settings.do_plots), \
+    'include_original_networks_computations cannot be False (set True or None) when do_plots'
 
 
 def check_type(obj):
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         # number_edges = G.number_of_edges()
 
         if settings.do_computations:
-            if include_original_networks_comptations:
+            if include_original_networks_computations:
                 params_original = {
                     'network': G,
                     'size': network_size,
@@ -116,7 +116,7 @@ if __name__ == '__main__':
                 print(type(speed_original))
 
         if settings.save_computations:
-            if include_original_networks_comptations:
+            if include_original_networks_computations:
                 pickle.dump(speed_samples_original, open(spreading_pickled_samples_directory_address
                                                          + 'speed_samples_original_'
                                                          + network_group + network_id
