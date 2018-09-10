@@ -56,6 +56,12 @@ output_directory_address = root_data_address + 'output/'
 
 pickled_samples_directory_address = root_data_address + 'pickled_samples/'
 
+properties_pickled_samples_directory_address = pickled_samples_directory_address + 'properties_pickled_samples/'
+
+spreading_pickled_samples_directory_address = pickled_samples_directory_address + 'spreading_pickled_samples/'
+
+networks_pickled_samples_directory_address = pickled_samples_directory_address + 'networks_pickled_samples/'
+
 try:
     os.makedirs(output_directory_address)
 except OSError as e:
@@ -67,13 +73,34 @@ try:
 except OSError as e:
     if e.errno != errno.EEXIST:
         raise
-#
+
+try:
+    os.makedirs(properties_pickled_samples_directory_address)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
+
+try:
+    os.makedirs(spreading_pickled_samples_directory_address)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
+
+try:
+    os.makedirs(networks_pickled_samples_directory_address)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
+
+
 network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
 
 # networks 13 and 22 are missing form banerjee data set:
 if network_group == 'banerjee_combined_edgelist_':
     del network_id_list[12]
     del network_id_list[20]
+
+# network_id_list = [4]
 
 network_id_list = [str(int(id)) for id in network_id_list]
 
@@ -105,15 +132,25 @@ else:
 number_initial_seeds = 2
 
 #  different modes of operation:
+#
+# do_computations = False
+# save_computations = False
+# load_computations = True
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = True
+# simulator_mode = False
 
 do_computations = True
-save_computations = True
+save_computations = False
 load_computations = False
 do_plots = False
 save_plots = False
 show_plots = False
 data_dump = False
 simulator_mode = False
+
 
 #  check that different modes are set consistently
 

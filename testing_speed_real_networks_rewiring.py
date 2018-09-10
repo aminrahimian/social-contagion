@@ -18,14 +18,29 @@ size_of_dataset = 200
 # network_id_list = [str(int(id)) for id in network_id_list]
 
 rewiring_percentage_list = [5, 10, 15, 20, 25]
-loop_mode = (len(rewiring_percentage_list) > 1)
-print(loop_mode)
+# loop_mode = (len(rewiring_percentage_list) > 1)
+# print(loop_mode)
+
+include_original_networks_comptations = True
+
+assert (include_original_networks_comptations is None) or settings.do_computations, \
+    'include_original_networks_comptations cannot be set (True or False)  when not do_computations'
+
+
+assert (not (include_original_networks_comptations is None)) or (not settings.do_computations), \
+    'include_original_networks_comptations should not be None (set True or False) when do_computations'
+
+
+assert (not (include_original_networks_comptations is False)) or (not settings.do_plots), \
+    'include_original_networks_comptations cannot be False (set True or None) when do_plots'
+
 
 def check_type(obj):
     if isinstance(obj, np.generic):
         return np.asscalar(obj)
     else:
         return obj
+
 
 if __name__ == '__main__':
 
@@ -71,44 +86,45 @@ if __name__ == '__main__':
         # number_edges = G.number_of_edges()
 
         if settings.do_computations:
+            if include_original_networks_comptations:
+                params_original = {
+                    'network': G,
+                    'size': network_size,
+                    'add_edges': False,
+                    'initialization_mode': 'fixed_number_initial_infection',
+                    'initial_infection_number': number_initial_seeds,
+                    'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+                    'fixed_prob_high': fixed_prob_high,
+                    'fixed_prob': fixed_prob_low,
+                    'alpha': alpha,
+                    'gamma': gamma,
+                    'theta': 2,
+                    'rewire': False,
+                    'rewiring_mode': 'random_random',
+                    'num_edges_for_random_random_rewiring': None,
+                }
 
-            params_original = {
-                'network': G,
-                'size': network_size,
-                'add_edges': False,
-                'initialization_mode': 'fixed_number_initial_infection',
-                'initial_infection_number': number_initial_seeds,
-                'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
-                'fixed_prob_high': fixed_prob_high,
-                'fixed_prob': fixed_prob_low,
-                'alpha': alpha,
-                'gamma': gamma,
-                'theta': 2,
-                'rewire': False,
-                'rewiring_mode': 'random_random',
-                'num_edges_for_random_random_rewiring': None,
-            }
+                dynamics_original = DeterministicLinear(params_original)
+                speed_original, std_original, _, _, speed_samples_original = \
+                    dynamics_original.avg_speed_of_spread(
+                        dataset_size=size_of_dataset,
+                        cap=0.9,
+                        mode='max')
+                print(speed_original, std_original)
+                print(speed_samples_original)
 
-            dynamics_original = DeterministicLinear(params_original)
-            speed_original, std_original, _, _, speed_samples_original = \
-                dynamics_original.avg_speed_of_spread(
-                    dataset_size=size_of_dataset,
-                    cap=0.9,
-                    mode='max')
-            print(speed_original, std_original)
-            print(speed_samples_original)
-
-            print(type(speed_original))
+                print(type(speed_original))
 
         if settings.save_computations:
-
-            pickle.dump(speed_samples_original, open(pickled_samples_directory_address + 'speed_samples_original_'
-                                                     + network_group + network_id
-                                                     + model_id + '.pkl', 'wb'))
+            if include_original_networks_comptations:
+                pickle.dump(speed_samples_original, open(spreading_pickled_samples_directory_address
+                                                         + 'speed_samples_original_'
+                                                         + network_group + network_id
+                                                         + model_id + '.pkl', 'wb'))
 
         if settings.load_computations:
-
-            speed_samples_original = pickle.load(open(pickled_samples_directory_address + 'speed_samples_original_'
+            speed_samples_original = pickle.load(open(spreading_pickled_samples_directory_address
+                                                      + 'speed_samples_original_'
                                                       + network_group + network_id
                                                       + model_id + '.pkl', 'rb'))
 
@@ -175,14 +191,14 @@ if __name__ == '__main__':
 
             if settings.save_computations:
 
-                pickle.dump(speed_samples_rewired, open(pickled_samples_directory_address + 'speed_samples_'
+                pickle.dump(speed_samples_rewired, open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                         + str(rewiring_percentage) +
                                                         '_percent_rewiring_' + network_group + network_id
                                                         + model_id + '.pkl', 'wb'))
 
             if settings.load_computations:
 
-                speed_samples_rewired = pickle.load(open(pickled_samples_directory_address + 'speed_samples_'
+                speed_samples_rewired = pickle.load(open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                          + str(rewiring_percentage) +
                                                          '_percent_rewiring_' + network_group + network_id
                                                          + model_id + '.pkl', 'rb'))

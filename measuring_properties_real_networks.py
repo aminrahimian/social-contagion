@@ -16,7 +16,7 @@ size_of_dataset = 200
 intervention_size_list = [5, 10, 15, 20, 25]
 
 
-old_properties = ['avg_clustering', 'average_shortest_path_length', 'diameter', 'size_2_core']
+old_properties = ['avg_clustering','average_shortest_path_length', 'diameter', 'size_2_core']
 
 new_properties = ['avg_degree','diam_2_core', 'max_degree', 'min_degree',
                   'max_degree_2_core', 'min_degree_2_core',
@@ -25,22 +25,31 @@ new_properties = ['avg_degree','diam_2_core', 'max_degree', 'min_degree',
 
 all_properties = old_properties + new_properties
 
-included_properties = new_properties
+included_properties = all_properties
 
-generate_network_intervention_dataset = False
+generate_network_intervention_dataset = None # In do_computations determines to whether generate networks (true) or
+# load and use previously generated networks (False). If not in do_computations mode, it should be set to None
 
-use_separate_address_for_pickled_networks = True  # pickled_networks take a lot of space.
+
+use_separate_address_for_pickled_networks = None  # pickled_networks take a lot of space.
 # Some may need to put them else where away from other pickled samples.
 
 separate_address_for_pickled_networks = '/home/rahimian/contagion/data/pickled_networks/'
 #  '/home/amin/Desktop/pickled_networks/'
+
+if use_separate_address_for_pickled_networks:
+    try:
+        os.makedirs(separate_address_for_pickled_networks)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 
 assert (generate_network_intervention_dataset is None) or settings.do_computations, \
     'generate_network_intervention_dataset cannot be set (True or False)  when not do_computations'
 
 
 assert (not (generate_network_intervention_dataset is None)) or (not settings.do_computations), \
-    'generate_network_intervention_dataset should not be None when do_computations'
+    'generate_network_intervention_dataset should not be None (set True or False) when do_computations'
 
 if __name__ == '__main__':
 
@@ -252,18 +261,18 @@ if __name__ == '__main__':
                         print('loaded rewired_networks from separate address', rewired_networks)
 
                     else:
-                        add_random_networks = pickle.load(open(pickled_samples_directory_address + 'networks_'
+                        add_random_networks = pickle.load(open(networks_pickled_samples_directory_address + 'networks_'
                                                                + str(intervention_size) + '_percent_' + 'add_ran_'
                                                                + network_group + network_id + '.pkl', 'rb'))
                         print('loaded add_random_networks from common pickle address', add_random_networks)
 
-                        add_triad_networks = pickle.load(open(pickled_samples_directory_address + 'networks_'
+                        add_triad_networks = pickle.load(open(networks_pickled_samples_directory_address + 'networks_'
                                                               + str(intervention_size) + '_percent_' + 'add_triad_'
                                                               + network_group + network_id + '.pkl', 'rb'))
 
                         print('loaded add_triad_networks from common pickle address', add_triad_networks)
 
-                        rewired_networks = pickle.load(open(pickled_samples_directory_address + 'networks_'
+                        rewired_networks = pickle.load(open(networks_pickled_samples_directory_address + 'networks_'
                                                             + str(intervention_size) + '_percent_' + 'rewiring_'
                                                             + network_group + network_id + '.pkl', 'rb'))
 
@@ -337,17 +346,17 @@ if __name__ == '__main__':
                     else:
 
                         pickle.dump(add_random_networks,
-                                    open(pickled_samples_directory_address + 'networks_'
+                                    open(networks_pickled_samples_directory_address + 'networks_'
                                          + str(intervention_size) + '_percent_' + 'add_random_'
                                          + network_group + network_id + '.pkl', 'wb'))
 
                         pickle.dump(add_triad_networks,
-                                    open(pickled_samples_directory_address + 'networks_'
+                                    open(networks_pickled_samples_directory_address + 'networks_'
                                          + str(intervention_size) + '_percent_' + 'add_triad_'
                                          + network_group + network_id + '.pkl', 'wb'))
 
                         pickle.dump(rewired_networks,
-                                    open(pickled_samples_directory_address + 'networks_'
+                                    open(networks_pickled_samples_directory_address + 'networks_'
                                          + str(intervention_size) + '_percent_' + 'rewiring_'
                                          + network_group + network_id + '.pkl', 'wb'))
 
@@ -358,19 +367,19 @@ if __name__ == '__main__':
                     for included_property in included_properties:
                         print(included_property, properties_sample_add_random[included_properties.index(included_property)])
                         pickle.dump(properties_sample_add_random[included_properties.index(included_property)],
-                                    open(pickled_samples_directory_address + included_property + '_'
+                                    open(properties_pickled_samples_directory_address + included_property + '_'
                                          + str(intervention_size) + '_percent_' + 'add_random_'
                                          + network_group + network_id + '.pkl', 'wb'))
                         print(included_property,
                               properties_sample_add_triad[included_properties.index(included_property)])
                         pickle.dump(properties_sample_add_triad[included_properties.index(included_property)],
-                                    open(pickled_samples_directory_address + included_property + '_'
+                                    open(properties_pickled_samples_directory_address + included_property + '_'
                                          + str(intervention_size) + '_percent_' + 'add_triad_'
                                          + network_group + network_id + '.pkl', 'wb'))
                         print(included_property,
                               properties_sample_rewired[included_properties.index(included_property)])
                         pickle.dump(properties_sample_rewired[included_properties.index(included_property)],
-                                    open(pickled_samples_directory_address + included_property + '_'
+                                    open(properties_pickled_samples_directory_address + included_property + '_'
                                          + str(intervention_size) + '_percent_' + 'rewiring_'
                                          + network_group + network_id + '.pkl', 'wb'))
                         print('dumped ' + included_property + '_'
@@ -390,17 +399,17 @@ if __name__ == '__main__':
                 for included_property in included_properties:
 
                     properties_sample_add_random += \
-                        [pickle.load(open(pickled_samples_directory_address + included_property + '_'
+                        [pickle.load(open(properties_pickled_samples_directory_address + included_property + '_'
                                           + str(intervention_size) + '_percent_' + 'add_random_'
                                           + network_group + network_id + '.pkl', 'rb'))]
 
                     properties_sample_add_triad += \
-                        [pickle.load(open(pickled_samples_directory_address + included_property + '_'
+                        [pickle.load(open(properties_pickled_samples_directory_address + included_property + '_'
                                           + str(intervention_size) + '_percent_' + 'add_triad_'
                                           + network_group + network_id + '.pkl', 'rb'))]
 
                     properties_sample_rewired += \
-                        [pickle.load(open(pickled_samples_directory_address + included_property + '_'
+                        [pickle.load(open(properties_pickled_samples_directory_address + included_property + '_'
                                           + str(intervention_size) + '_percent_' + 'rewiring_'
                                           + network_group + network_id + '.pkl', 'rb'))]
 

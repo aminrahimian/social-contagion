@@ -12,7 +12,7 @@ from models import *
 
 size_of_dataset = 200
 
-percent_more_edges_list = [5,10,15,20,25]
+percent_more_edges_list = [5, 10, 15, 20, 25]
 
 if __name__ == '__main__':
 
@@ -122,22 +122,22 @@ if __name__ == '__main__':
 
             if settings.save_computations:
 
-                pickle.dump(speed_samples_add_random, open(pickled_samples_directory_address + 'speed_samples_'
+                pickle.dump(speed_samples_add_random, open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                            + str(percent_more_edges) + '_percent_' + 'add_random_'
                                                            + network_group + network_id
                                                            + model_id + '.pkl', 'wb'))
-                pickle.dump(speed_samples_add_triad, open(pickled_samples_directory_address + 'speed_samples_'
+                pickle.dump(speed_samples_add_triad, open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                           + str(percent_more_edges) + '_percent_' + 'add_triad_'
                                                           + network_group + network_id
                                                           + model_id + '.pkl', 'wb'))
 
             if settings.load_computations:
 
-                speed_samples_add_random = pickle.load(open(pickled_samples_directory_address + 'speed_samples_'
+                speed_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                             + str(percent_more_edges) + '_percent_' + 'add_random_'
                                                             + network_group + network_id
                                                             + model_id + '.pkl', 'rb'))
-                speed_samples_add_triad = pickle.load(open(pickled_samples_directory_address + 'speed_samples_'
+                speed_samples_add_triad = pickle.load(open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                            + str(percent_more_edges) + '_percent_' + 'add_triad_'
                                                            + network_group + network_id
                                                            + model_id + '.pkl', 'rb'))
