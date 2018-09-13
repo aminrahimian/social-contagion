@@ -1,10 +1,17 @@
 
 from models import *
-from settings import *
+# from settings import *
 
+import matplotlib.pyplot as plt
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
+from decimal import Decimal
+FOURPLACES = Decimal(10) ** -4
+TWOPLACES = Decimal(10) ** -2
+ERROR_BAR_TYPE = 'std'
 
-
-degree_range=np.linspace(0,5,300)
+degree_range = np.linspace(0,5,300)
+degree_range_int = np.linspace(0,5,6)
 
 if __name__ == '__main__':
 
@@ -61,9 +68,21 @@ if __name__ == '__main__':
 
     activation_probabilities_si_6 = dynamics_6.get_activation_probabilities(degree_range)
 
-    plt.plot(degree_range, activation_probabilities_si_4, linewidth=2, label='$\\beta  =  0.4$')
-    plt.plot(degree_range, activation_probabilities_si_5, linewidth=2, label='$\\beta  =  0.5$')
-    plt.plot(degree_range, activation_probabilities_si_6, linewidth=2, label='$\\beta  =  0.6$')
+    activation_probabilities_si_4_int = dynamics_4.get_activation_probabilities(degree_range_int)
+
+    activation_probabilities_si_5_int = dynamics_5.get_activation_probabilities(degree_range_int)
+
+    activation_probabilities_si_6_int = dynamics_6.get_activation_probabilities(degree_range_int)
+
+    plt.plot(degree_range, activation_probabilities_si_4, linewidth=2,
+             label='$\\beta  =  0.4$')
+    plt.scatter(degree_range_int, activation_probabilities_si_4_int)
+    plt.plot(degree_range, activation_probabilities_si_5, linewidth=2,
+             label='$\\beta  =  0.5$')
+    plt.scatter(degree_range_int, activation_probabilities_si_5_int)
+    plt.plot(degree_range, activation_probabilities_si_6, linewidth=2,
+             label='$\\beta  =  0.6$')
+    plt.scatter(degree_range_int, activation_probabilities_si_6_int)
 
     plt.ylabel('Adoption Probability')
     plt.xlabel('Number of Adopters in the Social Neighborhood')
@@ -97,12 +116,40 @@ if __name__ == '__main__':
     activation_probabilities_linear = dynamics_linear.get_activation_probabilities(degree_range)
 
     activation_probabilities_sub_threshold = dynamics_linear_sub_threshold.get_activation_probabilities(degree_range)
+
+    activation_probabilities_probit_int = dynamics_probit.get_activation_probabilities(degree_range_int)
+
+    activation_probabilities_logit_int = dynamics_logit.get_activation_probabilities(degree_range_int)
+
+    # activation_probabilities_si_threshold =
+    # dynamics_si_threshold.get_activation_probabilities(degree_range)
+    #
+    # activation_probabilities_si_threshold_soft =
+    # dynamics_si_threshold_soft.get_activation_probabilities(degree_range)
+    #
+    # activation_probabilities_si_threshold_soft_fixed =
+    # dynamics_si_threshold_soft_fixed.get_activation_probabilities(degree_range)
+
+    activation_probabilities_linear_int = \
+        dynamics_linear.get_activation_probabilities(degree_range_int)
+
+    activation_probabilities_sub_threshold_int = \
+        dynamics_linear_sub_threshold.get_activation_probabilities(degree_range_int)
+
     print(degree_range)
 
-    plt.plot(degree_range, activation_probabilities_probit, linewidth=2, label='Probit $(\\sigma = 0.5)$')
-    plt.plot(degree_range, activation_probabilities_logit, linewidth=2, label='Logit $(\\sigma = 0.5)$')
-    plt.plot(degree_range, activation_probabilities_linear, 'r--', linewidth=1.5, label='Linear Threshold')
-    plt.plot(degree_range, activation_probabilities_sub_threshold, linewidth=4, label='Sub-Threshold Adoptions')
+    plt.plot(degree_range, activation_probabilities_probit, linewidth=2,
+             label='Probit $(\\sigma = 0.5)$')
+    plt.scatter(degree_range_int, activation_probabilities_probit_int)
+    plt.plot(degree_range, activation_probabilities_logit, linewidth=2,
+             label='Logit $(\\sigma = 0.5)$')
+    plt.scatter(degree_range_int, activation_probabilities_logit_int)
+    plt.plot(degree_range, activation_probabilities_linear, 'r--', linewidth=1.5,
+             label='Linear Threshold')
+    plt.scatter(degree_range_int, activation_probabilities_linear_int)
+    plt.plot(degree_range, activation_probabilities_sub_threshold, linewidth=4,
+             label='Sub-Threshold Adoptions')
+    plt.scatter(degree_range_int, activation_probabilities_sub_threshold_int)
     # plt.plot(degree_range, activation_probabilities_si_threshold,
     # label='Threshold SI',alpha = 0.4, linewidth = 4)
     # plt.plot(degree_range, activation_probabilities_si_threshold_soft, ':', linewidth = 3,
