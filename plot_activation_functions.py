@@ -74,6 +74,8 @@ if __name__ == '__main__':
 
     activation_probabilities_si_6_int = dynamics_6.get_activation_probabilities(degree_range_int)
 
+    plt.figure(1)
+
     plt.plot(degree_range, activation_probabilities_si_4, linewidth=2,
              label='$\\beta  =  0.4$')
     plt.scatter(degree_range_int, activation_probabilities_si_4_int)
@@ -161,4 +163,19 @@ if __name__ == '__main__':
     plt.xlabel('Number of Adopters in the Social Neighborhood')
     plt.title('Complex Activation Functions')
     plt.legend()
+    plt.show()
+
+    plt.figure(3)
+
+    plt.plot(degree_range[0:180], activation_probabilities_sub_threshold[0:180], linewidth=4)
+    plt.scatter(degree_range_int[0:3], activation_probabilities_sub_threshold_int[0:3])
+
+    plt.ylabel('Adoption Probability')
+    plt.xlabel('Number of Adopters in the Social Neighborhood')
+    plt.ylim(ymax=1.3)
+    plt.text(2.25, 1.1, '$\\rho$', fontsize=30,
+             fontweight='bold', fontdict=None, withdash=False)
+    plt.text(1.25, 0.25, '$q_n$', fontsize=30,
+             fontweight='bold', fontdict=None, withdash=False)
+    plt.title('A Realistic Complex Activation Function')
     plt.show()
