@@ -9,11 +9,21 @@ import pickle
 import os
 import errno
 import networkx as NX
+import re
 
-RD.seed()
-np.random.seed()
+def atoi(text):
+    return int(text) if text.isdigit() else text
 
-network_group = 'banerjee_combined_edgelist_'
+def natural_keys(text):
+    '''
+    alist.sort(key=natural_keys) sorts in human order
+    http://nedbatchelder.com/blog/200712/human_sorting.html
+    (See Toothy's implementation in the comments)
+    '''
+    return [atoi(c) for c in re.split('(\d+)', text) ]
+
+network_group = 'fb100_edgelist_'
+# 'banerjee_combined_edgelist_'
 #'chami_friendship_edgelist_'
 #'chami_advice_edgelist_'
 #'cai_edgelist_'
@@ -24,7 +34,7 @@ if network_group == 'cai_edgelist_':
 
     DELIMITER = ' '
 
-    TOP_ID = 175
+    # TOP_ID = 175
 
 elif network_group == 'chami_friendship_edgelist_':
 
@@ -32,7 +42,7 @@ elif network_group == 'chami_friendship_edgelist_':
 
     DELIMITER = ','
 
-    TOP_ID = 17
+    # TOP_ID = 17
 
 elif network_group == 'chami_advice_edgelist_':
 
@@ -40,7 +50,7 @@ elif network_group == 'chami_advice_edgelist_':
 
     DELIMITER = ','
 
-    TOP_ID = 17
+    # TOP_ID = 17
 
 elif network_group == 'banerjee_combined_edgelist_':
 
@@ -48,7 +58,15 @@ elif network_group == 'banerjee_combined_edgelist_':
 
     DELIMITER = ' '
 
-    TOP_ID = 77
+    # TOP_ID = 77
+
+elif network_group == 'fb100_edgelist_':
+
+    root_data_address = './data/fb100-data/'
+
+    DELIMITER = ' '
+
+    # TOP_ID = 77
 
 edgelist_directory_address = root_data_address + 'edgelists/'
 
@@ -61,6 +79,14 @@ properties_pickled_samples_directory_address = pickled_samples_directory_address
 spreading_pickled_samples_directory_address = pickled_samples_directory_address + 'spreading_pickled_samples/'
 
 networks_pickled_samples_directory_address = pickled_samples_directory_address + 'networks_pickled_samples/'
+use_separate_address_for_pickled_networks = True  # pickled_networks take a lot of space.
+# Some may need to put them else where away from other pickled samples.
+separate_address_for_pickled_networks = '/home/amin/Desktop/pickled_networks/'
+# '/home/rahimian/contagion/data/pickled_networks/'
+#  '/home/amin/Desktop/pickled_networks/'
+if use_separate_address_for_pickled_networks:
+    networks_pickled_samples_directory_address = \
+        separate_address_for_pickled_networks
 
 try:
     os.makedirs(output_directory_address)
@@ -92,17 +118,26 @@ except OSError as e:
     if e.errno != errno.EEXIST:
         raise
 
+# get the network_id_lists
 
-network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
+# network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
+#
+# # networks 13 and 22 are missing form banerjee data set:
+# if network_group == 'banerjee_combined_edgelist_':
+#     del network_id_list[12]
+#     del network_id_list[20]
+#
+# network_id_list = [str(int(id)) for id in network_id_list]
 
-# networks 13 and 22 are missing form banerjee data set:
-if network_group == 'banerjee_combined_edgelist_':
-    del network_id_list[12]
-    del network_id_list[20]
-
-# network_id_list = [4]
-
-network_id_list = [str(int(id)) for id in network_id_list]
+# if network_group == 'fb100_edgelist_' or 'banerjee_combined_edgelist_':
+network_id_list = []
+for file in os.listdir(edgelist_directory_address):
+    filename = os.path.splitext(file)[0]
+    net_id = filename.replace(network_group,'')
+    print(net_id)
+    network_id_list += [net_id]
+network_id_list.sort(key=natural_keys)
+print(network_id_list)
 
 #  different models:
 model_id = '_model_1'
@@ -129,7 +164,7 @@ else:
     print('model_id is not valid')
     exit()
 
-number_initial_seeds = 2
+number_initial_seeds = 500
 
 #  different modes of operation:
 #

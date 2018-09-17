@@ -796,6 +796,7 @@ class contagion_model(network_model):
                 cap_time = time_the_cap(dataset[i][1][:, 0], cap)
                 if cap_time == -1:
                     dataset_size += -1
+                    cap_times += [float('Inf')]
                     continue
                 sum_of_cap_times += cap_time
                 cap_times += [cap_time]
@@ -820,9 +821,10 @@ class contagion_model(network_model):
                 # print('total_spread_time',total_spread_time)
                 if total_spread_time == -1:
                     dataset_size += -1
+                    total_spread_times += [total_spread_time]
                     print('The contagion did not spread totally.')
                     continue
-                total_spread_times += [total_spread_time]
+                total_spread_times += [float('Inf')]
                 sum_of_total_spread_times += total_spread_time
                 count += 1
             if dataset_size == 0:
