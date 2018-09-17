@@ -800,7 +800,11 @@ class contagion_model(network_model):
                 sum_of_cap_times += cap_time
                 cap_times += [cap_time]
             if dataset_size == 0:
-                avg_speed = -1
+                avg_speed = float('Inf')
+                speed_std = float('NaN')
+                speed_max = float('Inf')
+                speed_min = float('Inf')
+                speed_samples = np.asarray([float('Inf')])
             else:
                 avg_speed = sum_of_cap_times/dataset_size
                 speed_std = np.std(cap_times)
@@ -822,7 +826,12 @@ class contagion_model(network_model):
                 sum_of_total_spread_times += total_spread_time
                 count += 1
             if dataset_size == 0:
-                avg_speed = -1
+                avg_speed = float('Inf')
+                speed_std = float('NaN')
+                speed_max = float('Inf')
+                speed_min = float('Inf')
+                speed_samples = np.asarray([float('Inf')])
+
             else:
                 avg_speed = sum_of_total_spread_times/dataset_size
                 speed_std = np.std(total_spread_times)
