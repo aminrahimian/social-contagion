@@ -22,7 +22,7 @@ def natural_keys(text):
     '''
     return [atoi(c) for c in re.split('(\d+)', text) ]
 
-network_group = 'fb100_edgelist_'
+network_group = 'cai_edgelist_' #'fb100_edgelist_'
 # 'banerjee_combined_edgelist_'
 #'chami_friendship_edgelist_'
 #'chami_advice_edgelist_'
@@ -164,7 +164,7 @@ else:
     print('model_id is not valid')
     exit()
 
-number_initial_seeds = 500
+
 
 #  different modes of operation:
 #
@@ -178,6 +178,7 @@ number_initial_seeds = 500
 # simulator_mode = False
 
 do_computations = True
+do_multiprocessing = True
 save_computations = False
 load_computations = False
 do_plots = False
@@ -190,6 +191,8 @@ simulator_mode = False
 #  check that different modes are set consistently
 
 assert (not save_computations) or do_computations, "do_computations should be true to save_computations"
+
+assert (not do_multiprocessing) or do_computations, "do_computations should be true to do_multiprocessing"
 
 assert (not (save_plots or show_plots)) or do_plots, "do_plots should be true to save_plots or show_plots"
 
@@ -280,6 +283,11 @@ if do_plots:
     FOURPLACES = Decimal(10) ** -4
     TWOPLACES = Decimal(10) ** -2
     ERROR_BAR_TYPE = 'std'
+
+if do_multiprocessing:
+    import multiprocessing
+    from itertools import product
+    number_CPU = 3
 
 def combine(list_of_names,output_name):
     '''Useful for combining pickle files from cluster computations.'''
