@@ -5,15 +5,17 @@ from multiprocessing import Pool
 
 assert do_computations, "we should be in do_computations mode"
 
-size_of_dataset = 2
+size_of_dataset = 1000
 
 rewiring_percentage_list = [0, 5, 10, 15, 20, 25]
 
 percent_more_edges_list = [5, 10, 15, 20, 25]
 
-intervention_type = 'triad-addition' #, 'random-addition', 'rewiring' #
+intervention_type = 'rewiring'  # 'random-addition'  # 'triad-addition' # 'random-addition'# 'rewiring' #
 
 number_initial_seeds = 2
+
+CAP = 0.8
 
 
 def measure_rewiring_spread_time(network_id, rewiring_percentage):
@@ -56,7 +58,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
         speed_original, std_original, _, _, speed_samples_original = \
             dynamics_original.avg_speed_of_spread(
                 dataset_size=size_of_dataset,
-                cap=0.9,
+                cap=CAP,
                 mode='max')
         print(speed_original, std_original)
         print(speed_samples_original)
@@ -90,7 +92,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
         dynamics_rewired = DeterministicLinear(params_rewired)
         speed_rewired, std_rewired, _, _, speed_samples_rewired = \
             dynamics_rewired.avg_speed_of_spread(dataset_size=size_of_dataset,
-                                                 cap=0.9,
+                                                 cap=CAP,
                                                  mode='max')
         print(speed_rewired, std_rewired)
         print(speed_samples_rewired)
@@ -145,7 +147,7 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
     speed_add_triad, std_add_triad, _, _, speed_samples_add_triad = \
         dynamics_add_triad.avg_speed_of_spread(
             dataset_size=size_of_dataset,
-            cap=0.9,
+            cap=CAP,
             mode='max')
     print(speed_add_triad, std_add_triad)
     print(speed_samples_add_triad)
@@ -199,7 +201,7 @@ def measure_random_addition_spread_time(network_id,percent_more_edges):
     speed_add_random, std_add_random, _, _, speed_samples_add_random = \
         dynamics_add_random.avg_speed_of_spread(
             dataset_size=size_of_dataset,
-            cap=0.9,
+            cap=CAP,
             mode='max')
     print(speed_add_random, std_add_random)
     print(speed_samples_add_random)
