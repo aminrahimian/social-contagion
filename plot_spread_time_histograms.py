@@ -57,6 +57,8 @@ if __name__ == '__main__':
 
             std_rewired = np.std(speed_samples_rewired)
 
+            # plot edge addition spreading times
+
             plt.figure()
 
             plt.hist([speed_samples_original, speed_samples_add_random, speed_samples_add_triad],
@@ -85,6 +87,10 @@ if __name__ == '__main__':
                             + network_group + network_id
                             + model_id + '.png')
 
+            plt.close()
+
+            # plot rewiring spreading times
+
             plt.figure()
 
             plt.hist([speed_samples_original, speed_samples_rewired], label=['original', 'rewired'])
@@ -111,3 +117,4 @@ if __name__ == '__main__':
                 plt.savefig(output_directory_address + 'speed_samples_histogram_' + str(intervention_size)
                             + '_percent_rewiring_' + network_group + network_id
                             + model_id + '.png')
+            plt.close()
