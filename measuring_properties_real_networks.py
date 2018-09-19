@@ -1,7 +1,4 @@
-# Comparing the rate of contagion in the original and rewired network.
-# uses maslov_sneppen_rewiring(num_steps = np.floor(0.1 * self.params['network'].number_of_edges()))
-# to rewire the network
-# uses avg_speed_of_spread(dataset_size=1000,cap=0.9, mode='max') to measure the rate of spread
+# measures/computes structural properties of real networks original and under various rewirings
 
 from settings import *
 import settings
