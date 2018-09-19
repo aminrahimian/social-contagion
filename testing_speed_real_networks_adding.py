@@ -1,12 +1,8 @@
-# Comparing the rate of contagion in the original and rewired network.
-# uses maslov_sneppen_rewiring(num_steps = np.floor(0.1 * self.params['network'].number_of_edges()))
-# to rewire the network
-# uses avg_speed_of_spread(dataset_size=1000,cap=0.9, mode='max') to measure the rate of spread
+# Comparing the rate of contagion in the original and network with added edges.
 
-from settings import *
-import settings
-
-# assert settings.data_dump, "we should be in data_dump mode!"
+assert False, \
+    "This file is obsolete use measuring_spread_time_real_networks.py ," \
+    " dump_spreading_data.py, and plot_spread_time_histograms.py instead."
 
 from models import *
 
@@ -54,7 +50,7 @@ if __name__ == '__main__':
 
             # original_average_clustering = NX.average_clustering(G)
 
-            if settings.do_computations:
+            if do_computations:
 
                 initial_seeds = 2
 
@@ -120,7 +116,7 @@ if __name__ == '__main__':
 
                 print(NX.is_connected(G))
 
-            if settings.save_computations:
+            if save_computations:
 
                 pickle.dump(speed_samples_add_random, open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                            + str(percent_more_edges) + '_percent_' + 'add_random_'
@@ -131,7 +127,7 @@ if __name__ == '__main__':
                                                           + network_group + network_id
                                                           + model_id + '.pkl', 'wb'))
 
-            if settings.load_computations:
+            if load_computations:
 
                 speed_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                             + str(percent_more_edges) + '_percent_' + 'add_random_'
@@ -150,7 +146,7 @@ if __name__ == '__main__':
 
                 std_add_random = np.std(speed_samples_add_random)
 
-            if settings.do_plots:
+            if do_plots:
 
                 plt.figure()
 
@@ -167,15 +163,15 @@ if __name__ == '__main__':
                           + '\\vspace{-10pt}  \\begin{center}  in the two networks with ' + str(percent_more_edges)
                           + '\% additional random or triad closing edges. \\end{center}')
                 plt.legend()
-                if settings.show_plots:
+                if show_plots:
                     plt.show()
 
-                if settings.save_plots:
+                if save_plots:
                     plt.savefig(output_directory_address + 'speed_samples_histogram_'
                                 + str(percent_more_edges) + '_edge_additions_'
                                 + network_group + network_id
                                 + model_id + '.png')
-            if settings.data_dump:
+            if data_dump:
 
                 print('we are in data_dump mode')
 
@@ -215,5 +211,5 @@ if __name__ == '__main__':
 
                 df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False)#.drop_duplicates().reset_index(drop=True)
 
-    if settings.data_dump:
+    if data_dump:
         df.to_csv(output_directory_address + network_group + 'spreading_data_dump.csv', index=False)#  , index=False

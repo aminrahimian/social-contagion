@@ -1,9 +1,8 @@
-# Comparing the rate of contagion in the original and rewired network.
-# loops over all files in
-# uses maslov_sneppen_rewiring(num_steps = np.floor(0.1 * self.params['network'].number_of_edges()))
-# to rewire the network
-# uses avg_speed_of_spread(dataset_size=1000,cap=0.9, mode='max') to measure the rate of spread
+# Comparing the rate of spread in the original and rewired networks.
 
+assert False, \
+    "This file is obsolete use measuring_spread_time_real_networks.py ," \
+    " dump_spreading_data.py, and plot_spread_time_histograms.py instead."
 from settings import *
 import settings
 
