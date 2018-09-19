@@ -1,9 +1,5 @@
 from settings import *
 
-import settings
-
-import torch
-import pandas as pd
 import copy
 
 from scipy.stats import norm
@@ -98,32 +94,32 @@ def random_factor_pair(value):
     return RD.choice(factors)
 
 
-def time_the_cap(fraction_timeseries, cap):
-    """
-    Returns the first time a time-series of the fractions goes above the cap.
-    Extrapolates if too slow, or returns -1 if not-spread
-    """
-    time_of_the_cap = None
-    total_steps = len(fraction_timeseries)
-    if fraction_timeseries[-1] < cap:
-        if fraction_timeseries[0] == fraction_timeseries[-1]:  # contagion has not spread
-            time_of_the_cap = -1
-        else:
-            count_steps = 0
-            for i in reversed(range(total_steps)):
-                if fraction_timeseries[i] < fraction_timeseries[-1]:
-                    count_steps += 1
-                    time_of_the_cap = ((cap - fraction_timeseries[-1]) /
-                                       (fraction_timeseries[-1] - fraction_timeseries[i]))*count_steps + total_steps - 1
-                    break
-                    count_steps +=1
-    else:
-        for i in reversed(range(total_steps)):
-            if fraction_timeseries[i] < cap:
-                time_of_the_cap = i + 1
-                break
-    assert time_of_the_cap is not None, 'time_of_the_cap is not set'
-    return time_of_the_cap
+# def time_the_cap(fraction_timeseries, cap):
+#     """
+#     Returns the first time a time-series of the fractions goes above the cap.
+#     Extrapolates if too slow, or returns -1 if not-spread
+#     """
+#     time_of_the_cap = None
+#     total_steps = len(fraction_timeseries)
+#     if fraction_timeseries[-1] < cap:
+#         if fraction_timeseries[0] == fraction_timeseries[-1]:  # contagion has not spread
+#             time_of_the_cap = -1
+#         else:
+#             count_steps = 0
+#             for i in reversed(range(total_steps)):
+#                 if fraction_timeseries[i] < fraction_timeseries[-1]:
+#                     count_steps += 1
+#                     time_of_the_cap = ((cap - fraction_timeseries[-1]) /
+#                                        (fraction_timeseries[-1] - fraction_timeseries[i]))*count_steps + total_steps - 1
+#                     break
+#                     count_steps +=1
+#     else:
+#         for i in reversed(range(total_steps)):
+#             if fraction_timeseries[i] < cap:
+#                 time_of_the_cap = i + 1
+#                 break
+#     assert time_of_the_cap is not None, 'time_of_the_cap is not set'
+#     return time_of_the_cap
 
 
 def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
@@ -273,7 +269,6 @@ def add_edges(G, number_of_edges_to_be_added=10, mode='random', seed=None):
                                          p=normalized_weights)
 
         addition_list = addition_list.astype(int)
-
 
         addition_list = [unformed_edges[ii] for ii in list(addition_list)]
 
@@ -667,9 +662,12 @@ class contagion_model(network_model):
         self.time_since_infection_is_updated = False
         self.time_since_activation_is_updated = False
 
-    def time_the_total_spread(self, get_network_time_series = False, verbose = False):
+    def time_the_total_spread(self, cap=0.99,
+                              get_time_series=False,
+                              verbose=False):
         time = 0
         network_time_series = []
+        fractions_time_series = []
 
         self.missing_params_not_set = True
         self.setRandomParams()
@@ -677,85 +675,92 @@ class contagion_model(network_model):
         if hasattr(self, 'isActivationModel'):
             self.set_activation_functions()
 
+        # record the values at time zero:
         dummy_network = self.params['network'].copy()
-        network_time_series.append(dummy_network)
 
         all_nodes_states = list(
             map(lambda node_pointer: 1.0 * self.params['network'].node[node_pointer]['state'],
                 self.params['network'].nodes()))
         total_number_of_infected = 2*np.sum(abs(np.asarray(all_nodes_states)))
+        fraction_of_infected = total_number_of_infected / self.params['size']
+
+        if get_time_series:
+            network_time_series.append(dummy_network)
+            fractions_time_series.append(fraction_of_infected)
+
         if verbose:
             print('time is', time)
             print('total_number_of_infected is', total_number_of_infected)
             print('total size is', self.params['size'])
-        while total_number_of_infected < self.params['size']:
+        while total_number_of_infected < cap*self.params['size']:
             self.outer_step()
             dummy_network = self.params['network'].copy()
-            network_time_series.append(dummy_network)
             time += 1
             all_nodes_states = list(
                 map(lambda node_pointer: 1.0 * self.params['network'].node[node_pointer]['state'],
                     self.params['network'].nodes()))
-            total_number_of_infected = 2*np.sum(abs(np.asarray(all_nodes_states)))
-
+            total_number_of_infected = 2 * np.sum(abs(np.asarray(all_nodes_states)))
+            fraction_of_infected = total_number_of_infected / self.params['size']
+            if get_time_series:
+                network_time_series.append(dummy_network)
+                fractions_time_series.append(fraction_of_infected)
             if verbose:
                 print('time is', time)
                 print('total_number_of_infected is', total_number_of_infected)
                 print('total size is', self.params['size'])
-
-            if time > self.params['size']**3:
-                time = -1
-                print('It is taking too long (3x size) to spread totally.')
+            if time > self.params['size']**10:
+                time = float('Inf')
+                print('It is taking too long (10x size) to spread totally.')
                 break
 
-        if get_network_time_series:
-            return time, network_time_series
+        if get_time_series:
+            return time, network_time_series, fractions_time_series
         else:
             return time
 
-    def generateTimeseries(self):
-        # conditioned on the fixed_params
-        # returns the time series from fraction of infected nodes.
-        total_time = self.time_the_total_spread()
-
-        time = 0
-        self.missing_params_not_set = True
-        self.setRandomParams()
-        if hasattr(self, 'isActivationModel'):
-            self.set_activation_functions()
-        network_timeseries = []
-
-        while time < total_time:
-            dummy_network = self.params['network'].copy()
-            network_timeseries.append(dummy_network)
-            self.outer_step()
-            time += 1
-
-        all_nodes_states = list(map(lambda node_pointer:
-                                    list(map(lambda network: 1.0*(network.node[node_pointer]['state']),
-                                             network_timeseries)), self.params['network'].nodes()))
-
-        fractions_timeseies = np.sum(abs(np.asarray(all_nodes_states)), 0)/(0.5*self.params['size'])
-
-        df = pd.DataFrame(fractions_timeseies)
-
-        # if you want to return all node states as opposed to fractions time series:
-        # df = pd.DataFrame(np.transpose(all_nodes_states))
-
-        return df
-
-    def genTorchSample(self):
-        df = self.generateTimeseries()
-        data = torch.FloatTensor(df.values[:, 0:1])  # [:,0:feature_length] pass on the fraction of infected people
-        label_of_data = torch.LongTensor([self.classification_label])
-        return label_of_data, data
-
-    def genTorchDataset(self,dataset_size=1000):
-        simulation_results = []
-        for iter in range(dataset_size):
-            label_of_data, data = self.genTorchSample()
-            simulation_results.append((label_of_data, data))
-        return simulation_results
+    # def generateTimeseries(self):
+    #     # conditioned on the fixed_params
+    #     # returns the time series from fraction of infected nodes.
+    #     total_time = self.time_the_total_spread()
+    #
+    #     time = 0
+    #     self.missing_params_not_set = True
+    #     self.setRandomParams()
+    #     if hasattr(self, 'isActivationModel'):
+    #         self.set_activation_functions()
+    #     network_timeseries = []
+    #
+    #     while time < total_time:
+    #         dummy_network = self.params['network'].copy()
+    #         network_timeseries.append(dummy_network)
+    #         self.outer_step()
+    #         time += 1
+    #
+    #     all_nodes_states = list(map(lambda node_pointer:
+    #                                 list(map(lambda network: 1.0*(network.node[node_pointer]['state']),
+    #                                          network_timeseries)), self.params['network'].nodes()))
+    #
+    #     fractions_timeseies = np.sum(abs(np.asarray(all_nodes_states)), 0)/(0.5*self.params['size'])
+    #
+    #     df = pd.DataFrame(fractions_timeseies)
+    #
+    #     # if you want to return all node states as opposed to fractions time series:
+    #     # df = pd.DataFrame(np.transpose(all_nodes_states))
+    #
+    #     return df
+    #
+    # def genTorchSample(self):
+    #     df = self.generateTimeseries()
+    #     data = torch.FloatTensor(df.values[:, 0:1])  # [:,0:feature_length] pass on the fraction of infected people
+    #     label_of_data = torch.LongTensor([self.classification_label])
+    #     return label_of_data, data
+    #
+    # def genTorchDataset(self,dataset_size=1000):
+    #     simulation_results = []
+    #     for iter in range(dataset_size):
+    #         label_of_data, data = self.genTorchSample()
+    #         simulation_results.append((label_of_data, data))
+    #     return simulation_results
 
     def generate_network_intervention_dataset(self, dataset_size=200):
 
@@ -773,12 +778,11 @@ class contagion_model(network_model):
         # The time to spread is measured in one of the modes:
         # integral, max, and total.
         if mode == 'integral':
-            dataset = self.genTorchDataset(dataset_size)
-            # dataset has the time series of the fraction of infected nodes
             integrals = []
             sum_of_integrals = 0
             for i in range(dataset_size):
-                integral = sum(dataset[i][1][:,0])#/len(dataset[i][1])
+                _, _, infected_fraction_timeseries = self.time_the_total_spread(cap=cap, get_time_series=True)
+                integral = sum(infected_fraction_timeseries)
                 sum_of_integrals += integral
                 integrals += [integral]
             avg_speed = sum_of_integrals/dataset_size
@@ -786,15 +790,13 @@ class contagion_model(network_model):
             speed_max = np.max(integrals)
             speed_min = np.min(integrals)
             speed_samples = np.asarray(integrals)
-
         elif mode == 'max':
-            dataset = self.genTorchDataset(dataset_size)
-            # dataset has the time series of the fraction of infected nodes
             cap_times = []
             sum_of_cap_times = 0
             for i in range(dataset_size):
-                cap_time = time_the_cap(dataset[i][1][:, 0], cap)
-                if cap_time == -1:
+                time, _, _ = self.time_the_total_spread(cap=cap, get_time_series=True)
+                cap_time = time
+                if cap_time == float('Inf'):
                     dataset_size += -1
                     cap_times += [float('Inf')]
                     continue
@@ -808,7 +810,7 @@ class contagion_model(network_model):
                 speed_samples = np.asarray([float('Inf')])
             else:
                 avg_speed = sum_of_cap_times/dataset_size
-                speed_std = np.std(cap_times)
+                speed_std = np.ma.std(cap_times)
                 speed_max = np.max(cap_times)
                 speed_min = np.min(cap_times)
                 speed_samples = np.asarray(cap_times)
@@ -819,7 +821,7 @@ class contagion_model(network_model):
             while count <= dataset_size:
                 total_spread_time = self.time_the_total_spread()
                 # print('total_spread_time',total_spread_time)
-                if total_spread_time == -1:
+                if total_spread_time == float('Inf'):
                     dataset_size += -1
                     total_spread_times += [total_spread_time]
                     print('The contagion did not spread totally.')
@@ -844,8 +846,8 @@ class contagion_model(network_model):
         else:
             assert False, 'undefined mode for avg_speed_of_spread'
 
-        if type(avg_speed) is torch.Tensor:
-            avg_speed = avg_speed.item()
+        # if type(avg_speed) is torch.Tensor:
+        #     avg_speed = avg_speed.item()
 
         return avg_speed, speed_std, speed_max, speed_min, speed_samples
 
@@ -861,6 +863,7 @@ class contagion_model(network_model):
             'error: number_of_infected_neighbors or time_since_infection mishandle'
 
     def step(self):
+        # implement this is activation class children
         pass
 
 class activation(contagion_model):
