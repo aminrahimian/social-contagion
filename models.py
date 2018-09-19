@@ -19,8 +19,9 @@ SENTINEL = object()
 def measure_property(network_intervention_dataset, property='avg_clustering', sample_size=None):
 
     if sample_size is not None:
-        assert sample_size < len(network_intervention_dataset), \
-            "not enough samples to do measurements on network_intervention_dataset"
+        assert sample_size <= len(network_intervention_dataset), \
+            "not enough samples to do measurements on network_intervention_dataset, sample_size: " + str(sample_size) \
+            + "len(network_intervention_dataset): " + str(len(network_intervention_dataset))
         network_intervention_dataset = network_intervention_dataset[0:sample_size-1]
 
     property_samples = []
