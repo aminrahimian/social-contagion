@@ -22,7 +22,8 @@ def natural_keys(text):
     '''
     return [atoi(c) for c in re.split('(\d+)', text) ]
 
-network_group = 'cai_edgelist_' #'fb100_edgelist_'
+network_group = 'banerjee_combined_edgelist_'
+#'cai_edgelist_' #'fb100_edgelist_'
 # 'banerjee_combined_edgelist_'
 #'chami_friendship_edgelist_'
 #'chami_advice_edgelist_'
@@ -34,7 +35,6 @@ if network_group == 'cai_edgelist_':
 
     DELIMITER = ' '
 
-    # TOP_ID = 175
 
 elif network_group == 'chami_friendship_edgelist_':
 
@@ -42,7 +42,6 @@ elif network_group == 'chami_friendship_edgelist_':
 
     DELIMITER = ','
 
-    # TOP_ID = 17
 
 elif network_group == 'chami_advice_edgelist_':
 
@@ -50,23 +49,17 @@ elif network_group == 'chami_advice_edgelist_':
 
     DELIMITER = ','
 
-    # TOP_ID = 17
-
 elif network_group == 'banerjee_combined_edgelist_':
 
-    root_data_address = './data/banerjee-combined-data/'
+    root_data_address = './data/banerjee-combined-data/test_47/'
 
     DELIMITER = ' '
-
-    # TOP_ID = 77
 
 elif network_group == 'fb100_edgelist_':
 
     root_data_address = './data/fb100-data/'
 
     DELIMITER = ' '
-
-    # TOP_ID = 77
 
 edgelist_directory_address = root_data_address + 'edgelists/'
 
@@ -79,9 +72,9 @@ properties_pickled_samples_directory_address = pickled_samples_directory_address
 spreading_pickled_samples_directory_address = pickled_samples_directory_address + 'spreading_pickled_samples/'
 
 networks_pickled_samples_directory_address = pickled_samples_directory_address + 'networks_pickled_samples/'
-use_separate_address_for_pickled_networks = True  # pickled_networks take a lot of space.
-# Some may need to put them else where away from other pickled samples.
-separate_address_for_pickled_networks = '/home/amin/Desktop/pickled_networks/'
+use_separate_address_for_pickled_networks = False  # pickled_networks take a lot of space.
+# Some may need to put them else where with a lot of space away from other pickled samples.
+separate_address_for_pickled_networks = '/home/rahimian/contagion/data/pickled_networks/'
 # '/home/rahimian/contagion/data/pickled_networks/'
 #  '/home/amin/Desktop/pickled_networks/'
 if use_separate_address_for_pickled_networks:
@@ -118,18 +111,6 @@ except OSError as e:
     if e.errno != errno.EEXIST:
         raise
 
-# get the network_id_lists
-
-# network_id_list = list(np.linspace(1,TOP_ID,TOP_ID))
-#
-# # networks 13 and 22 are missing form banerjee data set:
-# if network_group == 'banerjee_combined_edgelist_':
-#     del network_id_list[12]
-#     del network_id_list[20]
-#
-# network_id_list = [str(int(id)) for id in network_id_list]
-
-# if network_group == 'fb100_edgelist_' or 'banerjee_combined_edgelist_':
 network_id_list = []
 for file in os.listdir(edgelist_directory_address):
     filename = os.path.splitext(file)[0]
@@ -138,6 +119,8 @@ for file in os.listdir(edgelist_directory_address):
     network_id_list += [net_id]
 network_id_list.sort(key=natural_keys)
 print(network_id_list)
+
+# network_id_list = ['47']
 
 #  different models:
 model_id = '_model_1'
@@ -179,7 +162,7 @@ else:
 
 do_computations = True
 do_multiprocessing = True
-save_computations = False
+save_computations = True
 load_computations = False
 do_plots = False
 save_plots = False
@@ -288,6 +271,7 @@ if do_multiprocessing:
     import multiprocessing
     from itertools import product
     number_CPU = 3
+
 
 def combine(list_of_names,output_name):
     '''Useful for combining pickle files from cluster computations.'''

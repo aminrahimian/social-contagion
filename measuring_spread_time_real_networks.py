@@ -5,13 +5,15 @@ from multiprocessing import Pool
 
 assert do_computations, "we should be in do_computations mode"
 
-size_of_dataset = 1000
+size_of_dataset = 500
 
-rewiring_percentage_list = [0, 5, 10, 15, 20, 25]
+rewiring_percentage_list = [5, 10, 15, 20, 25]
 
 percent_more_edges_list = [5, 10, 15, 20, 25]
 
-intervention_type = 'rewiring'  # 'random-addition'  # 'triad-addition' # 'random-addition'# 'rewiring' #
+intervention_type = 'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
+
+all_interventions = ['triad-addition', 'random-addition', 'rewiring']
 
 number_initial_seeds = 2
 
@@ -214,10 +216,22 @@ def measure_random_addition_spread_time(network_id,percent_more_edges):
     return
 
 
+def measure_any_intervention_spread_time(intervention_type, network_id, percent_more_edges):
+    if intervention_type == 'rewiring':
+        measure_rewiring_spread_time(network_id, percent_more_edges)
+    elif intervention_type == 'triad-addition':
+        measure_triad_addition_spread_time(network_id, percent_more_edges)
+    elif intervention_type == 'random-addition':
+        measure_random_addition_spread_time(network_id, percent_more_edges)
+
+
 if __name__ == '__main__':
 
     if do_multiprocessing:
         with multiprocessing.Pool(processes=number_CPU) as pool:
+            # do computations for the original networks:
+            pool.starmap(measure_rewiring_spread_time, product(network_id_list, [0]))
+            # do computations for the modified networks:
             if intervention_type == 'rewiring':
                 pool.starmap(measure_rewiring_spread_time, product(network_id_list, rewiring_percentage_list))
                 pool.close()
@@ -230,24 +244,42 @@ if __name__ == '__main__':
                 pool.starmap(measure_random_addition_spread_time, product(network_id_list, percent_more_edges_list))
                 pool.close()
                 pool.join()
+            elif intervention_type == 'all':
+                pool.starmap(measure_any_intervention_spread_time,
+                             product(all_interventions, network_id_list, percent_more_edges_list))
+                pool.close()
+                pool.join()
             else:
                 assert False, "intervention type not supported"
 
-    else:
+    else:  # no multi-processing
+        # do computations for the original networks:
+        for network_id in network_id_list:
+            measure_rewiring_spread_time(network_id, 0)
+        # do computations for the modified networks:
         if intervention_type == 'rewiring':
             # spreading time computations for rewiring interventions
             for network_id in network_id_list:
                 for rewiring_percentage in rewiring_percentage_list:
                     measure_rewiring_spread_time(network_id, rewiring_percentage)
         elif intervention_type == 'triad-addition':
-            # spreading time computations for edge addition interventions
+            # spreading time computations for triad edge addition interventions
             for network_id in network_id_list:
                 for percent_more_edges in percent_more_edges_list:
                     measure_triad_addition_spread_time(network_id, percent_more_edges)
         elif intervention_type == 'random-addition':
-            # spreading time computations for edge addition interventions
+            # spreading time computations for random edge addition interventions
             for network_id in network_id_list:
                 for percent_more_edges in percent_more_edges_list:
                     measure_random_addition_spread_time(network_id, percent_more_edges)
+        elif intervention_type == 'all':
+            # spreading time computations for all interventions
+            for network_id in network_id_list:
+                for rewiring_percentage in rewiring_percentage_list:
+                    measure_rewiring_spread_time(network_id, rewiring_percentage)
+                for percent_more_edges in percent_more_edges_list:
+                    measure_triad_addition_spread_time(network_id, percent_more_edges)
+                    measure_random_addition_spread_time(network_id, percent_more_edges)
+
         else:
             assert False, "intervention type not supported"
