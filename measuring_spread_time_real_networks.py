@@ -17,7 +17,7 @@ all_interventions = ['triad-addition', 'random-addition', 'rewiring']
 
 number_initial_seeds = 2
 
-CAP = 0.8
+CAP = 0.9
 
 
 def measure_rewiring_spread_time(network_id, rewiring_percentage):

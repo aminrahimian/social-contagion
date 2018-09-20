@@ -22,7 +22,7 @@ all_properties = old_properties + new_properties
 
 included_properties = all_properties
 
-generate_network_intervention_dataset = True
+generate_network_intervention_dataset = False
 # determines to whether generate networks (true) or
 # load and use previously generated networks (False)
 
@@ -214,8 +214,6 @@ if __name__ == '__main__':
         if do_multiprocessing:
             with multiprocessing.Pool(processes=number_CPU) as pool:
                 pool.starmap(generate_network_intervention_datasets, product(network_id_list, intervention_size_list))
-                pool.close()
-                pool.join()
         else:  # not multiprocessing, do for-loops
             for intervention_size in intervention_size_list:
                 for network_id in network_id_list:
@@ -234,3 +232,5 @@ if __name__ == '__main__':
             for network_id in network_id_list:
                 measure_properties_of_network_inetrvention_datasets(network_id, intervention_size)
 
+    pool.close()
+    pool.join()

@@ -42,7 +42,10 @@ def measure_property(network_intervention_dataset, property='avg_clustering', sa
             property_sample = sum_of_edges/network_intervention.number_of_nodes()
         elif property is 'diam_2_core':
             sample_2_core = NX.k_core(network_intervention, k=2)
-            property_sample = NX.diameter(sample_2_core)
+            if sample_2_core.number_of_nodes() == 0:
+                property_sample = float('Inf')
+            else:
+                property_sample = NX.diameter(sample_2_core)
         elif property is 'max_degree':
             degree_sequence = sorted([d for n, d in network_intervention.degree()], reverse=True)
             property_sample = max(degree_sequence)
@@ -51,36 +54,55 @@ def measure_property(network_intervention_dataset, property='avg_clustering', sa
             property_sample = min(degree_sequence)
         elif property is 'max_degree_2_core':
             sample_2_core = NX.k_core(network_intervention, k=2)
-            degree_sequence = sorted([d for n, d in sample_2_core.degree()], reverse=True)
-            property_sample = max(degree_sequence)
+            if sample_2_core.number_of_nodes() == 0:
+                property_sample = 0
+            else:
+                degree_sequence = sorted([d for n, d in sample_2_core.degree()], reverse=True)
+                property_sample = max(degree_sequence)
         elif property is 'min_degree_2_core':
             sample_2_core = NX.k_core(network_intervention, k=2)
-            degree_sequence = sorted([d for n, d in sample_2_core.degree()], reverse=True)
-            property_sample = min(degree_sequence)
+            if sample_2_core.number_of_nodes() == 0:
+                property_sample = 0
+            else:
+                degree_sequence = sorted([d for n, d in sample_2_core.degree()], reverse=True)
+                property_sample = min(degree_sequence)
         elif property is 'avg_degree_2_core':
             sample_2_core = NX.k_core(network_intervention, k=2)
-            degree_sequence = [d for n, d in sample_2_core.degree()]
-            sum_of_edges = sum(degree_sequence)
-            property_sample = sum_of_edges / sample_2_core.number_of_nodes()
+            if sample_2_core.number_of_nodes() == 0:
+                property_sample = 0
+            else:
+                degree_sequence = [d for n, d in sample_2_core.degree()]
+                sum_of_edges = sum(degree_sequence)
+                property_sample = sum_of_edges / sample_2_core.number_of_nodes()
         elif property is 'number_edges':
             property_sample = network_intervention.number_of_edges()
         elif property is 'number_edges_2_core':
             sample_2_core = NX.k_core(network_intervention, k=2)
-            property_sample = sample_2_core.number_of_edges()
+            if sample_2_core.number_of_nodes() == 0:
+                property_sample = 0
+            else:
+                property_sample = sample_2_core.number_of_edges()
         elif property is 'avg_clustering_2_core':
             sample_2_core = NX.k_core(network_intervention, k=2)
-            property_sample = NX.average_clustering(sample_2_core)
+            if sample_2_core.number_of_nodes() == 0:
+                property_sample = float('NaN')
+            else:
+                property_sample = NX.average_clustering(sample_2_core)
         elif property is 'transitivity':
             property_sample = NX.transitivity(network_intervention)
         elif property is 'transitivity_2_core':
             sample_2_core = NX.k_core(network_intervention, k=2)
-            property_sample = NX.transitivity(sample_2_core)
+            if sample_2_core.number_of_nodes() == 0:
+                property_sample = float('NaN')
+            else:
+                property_sample = NX.transitivity(sample_2_core)
         else:
             assert False, property + ' property not supported.'
 
         property_samples += [property_sample]
 
     return property_samples
+
 
 def random_factor_pair(value):
     """
@@ -93,34 +115,6 @@ def random_factor_pair(value):
         if value % i == 0:
             factors.append((int(i), value // i))
     return RD.choice(factors)
-
-
-# def time_the_cap(fraction_timeseries, cap):
-#     """
-#     Returns the first time a time-series of the fractions goes above the cap.
-#     Extrapolates if too slow, or returns -1 if not-spread
-#     """
-#     time_of_the_cap = None
-#     total_steps = len(fraction_timeseries)
-#     if fraction_timeseries[-1] < cap:
-#         if fraction_timeseries[0] == fraction_timeseries[-1]:  # contagion has not spread
-#             time_of_the_cap = -1
-#         else:
-#             count_steps = 0
-#             for i in reversed(range(total_steps)):
-#                 if fraction_timeseries[i] < fraction_timeseries[-1]:
-#                     count_steps += 1
-#                     time_of_the_cap = ((cap - fraction_timeseries[-1]) /
-#                                        (fraction_timeseries[-1] - fraction_timeseries[i]))*count_steps + total_steps - 1
-#                     break
-#                     count_steps +=1
-#     else:
-#         for i in reversed(range(total_steps)):
-#             if fraction_timeseries[i] < cap:
-#                 time_of_the_cap = i + 1
-#                 break
-#     assert time_of_the_cap is not None, 'time_of_the_cap is not set'
-#     return time_of_the_cap
 
 
 def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
@@ -187,6 +181,7 @@ def cycle_union_Erdos_Renyi(n, k=4, c=2, seed=None,
     print(composed.edges.data())
 
     return composed
+
 
 def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed=None):
     """Return graph that interpolates C_1 and C_2.
@@ -276,6 +271,7 @@ def add_edges(G, number_of_edges_to_be_added=10, mode='random', seed=None):
         fat_network.add_edges_from(addition_list)
 
         return fat_network
+
 
 class network_model():
     """
@@ -719,50 +715,6 @@ class contagion_model(network_model):
         else:
             return time
 
-    # def generateTimeseries(self):
-    #     # conditioned on the fixed_params
-    #     # returns the time series from fraction of infected nodes.
-    #     total_time = self.time_the_total_spread()
-    #
-    #     time = 0
-    #     self.missing_params_not_set = True
-    #     self.setRandomParams()
-    #     if hasattr(self, 'isActivationModel'):
-    #         self.set_activation_functions()
-    #     network_timeseries = []
-    #
-    #     while time < total_time:
-    #         dummy_network = self.params['network'].copy()
-    #         network_timeseries.append(dummy_network)
-    #         self.outer_step()
-    #         time += 1
-    #
-    #     all_nodes_states = list(map(lambda node_pointer:
-    #                                 list(map(lambda network: 1.0*(network.node[node_pointer]['state']),
-    #                                          network_timeseries)), self.params['network'].nodes()))
-    #
-    #     fractions_timeseies = np.sum(abs(np.asarray(all_nodes_states)), 0)/(0.5*self.params['size'])
-    #
-    #     df = pd.DataFrame(fractions_timeseies)
-    #
-    #     # if you want to return all node states as opposed to fractions time series:
-    #     # df = pd.DataFrame(np.transpose(all_nodes_states))
-    #
-    #     return df
-    #
-    # def genTorchSample(self):
-    #     df = self.generateTimeseries()
-    #     data = torch.FloatTensor(df.values[:, 0:1])  # [:,0:feature_length] pass on the fraction of infected people
-    #     label_of_data = torch.LongTensor([self.classification_label])
-    #     return label_of_data, data
-    #
-    # def genTorchDataset(self,dataset_size=1000):
-    #     simulation_results = []
-    #     for iter in range(dataset_size):
-    #         label_of_data, data = self.genTorchSample()
-    #         simulation_results.append((label_of_data, data))
-    #     return simulation_results
-
     def generate_network_intervention_dataset(self, dataset_size=200):
 
         interventioned_networks = []
@@ -847,8 +799,6 @@ class contagion_model(network_model):
         else:
             assert False, 'undefined mode for avg_speed_of_spread'
 
-        # if type(avg_speed) is torch.Tensor:
-        #     avg_speed = avg_speed.item()
 
         return avg_speed, speed_std, speed_max, speed_min, speed_samples
 

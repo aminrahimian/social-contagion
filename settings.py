@@ -159,14 +159,14 @@ else:
 # data_dump = True
 # simulator_mode = False
 
-do_computations = True
-do_multiprocessing = True
-save_computations = True
-load_computations = False
+do_computations = False
+do_multiprocessing = False
+save_computations = False
+load_computations = True
 do_plots = False
 save_plots = False
 show_plots = False
-data_dump = False
+data_dump = True
 simulator_mode = False
 
 
