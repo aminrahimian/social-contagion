@@ -51,7 +51,7 @@ elif network_group == 'chami_advice_edgelist_':
 
 elif network_group == 'banerjee_combined_edgelist_':
 
-    root_data_address = './data/banerjee-combined-data/test_47/'
+    root_data_address = './data/banerjee-combined-data/'
 
     DELIMITER = ' '
 
@@ -120,7 +120,6 @@ for file in os.listdir(edgelist_directory_address):
 network_id_list.sort(key=natural_keys)
 print(network_id_list)
 
-# network_id_list = ['47']
 
 #  different models:
 model_id = '_model_1'
@@ -270,7 +269,7 @@ if do_plots:
 if do_multiprocessing:
     import multiprocessing
     from itertools import product
-    number_CPU = 3
+    number_CPU = 13
 
 
 def combine(list_of_names,output_name):
