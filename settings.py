@@ -22,6 +22,8 @@ def natural_keys(text):
     '''
     return [atoi(c) for c in re.split('(\d+)', text) ]
 
+
+# real world networks simulation settings:
 network_group = 'banerjee_combined_edgelist_'
 #'cai_edgelist_' #'fb100_edgelist_'
 # 'banerjee_combined_edgelist_'
@@ -131,9 +133,9 @@ if model_id == '_model_1':
     alpha = 1.0
     gamma = 0.0
 elif model_id == '_model_2':
-    MODEL = '(0.05,0.5)'
+    MODEL = '(0.025,0.5)'
     fixed_prob_high = 0.5
-    fixed_prob_low = 0.05
+    fixed_prob_low = 0.025
     alpha = 1.0
     gamma = 0.0
 elif model_id == '_model_3':
@@ -147,26 +149,44 @@ else:
     exit()
 
 
+# theory simulations settings:
 
-#  different modes of operation:
-#
-# do_computations = False
-# save_computations = False
-# load_computations = True
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = True
-# simulator_mode = False
+simulation_type = 'c1_c2_interpolation_SimpleOnlyAlongC1'
 
-do_computations = False
-do_multiprocessing = False
-save_computations = False
-load_computations = True
+root_theory_simulations_address = './data/theory-simulations/'
+
+try:
+    os.makedirs(root_theory_simulations_address)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
+
+theory_simulation_output_address = root_theory_simulations_address + simulation_type + '/output/'
+
+theory_simulation_pickle_address = root_theory_simulations_address + simulation_type + '/pickled_samples/'
+
+try:
+    os.makedirs(theory_simulation_output_address)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
+
+try:
+    os.makedirs(theory_simulation_pickle_address)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
+
+# general settings:
+
+do_computations = True
+do_multiprocessing = True
+save_computations = True
+load_computations = False
 do_plots = False
 save_plots = False
 show_plots = False
-data_dump = True
+data_dump = False
 simulator_mode = False
 
 
@@ -269,7 +289,7 @@ if do_plots:
 if do_multiprocessing:
     import multiprocessing
     from itertools import product
-    number_CPU = 13
+    number_CPU = 10
 
 
 def combine(list_of_names,output_name):
