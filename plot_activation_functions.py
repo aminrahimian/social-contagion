@@ -178,4 +178,5 @@ if __name__ == '__main__':
     plt.text(1.25, 0.25, '$q_n$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
     plt.title('A Realistic Complex Activation Function')
+    plt.xticks([0,1,2,3])
     plt.show()
