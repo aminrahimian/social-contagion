@@ -768,20 +768,22 @@ class contagion_model(network_model):
                 speed_min = np.min(cap_times)
                 speed_samples = np.asarray(cap_times)
         elif mode == 'total':
+            print('we are here!')
             total_spread_times = []
             sum_of_total_spread_times = 0
             count = 1
             while count <= dataset_size:
                 total_spread_time = self.time_the_total_spread()
-                # print('total_spread_time',total_spread_time)
+                print('total_spread_time',total_spread_time)
                 if total_spread_time == float('Inf'):
                     dataset_size += -1
-                    total_spread_times += [total_spread_time]
+                    total_spread_times += [float('Inf')]
                     print('The contagion did not spread totally.')
                     continue
-                total_spread_times += [float('Inf')]
+                total_spread_times += [total_spread_time]
                 sum_of_total_spread_times += total_spread_time
                 count += 1
+            print(dataset_size)
             if dataset_size == 0:
                 avg_speed = float('Inf')
                 speed_std = float('NaN')
@@ -790,6 +792,7 @@ class contagion_model(network_model):
                 speed_samples = np.asarray([float('Inf')])
 
             else:
+                print(total_spread_times)
                 avg_speed = sum_of_total_spread_times/dataset_size
                 speed_std = np.std(total_spread_times)
                 speed_max = np.max(total_spread_times)
@@ -799,7 +802,7 @@ class contagion_model(network_model):
         else:
             assert False, 'undefined mode for avg_speed_of_spread'
 
-
+        print(speed_samples)
         return avg_speed, speed_std, speed_max, speed_min, speed_samples
 
     def outer_step(self):
