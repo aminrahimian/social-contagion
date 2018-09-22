@@ -151,7 +151,8 @@ else:
 
 # theory simulations settings:
 
-simulation_type = 'c1_c2_interpolation_SimpleOnlyAlongC1'
+simulation_type = 'c1_c2_interpolation'
+# 'c1_c2_interpolation_SimpleOnlyAlongC1'
 
 root_theory_simulations_address = './data/theory-simulations/'
 

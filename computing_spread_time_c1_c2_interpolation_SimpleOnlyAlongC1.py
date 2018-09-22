@@ -1,17 +1,18 @@
-# Comparing the speed in C_k uninon G(n,p_n). We use the (0,1) threshold model for complex contagion with theta = 2,
-# if two neighbors are infected then the agent gets infected. If less than two neighbors are infected then the agent
-# does not get infected.
+# Comparing the speed in C_k uninon G(n,p_n). We use the (q,1) threshold model for complex contagion with theta = 2,
+# if two neighbors are infected then the agent gets infected. If one neighbor is infected then the agent
+# gets infected with probability q.
 
 
 from models import *
 
 assert do_computations, "we should be in do_computations mode!"
 
-assert simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1'
+assert simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1' or 'c1_c2_interpolation', \
+    "simulation_type not set properly: " + simulation_type
 
 size_of_dataset = 500
 
-network_size = 500
+network_size = 200
 
 etas = list(np.linspace(0, 80, 10))
 
@@ -24,6 +25,7 @@ eta_labels = [str(x) for x in range(len(etas))]
 add_long_ties_exp = np.random.exponential(scale=network_size ** 2,
                                           size=int(1.0 * network_size * (network_size - 1)) // 2)
 remove_cycle_edges_exp = np.random.exponential(scale=2 * network_size,
+
                                                size=network_size)
 def compute_spread_time_for_q_eta(q, eta):
     params = {
@@ -43,7 +45,10 @@ def compute_spread_time_for_q_eta(q, eta):
 
     print('eta: ', params['eta'], 'q: ', params['fixed_prob'])
 
-    dynamics = SimpleOnlyAlongC1(params)
+    if simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1':
+        dynamics = SimpleOnlyAlongC1(params)
+    elif simulation_type is 'c1_c2_interpolation':
+        dynamics = DeterministicLinear(params)
 
     spread_time_avg, spread_time_std, _, _, samples = dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
 
