@@ -43,7 +43,16 @@ if __name__ == '__main__':
     print(avg_spread_times)
     print(std_spread_times)
 
-    plt.figure(1)
+    pickle.dump(avg_spread_times, open(theory_simulation_pickle_address
+                                       + 'spreading_time_avg'
+                                       + simulation_type
+                                       + '.pkl', 'wb'))
+    pickle.dump(std_spread_times, open(theory_simulation_pickle_address
+                                       + 'spreading_time_std'
+                                       + simulation_type
+                                       + '.pkl', 'wb'))
+
+    plt.figure()
 
     for q_label in q_labels:
 
