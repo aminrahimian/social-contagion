@@ -576,7 +576,7 @@ class network_model():
 
         removal_list = [formed_edges[ii] for ii in list(removal_list)]
 
-        rewired_network.add_edges_from(removal_list)
+        rewired_network.remove_edges_from(removal_list)
 
         if return_connected:
             while not NX.is_connected(rewired_network):
@@ -755,7 +755,7 @@ class contagion_model(network_model):
             cap_times = []
             sum_of_cap_times = 0
             for i in range(dataset_size):
-                time, _, _ = self.time_the_total_spread(cap=cap, get_time_series=True)
+                time = self.time_the_total_spread(cap=cap, get_time_series=False)
                 cap_time = time
                 if cap_time == float('Inf'):
                     dataset_size += -1
