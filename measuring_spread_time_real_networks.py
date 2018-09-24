@@ -11,7 +11,9 @@ rewiring_percentage_list = [5, 10, 15, 20, 25]
 
 percent_more_edges_list = [5, 10, 15, 20, 25]
 
-intervention_type = 'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
+do_computations_for_original_network = False
+
+intervention_type = 'rewiring' #'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
 
 all_interventions = ['triad-addition', 'random-addition', 'rewiring']
 
@@ -230,7 +232,8 @@ if __name__ == '__main__':
     if do_multiprocessing:
         with multiprocessing.Pool(processes=number_CPU) as pool:
             # do computations for the original networks:
-            pool.starmap(measure_rewiring_spread_time, product(network_id_list, [0]))
+            if do_computations_for_original_network:
+                pool.starmap(measure_rewiring_spread_time, product(network_id_list, [0]))
             # do computations for the modified networks:
             if intervention_type == 'rewiring':
                 pool.starmap(measure_rewiring_spread_time, product(network_id_list, rewiring_percentage_list))
@@ -254,8 +257,9 @@ if __name__ == '__main__':
 
     else:  # no multi-processing
         # do computations for the original networks:
-        for network_id in network_id_list:
-            measure_rewiring_spread_time(network_id, 0)
+        if do_computations_for_original_network:
+            for network_id in network_id_list:
+                measure_rewiring_spread_time(network_id, 0)
         # do computations for the modified networks:
         if intervention_type == 'rewiring':
             # spreading time computations for rewiring interventions
