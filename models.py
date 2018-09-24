@@ -341,6 +341,14 @@ class network_model():
                     self.params['c'] = 2
                 if 'nearest_neighbors' not in self.fixed_params:
                     self.params['nearest_neighbors'] = 2
+                if 'add_long_ties_exp' not in self.fixed_params:
+                    self.params['add_long_ties_exp'] = np.random.exponential(scale=self.params['size'] ** 2,
+                                                                             size=int(1.0 * self.params['size']
+                                                                                      * (self.params['size'] - 1)) // 2)
+
+                    self.params['remove_cycle_edges_exp'] = np.random.exponential(scale=2 * self.params['size'],
+                                                                                  size=self.params['size'])
+
                 self.params['network'] = c_1_c_2_interpolation(self.params['size'],self.params['eta'],
                                                                self.params['add_long_ties_exp'],
                                                                self.params['remove_cycle_edges_exp'])

@@ -13,52 +13,22 @@ if __name__ == '__main__':
     assert simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1' \
            or 'c1_c2_interpolation_SimpleOnlyAlongC1', "we are not in the right simulation_type:" + simulation_type
 
-    avg_spread_times = []
-    std_spread_times = []
-    for q_label in q_labels:
-        spread_avg = []
-        spread_std = []
-        for eta in etas:
-            spread_time_avg = pickle.load(open(theory_simulation_pickle_address
-                                               + 'spreading_time_avg'
-                                               + '_eta_' + eta_labels[etas.index(eta)]
-                                               + '_q_' + q_label
-                                               + '.pkl', 'rb'))
-            spread_time_std = pickle.load(open(theory_simulation_pickle_address
-                                               + 'spreading_time_std'
-                                               + '_eta_' + eta_labels[etas.index(eta)]
-                                               + '_q_' + q_label
-                                               + '.pkl', 'rb'))
-
-            spread_avg.append(spread_time_avg)
-            spread_std.append(spread_time_std)
-
-        print(spread_avg)
-        print(spread_std)
-
-        avg_spread_times.append(spread_avg)
-
-        std_spread_times.append(spread_std)
-
-    print(avg_spread_times)
-    print(std_spread_times)
-
-    pickle.dump(avg_spread_times, open(theory_simulation_pickle_address
-                                       + 'spreading_time_avg'
-                                       + simulation_type
-                                       + '.pkl', 'wb'))
-    pickle.dump(std_spread_times, open(theory_simulation_pickle_address
-                                       + 'spreading_time_std'
-                                       + simulation_type
-                                       + '.pkl', 'wb'))
+    avg_spread_times = pickle.load(open(theory_simulation_pickle_address
+                                        + 'spreading_time_avg_'
+                                        + simulation_type
+                                        + '.pkl', 'rb'))
+    std_spread_times = pickle.load(open(theory_simulation_pickle_address
+                                        + 'spreading_time_std_'
+                                        + simulation_type
+                                        + '.pkl', 'rb'))
 
     plt.figure()
 
     for q_label in q_labels:
 
-        plt.errorbar(etas, avg_spread_times[q_labels.index(q_label)], yerr=avg_spread_times[q_labels.index(q_label)],
+        plt.errorbar(etas[:8], avg_spread_times[q_labels.index(q_label)][:8],
+                     yerr=avg_spread_times[q_labels.index(q_label)][:8],
                      linewidth=2.5, label='$q_n = '+str(Decimal(qs[q_labels.index(q_label)]).quantize(FOURPLACES))+'$')
-
 
     plt.ylabel('Time to Spread')
     plt.xlabel('Edges Rewired ($\\eta$)')

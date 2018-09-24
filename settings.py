@@ -151,8 +151,8 @@ else:
 
 # theory simulations settings:
 
-simulation_type = 'c1_c2_interpolation_SimpleOnlyAlongC1'
-# 'c1_c2_interpolation'
+simulation_type = 'c1_c2_interpolation'
+# 'c1_c2_interpolation_SimpleOnlyAlongC1'
 
 root_theory_simulations_address = './data/theory-simulations/'
 
@@ -180,12 +180,12 @@ except OSError as e:
 
 # general settings:
 
-do_computations = False
-do_multiprocessing = False
-save_computations = False
-load_computations = True
-do_plots = True
-save_plots = True
+do_computations = True
+do_multiprocessing = True
+save_computations = True
+load_computations = False
+do_plots = False
+save_plots = False
 show_plots = False
 data_dump = False
 simulator_mode = False
