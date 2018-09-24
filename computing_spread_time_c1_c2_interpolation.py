@@ -1,14 +1,10 @@
-# Comparing the speed in C_k uninon G(n,p_n). We use the (q,1) threshold model for complex contagion with theta = 2,
+# Computing the spread times in C_2^eta model. We use the (q,1) threshold model for complex contagion with theta = 2,
 # if two neighbors are infected then the agent gets infected. If one neighbor is infected then the agent
-# gets infected with probability q.
+# gets infected with probability q. eta determines how much of the C_2\C_1 edges are rewired.
 
 
 from models import *
 
-assert do_computations, "we should be in do_computations mode!"
-
-assert simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1' or 'c1_c2_interpolation', \
-    "simulation_type not set properly: " + simulation_type
 
 size_of_dataset = 500
 
@@ -25,7 +21,6 @@ eta_labels = [str(x) for x in range(len(etas))]
 add_long_ties_exp = np.random.exponential(scale=network_size ** 2,
                                           size=int(1.0 * network_size * (network_size - 1)) // 2)
 remove_cycle_edges_exp = np.random.exponential(scale=2 * network_size,
-
                                                size=network_size)
 def compute_spread_time_for_q_eta(q, eta):
     params = {
@@ -70,6 +65,11 @@ def compute_spread_time_for_q_eta(q, eta):
 
 if __name__ == '__main__':
 
+    assert do_computations, "we should be in do_computations mode!"
+
+    assert simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1' or 'c1_c2_interpolation', \
+        "simulation_type not set properly: " + simulation_type
+
     if do_multiprocessing:
         with multiprocessing.Pool(processes=number_CPU) as pool:
             # do computations for the original networks:
@@ -79,31 +79,3 @@ if __name__ == '__main__':
             for eta in etas:
                 compute_spread_time_for_q_eta(q, eta)
 
-    if save_computations:
-        for q in qs:
-            spread_avg = []
-            spread_std = []
-            for eta in etas:
-                spread_time_avg = pickle.load(open(theory_simulation_pickle_address
-                                                   + 'spreading_time_avg'
-                                                   + '_eta_' + eta_labels[etas.index(eta)]
-                                                   + '_q_' + q_labels[qs.index(q)]
-                                                   + '.pkl', 'rb'))
-                spread_time_std = pickle.load(open(theory_simulation_pickle_address
-                                                   + 'spreading_time_std'
-                                                   + '_eta_' + eta_labels[etas.index(eta)]
-                                                   + '_q_' + q_labels[qs.index(q)]
-                                                   + '.pkl', 'rb'))
-
-                spread_avg.append(spread_time_avg)
-                spread_std.append(spread_time_std)
-
-            print(spread_avg)
-            print(spread_std)
-
-            pickle.dump(spread_time_avg, open(theory_simulation_pickle_address
-                                              + simulation_type + '_avg_points'
-                                              + '.pkl', 'wb'))
-            pickle.dump(spread_time_std, open(theory_simulation_pickle_address
-                                              + simulation_type + '_std_points'
-                                              + '.pkl', 'wb'))
