@@ -351,7 +351,8 @@ many_with_insets <- many_ecdf_plot +
         scale_y_continuous(breaks = c(0, .5, 1)) +
         scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), max(st_1$time_to_spread))) +
         theme(text = element_text(size=7),
-              rect = element_rect(fill = "transparent"))
+              rect = element_rect(fill = "transparent"),
+              plot.background = element_rect(color = NA))
    ), 
     xmin = .3, xmax = log10(14), ymin = -0.03, ymax = -0.03 + .5
   ) +
@@ -363,7 +364,8 @@ many_with_insets <- many_ecdf_plot +
         scale_y_continuous(breaks = c(0, .5)) +
         scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), max(st_1$time_to_spread))) +
         theme(text = element_text(size=7),
-              rect = element_rect(fill = "transparent"))
+              rect = element_rect(fill = "transparent"),
+              plot.background = element_rect(color = NA))
    ), 
     xmin = .3, xmax = log10(14), ymin = .44, ymax = .44 + .5
   )
