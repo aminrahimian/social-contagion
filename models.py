@@ -178,7 +178,7 @@ def cycle_union_Erdos_Renyi(n, k=4, c=2, seed=None,
     assert G_npn.nodes() == C_k.nodes(), "node sets are not the same"
     composed = NX.compose(G_npn, C_k)
 
-    print(composed.edges.data())
+    # print(composed.edges.data())
 
     return composed
 
@@ -780,7 +780,7 @@ class contagion_model(network_model):
             sum_of_total_spread_times = 0
             count = 1
             while count <= dataset_size:
-                total_spread_time = self.time_the_total_spread()
+                total_spread_time = self.time_the_total_spread(cap=0.999, get_time_series=False)
                 if total_spread_time == float('Inf'):
                     dataset_size += -1
                     total_spread_times += [float('Inf')]
@@ -846,7 +846,7 @@ class activation(contagion_model):
         self.activation_functions = []
         self.activation_functions_is_set = False
 
-        print(self.params)
+        # print(self.params)
 
         if 'size' not in self.params:
             if 'network' in self.params:
