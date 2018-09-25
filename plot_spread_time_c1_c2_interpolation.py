@@ -3,7 +3,7 @@
 
 from models import *
 
-from computing_spread_time_c1_c2_interpolation import etas, eta_labels, q_labels, qs
+from computing_spread_time_c1_c2_interpolation import etas, eta_labels, q_labels, qs, size_of_dataset
 
 
 if __name__ == '__main__':
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     for q_label in q_labels:
 
         plt.errorbar(etas, avg_spread_times[q_labels.index(q_label)],
-                     yerr=avg_spread_times[q_labels.index(q_label)],
+                     yerr=[1.96 * s / np.sqrt(size_of_dataset) for s in std_spread_times[q_labels.index(q_label)]],
                      linewidth=2.5, label='$q = '+str(Decimal(qs[q_labels.index(q_label)]).quantize(FOURPLACES))+'$')
 
     plt.ylabel('time to spread')
