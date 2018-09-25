@@ -28,12 +28,12 @@ if __name__ == '__main__':
 
         plt.errorbar(etas, avg_spread_times[q_labels.index(q_label)],
                      yerr=avg_spread_times[q_labels.index(q_label)],
-                     linewidth=2.5, label='$q_n = '+str(Decimal(qs[q_labels.index(q_label)]).quantize(FOURPLACES))+'$')
+                     linewidth=2.5, label='$q = '+str(Decimal(qs[q_labels.index(q_label)]).quantize(FOURPLACES))+'$')
 
-    plt.ylabel('Time to Spread')
-    plt.xlabel('Edges Rewired ($\\eta$)')
+    plt.ylabel('time to spread')
+    plt.xlabel('edges rewired ($\\eta$)')
     plt.title('\centering Complex Contagion over $\mathcal{C}_2^{\eta}, n = 200$'
-              '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions $(q_n)$ '
+              '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions $(q)$ '
               'and Rewiring $(\eta)$   \\end{center}')
     plt.legend()
     if show_plots:
