@@ -6,13 +6,13 @@
 from models import *
 
 
-size_of_dataset = 1000
+size_of_dataset = 1000 #20
 
 network_size = 500
 
-etas = list(np.linspace(0, 100, 50))
+etas = list(np.linspace(0, 100, 50))#list(np.linspace(0, 80, 10))
 
-qs = [1 / network_size ** x for x in [0.1, 0.35, 0.6, 0.7, 0.8]]
+qs = [1 / network_size ** x for x in [0.1, 0.35, 0.6, 0.7, 0.8]] #[1 / network_size ** x for x in [0.1,0.6,0.8]]#
 
 q_labels = [str(x) for x in range(len(qs))]
 
