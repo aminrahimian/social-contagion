@@ -1,0 +1,50 @@
+# plotting the computed spread times in computing_spread_time_c_1_union_ER
+
+from settings import *
+from computing_spread_time_c_1_union_ER import models_list,size_of_dataset
+
+
+if __name__ == '__main__':
+
+    assert do_plots and load_computations, "we should be in load_computations and do_plots mode!"
+
+    assert simulation_type is 'c1_union_ER', \
+        "we are not in the right simulation_type:" + simulation_type
+
+    spread_time_stds = pickle.load(open(theory_simulation_pickle_address
+                                        + simulation_type
+                                        + '_spread_times_std.pkl', 'rb'))
+
+    spread_time_avgs = pickle.load(open(theory_simulation_pickle_address
+                                        + simulation_type
+                                        + '_spread_time_avgs.pkl', 'rb'))
+
+    qs = pickle.load(open(theory_simulation_pickle_address
+                          + simulation_type
+                          + '_qs.pkl', 'rb'))
+
+    plt.figure()
+
+    for model in models_list:
+        model_index = models_list.index(model)
+        plt.errorbar(qs[model_index],
+                     spread_time_avgs[model_index],
+                     yerr=[1.96*s/np.sqrt(size_of_dataset) for s in spread_time_stds[model_index]],
+                     linewidth=1.5,
+                     label=model)  # $\\sigma_n = 1/2\log(n^{\\alpha})$
+
+    plt.plot(qs[models_list.index('Threshold')],
+             [500]*len(qs[models_list.index('Threshold')]),
+             color='c', linewidth=1,
+             label='$\mathcal{C}_2$ benchmark')
+
+    plt.xscale("log")
+    plt.ylabel('Time to Spread')
+    plt.xlabel('Probability of Adoptions below Threshold $(q_n)$')
+    plt.title('\centering Complex Contagion over $\mathcal{C}_{1} \\cup \mathcal{G}_{n,2/n},n = 1000$'
+              '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions \\end{center}')
+    plt.legend()
+    if show_plots:
+        plt.show()
+    if save_plots:
+        plt.savefig(theory_simulation_output_address + simulation_type + '.png')
