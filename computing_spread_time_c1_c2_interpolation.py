@@ -91,8 +91,9 @@ if __name__ == '__main__':
 
     if do_multiprocessing:
         with multiprocessing.Pool(processes=number_CPU) as pool:
-            # do computations for the original networks:
             pool.starmap(compute_spread_time_for_q_eta, product(qs,etas))
+            pool.close()
+            pool.join()
     else:  # no multi-processing:
         for q in qs:
             for eta in etas:
