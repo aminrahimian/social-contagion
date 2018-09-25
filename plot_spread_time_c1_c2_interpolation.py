@@ -26,8 +26,8 @@ if __name__ == '__main__':
 
     for q_label in q_labels:
 
-        plt.errorbar(etas[:8], avg_spread_times[q_labels.index(q_label)][:8],
-                     yerr=avg_spread_times[q_labels.index(q_label)][:8],
+        plt.errorbar(etas, avg_spread_times[q_labels.index(q_label)],
+                     yerr=avg_spread_times[q_labels.index(q_label)],
                      linewidth=2.5, label='$q_n = '+str(Decimal(qs[q_labels.index(q_label)]).quantize(FOURPLACES))+'$')
 
     plt.ylabel('Time to Spread')
