@@ -142,7 +142,7 @@ overall_ecdf_plot_facet_by_size = ggplot(
 overall_ecdf_plot_facet_by_size
 
 ggsave('figures/chami/chami_time_to_spread_ecdf_overall_by_intervention_size.pdf',
-       overall_ecdf_plot_facet_by_size, width = 12, height = 12)
+       overall_ecdf_plot_facet_by_size, width = 12, height = 4)
 
 
 # overlay ECDF for each network
@@ -223,7 +223,6 @@ st_1_ecdf <- st_1_ecdf %>%
   filter(time_to_spread <= time_to_spread_max)
 
 st_1_ecdf_diff <- st_1_ecdf %>%
-  #inner_join(combined_summary_null) %>%
   group_by(model, network_group, network_id) %>%
   mutate(
     cdf_diff_none = cdf - cdf[intervention_type == "none"],
@@ -243,7 +242,7 @@ many_diff_in_ecdf_plot = ggplot(
   scale_color_manual(values = intervention_colors) +
   scale_x_log10() +
   geom_hline(yintercept = 0, lwd = .3, lty = 2, alpha = .6) +
-  geom_line(alpha = .5, lwd = .2) +
+  geom_line(alpha = .6, lwd = .2) +
   ylab(expression(ECDF[rewired] - ECDF[original])) +
   xlab("time to spread") +
   theme(legend.position = "none") +
@@ -270,7 +269,7 @@ many_diff_in_ecdf_plot_random_vs_triad = ggplot(
   scale_color_manual(values = intervention_colors) +
   scale_x_log10() +
   geom_hline(yintercept = 0, lwd = .3, lty = 2, alpha = .6) +
-  geom_line(alpha = .5, lwd = .2) +
+  geom_line(alpha = .6, lwd = .2) +
   ylab(expression(ECDF[random] - ECDF[triadic])) +
   xlab("time to spread") +
   theme(legend.position = "none") +
@@ -315,29 +314,29 @@ ggsave('figures/chami/chami_time_to_spread_many_diff_in_ecdfs_random_vs_none.pdf
 # combine plots
 many_with_insets <- many_ecdf_plot +
   theme(legend.position = "none") +
-  scale_x_log10(breaks = c(.1, .25, .5, 1, 2, 4, 10), limits = c(.25, 10)) +
+  scale_x_log10(breaks = c(.1, .25, .5, 1, 2, 4, 10), limits = c(.25, 12)) +
   annotation_custom(
     ggplotGrob(
       overall_ecdf_plot +
         theme(legend.position = "none") +
         scale_y_continuous(breaks = c(0, .5, 1)) +
         scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), max(st_1$time_to_spread))) +
-        theme(text = element_text(size=8),
+        theme(text = element_text(size=7),
               rect = element_rect(fill = "transparent"))
    ), 
-    xmin = .2, xmax = 1, ymin = 0, ymax = .45
+    xmin = .3, xmax = log10(14), ymin = -0.03, ymax = -0.03 + .5
   ) +
   annotation_custom(
     ggplotGrob(
       many_diff_in_ecdf_plot_random_vs_triad +
         theme(legend.position = "none") +
-        xlab(NULL) + ylab("ECDF difference") +
+        xlab(NULL) +
         scale_y_continuous(breaks = c(0, .5)) +
         scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), max(st_1$time_to_spread))) +
-        theme(text = element_text(size=8),
+        theme(text = element_text(size=7),
               rect = element_rect(fill = "transparent"))
    ), 
-    xmin = .2, xmax = 1, ymin = .43, ymax = .43 + .45
+    xmin = .3, xmax = log10(14), ymin = .44, ymax = .44 + .5
   )
 many_with_insets
 

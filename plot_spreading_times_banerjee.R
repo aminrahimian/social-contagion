@@ -14,15 +14,6 @@ st <- read.csv(
   stringsAsFactors = FALSE
 )
 
-st %>%
-  group_by(model, intervention_type, intervention_size) %>%
-  summarise(
-    n = n(),
-    n_long = sum(time_to_spread > 100),
-    p_long = n_long / n
-  ) %>% print(n = 100)
-
-
 nd <- read.csv(
   "data/banerjee-combined-data/output/banerjee_combined_edgelist_properties_data_dump.csv",
   stringsAsFactors = FALSE
@@ -96,12 +87,6 @@ intervention_shapes <- c(
   "rewired" = 17
 )
 
-st_1 %>%
-  group_by(intervention_type, intervention_size) %>%
-  summarise(
-    time_to_spread_mean = mean(time_to_spread)
-    )
-
 # plot ECDF averaging over networks
 overall_ecdf_plot <- ggplot(
   aes(x = time_to_spread,
@@ -120,7 +105,7 @@ overall_ecdf_plot <- ggplot(
   xlab("time to spread") +
   theme(legend.position = c(0.8, 0.3)) +
   annotation_logticks(
-    sides = "b",
+    sides = "b", size = .3,
     short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
   )
 overall_ecdf_plot
@@ -151,7 +136,7 @@ overall_ecdf_plot_facet_by_size = ggplot(
   xlab("relative time to spread") +
   theme(legend.position = "bottom") +
   annotation_logticks(
-    sides = "b",
+      sides = "b", size = .3,
     short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
   )
 overall_ecdf_plot_facet_by_size
@@ -172,12 +157,12 @@ many_ecdf_plot = ggplot(
 ) +
   scale_x_log10(breaks = c(.25, .5, 1, 2, 4, 10)) +
   scale_color_manual(values = intervention_colors) +
-  stat_ecdf(alpha = .3, lwd = .2) +
+  stat_ecdf(alpha = .35, lwd = .2) +
   ylab("ECDF") +
   xlab("relative time to spread") +
   theme(legend.position = c(0.8, 0.3)) +
   annotation_logticks(
-    sides = "b",
+    sides = "b", size = .3,
     short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
   ) +
 guides(colour = guide_legend(override.aes = list(alpha = .7)))
@@ -205,13 +190,13 @@ many_ecdf_plot_facet_by_size = ggplot(
     ) %>%
       select(-intervention_size)
   ) +
-  stat_ecdf(alpha = .3, lwd = .2) +
+  stat_ecdf(alpha = .35, lwd = .2) +
   facet_grid(model ~ intervention_size) +
   ylab("ECDF") +
   xlab("relative time to spread") +
   theme(legend.position = "bottom") +
   annotation_logticks(
-    sides = "b",
+    sides = "b", size = .3,
     short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
   ) +
 guides(colour = guide_legend(override.aes = list(alpha = .7)))
@@ -260,13 +245,13 @@ many_diff_in_ecdf_plot = ggplot(
   scale_color_manual(values = intervention_colors) +
   scale_x_log10() +
   geom_hline(yintercept = 0, lwd = .3, lty = 2, alpha = .6) +
-  geom_line(alpha = .2, lwd = .2) +
+  geom_line(alpha = .35, lwd = .2) +
   ylab(expression(ECDF[rewired] - ECDF[original])) +
   xlab("time to spread") +
   theme(legend.position = "none") +
   guides(colour = guide_legend(override.aes = list(alpha = .7))) +
   annotation_logticks(
-    sides = "b",
+    sides = "b", size = .3,
     short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
   )
 many_diff_in_ecdf_plot
@@ -287,13 +272,13 @@ many_diff_in_ecdf_plot_random_vs_triad = ggplot(
   scale_color_manual(values = intervention_colors) +
   scale_x_log10() +
   geom_hline(yintercept = 0, lwd = .3, lty = 2, alpha = .6) +
-  geom_line(alpha = .2, lwd = .2) +
+  geom_line(alpha = .35, lwd = .2) +
   ylab(expression(ECDF[random] - ECDF[triadic])) +
   xlab("time to spread") +
   theme(legend.position = "none") +
   guides(colour = guide_legend(override.aes = list(alpha = .7))) +
   annotation_logticks(
-    sides = "b",
+    sides = "b", size = .3,
     short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
   )
 many_diff_in_ecdf_plot_random_vs_triad
@@ -314,13 +299,13 @@ many_diff_in_ecdf_plot = ggplot(
   scale_color_manual(values = intervention_colors) +
   scale_x_log10() +
   geom_hline(yintercept = 0, lwd = .3, lty = 2, alpha = .5) +
-  geom_line(alpha = .2, lwd = .2) +
+  geom_line(alpha = .35, lwd = .2) +
   ylab(expression(ECDF[random] - ECDF[original])) +
   xlab("time to spread") +
   theme(legend.position = "none") +
   guides(colour = guide_legend(override.aes = list(alpha = .7))) +
   annotation_logticks(
-    sides = "b",
+    sides = "b", size = .3,
     short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
   )
 many_diff_in_ecdf_plot
@@ -328,33 +313,11 @@ many_diff_in_ecdf_plot
 ggsave('figures/banerjee_combined/banerjee_combined_time_to_spread_many_diff_in_ecdfs_random_vs_none.pdf',
        many_diff_in_ecdf_plot, width = 5, height = 4)
 
-st_1_ecdf_diff %>%
-  filter(
-    intervention_type == "random_addition",
-    model == MODEL_1
-  ) %>%
-  summarise(
-    cdf_diff_none_pos = mean(cdf_diff_none > 0)
-  ) %>%
-  group_by(time_to_spread) %>%
-  summarise(
-    cdf_diff_none_pos_n = sum(cdf_diff_none_pos),
-    n = n()
-    )
-
-st_1_ecdf_diff %>%
-  filter(
-    intervention_type == "random_addition",
-    model == MODEL_1
-  )
-
-
-
 
 # combine plots
 many_with_insets <- many_ecdf_plot +
   theme(legend.position = "none") +
-  scale_x_log10(breaks = c(.25, .5, 1, 2, 4, 10)) +
+  scale_x_log10(breaks = c(.25, .5, 1, 2, 4, 10), limits = c(.25, 12)) +
   annotation_custom(
     ggplotGrob(
       overall_ecdf_plot +
@@ -363,7 +326,7 @@ many_with_insets <- many_ecdf_plot +
         scale_x_log10(breaks = c(1, 3, 10, 30), limits = c(2, 80)) +
         theme(text = element_text(size=8))
    ), 
-    xmin = .2, xmax = 1, ymin = 0, ymax = .45
+    xmin = .2, xmax = 1.1, ymin = 0, ymax = .45
   ) +
   annotation_custom(
     ggplotGrob(
@@ -374,7 +337,35 @@ many_with_insets <- many_ecdf_plot +
         scale_x_log10(breaks = c(1, 3, 10, 30), limits = c(2, 80)) +
         theme(text = element_text(size=8))
    ), 
-    xmin = .2, xmax = 1, ymin = .43, ymax = .43 + .45
+    xmin = .2, xmax = 1.1, ymin = .43, ymax = .43 + .45
+  )
+many_with_insets
+
+many_with_insets <- many_ecdf_plot +
+  theme(legend.position = "none") +
+  scale_x_log10(breaks = c(.1, .25, .5, 1, 2, 4, 10), limits = c(.25, 12)) +
+  annotation_custom(
+    ggplotGrob(
+      overall_ecdf_plot +
+        theme(legend.position = "none") +
+        scale_y_continuous(breaks = c(0, .5, 1)) +
+        scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), max(st_1$time_to_spread))) +
+        theme(text = element_text(size=7),
+              rect = element_rect(fill = "transparent"))
+   ), 
+    xmin = .3, xmax = log10(14), ymin = -0.03, ymax = -0.03 + .5
+  ) +
+  annotation_custom(
+    ggplotGrob(
+      many_diff_in_ecdf_plot_random_vs_triad +
+        theme(legend.position = "none") +
+        xlab(NULL) +
+        scale_y_continuous(breaks = c(0, .5)) +
+        scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), max(st_1$time_to_spread))) +
+        theme(text = element_text(size=7),
+              rect = element_rect(fill = "transparent"))
+   ), 
+    xmin = .3, xmax = log10(14), ymin = .44, ymax = .44 + .5
   )
 many_with_insets
 
