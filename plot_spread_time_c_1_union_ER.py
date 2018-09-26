@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     plt.xscale("log")
     plt.ylabel('Time to Spread')
-    plt.xlabel('Probability of Adoptions below Threshold $(q_n)$')
+    plt.xlabel('Probability of Adoptions below Threshold $(q)$')
     plt.title('\centering Complex Contagion over $\mathcal{C}_{1} \\cup \mathcal{G}_{n,2/n},n = 1000$'
               '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions \\end{center}')
     plt.legend()
