@@ -5,7 +5,6 @@
 from models import *
 from multiprocessing import Pool
 
-assert do_computations, "we should be in do_computations mode!"
 
 size_of_dataset = 200
 
@@ -208,6 +207,8 @@ def measure_properties_of_network_inetrvention_datasets(network_id, intervention
 
 
 if __name__ == '__main__':
+
+    assert do_computations, "we should be in do_computations mode!"
 
     # generate intervention network structures:
     if generate_network_intervention_dataset:

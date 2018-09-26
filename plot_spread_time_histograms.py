@@ -2,8 +2,6 @@
 
 from models import *
 
-assert do_plots and load_computations, "We should be in do_plots and load_computations mode!"
-
 size_of_dataset = 200
 
 intervention_size_list = [5, 10, 15, 20, 25]
@@ -17,6 +15,8 @@ def check_type(obj):
 
 
 if __name__ == '__main__':
+
+    assert do_plots and load_computations, "We should be in do_plots and load_computations mode!"
 
     for intervention_size in intervention_size_list:
         for network_id in network_id_list:

@@ -2,15 +2,16 @@
 
 from settings import *
 
-assert data_dump, "we should be in data_dump mode!"
-
-assert load_computations, "we should be in load_computations mode to dump data!"
 
 rewiring_percentage_list = [5, 10, 15, 20, 25]
 
 percent_more_edges_list = [5, 10, 15, 20, 25]
 
 if __name__ == "__main__":
+
+    assert data_dump, "we should be in data_dump mode!"
+
+    assert load_computations, "we should be in load_computations mode to dump data!"
 
     # check for the existing network_group + 'spreading_data_dump.csv' file
 

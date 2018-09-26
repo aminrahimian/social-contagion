@@ -3,7 +3,6 @@
 from models import *
 from multiprocessing import Pool
 
-assert do_computations, "we should be in do_computations mode"
 
 size_of_dataset = 500
 
@@ -228,6 +227,8 @@ def measure_any_intervention_spread_time(intervention_type, network_id, percent_
 
 
 if __name__ == '__main__':
+
+    assert do_computations, "we should be in do_computations mode"
 
     if do_multiprocessing:
         with multiprocessing.Pool(processes=number_CPU) as pool:

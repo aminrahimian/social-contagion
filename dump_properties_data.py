@@ -4,7 +4,6 @@ from settings import *
 
 from models import measure_property
 
-assert data_dump and load_computations, "we should be in data_dump and load_computations mode!"
 
 intervention_size_list = [5, 10, 15, 20, 25]
 
@@ -20,6 +19,8 @@ all_properties = old_properties + new_properties
 included_properties = all_properties
 
 if __name__ == '__main__':
+
+    assert data_dump and load_computations, "we should be in data_dump and load_computations mode!"
 
     generating_new_dump = False
 

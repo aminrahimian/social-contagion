@@ -2,7 +2,6 @@
 
 from models import *
 
-assert do_plots and load_computations, "we should be in do_plots and load_computations mode!"
 
 intervention_size_list = [5, 10, 15, 20, 25]
 
@@ -19,6 +18,8 @@ included_properties = all_properties
 
 
 if __name__ == '__main__':
+
+    assert do_plots and load_computations, "we should be in do_plots and load_computations mode!"
 
     original_properties = [[] for ii in range(len(included_properties))]
 
