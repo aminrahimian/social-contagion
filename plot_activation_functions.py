@@ -33,14 +33,14 @@ if __name__ == '__main__':
         'size': 10,
     }
 
-    params_probit_logit_5 = {
+    params_probit_5 = {
         'sigma': 0.5,
         'theta': 1.5,
         'size': 10,
     }
 
-    params_probit_logit_5 = {
-        'sigma': 0.5,
+    params_logit_5 = {
+        'sigma': 0.5/1.7,
         'theta': 1.5,
         'size': 10,
     }
@@ -93,8 +93,8 @@ if __name__ == '__main__':
     plt.show()
 
 
-    dynamics_probit = Probit(params_probit_logit_5)
-    dynamics_logit = Logit(params_probit_logit_5)
+    dynamics_probit = Probit(params_probit_5)
+    dynamics_logit = Logit(params_logit_5)
     # dynamics_si_threshold = SIS_threshold(params_4)
     # dynamics_si_threshold_soft = SIS_threshold_soft(params_5)
     dynamics_linear = DeterministicLinear(params_linear_threshold)
@@ -140,11 +140,11 @@ if __name__ == '__main__':
 
     print(degree_range)
 
-    plt.plot(degree_range, activation_probabilities_probit, linewidth=2,
+    plt.plot(degree_range, activation_probabilities_probit, linewidth=3, linestyle='--',
              label='Probit $(\\sigma = 0.5)$')
     plt.scatter(degree_range_int, activation_probabilities_probit_int)
     plt.plot(degree_range, activation_probabilities_logit, linewidth=2,
-             label='Logit $(\\sigma = 0.5)$')
+             label='Logit $(\\sigma = 0.29)$')
     plt.scatter(degree_range_int, activation_probabilities_logit_int)
     plt.plot(degree_range, activation_probabilities_linear, 'r--', linewidth=1.5,
              label='Linear Threshold')
@@ -162,6 +162,8 @@ if __name__ == '__main__':
     plt.ylabel('Adoption Probability')
     plt.xlabel('Number of Adopters in the Social Neighborhood')
     plt.title('Complex Activation Functions')
+    plt.text(1.5, 0.2, '$q$', fontsize=30,
+             fontweight='bold', fontdict=None, withdash=False)
     plt.legend()
     plt.show()
 
@@ -175,7 +177,7 @@ if __name__ == '__main__':
     plt.ylim(ymax=1.3)
     plt.text(2.25, 1.1, '$\\rho$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
-    plt.text(1.25, 0.25, '$q_n$', fontsize=30,
+    plt.text(1.25, 0.25, '$q$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
     plt.title('A Realistic Complex Activation Function')
     plt.xticks([0,1,2,3])
