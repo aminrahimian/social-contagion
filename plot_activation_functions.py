@@ -1,19 +1,14 @@
+# plots simple, complex and realistic threshold activation functions
+
 
 from models import *
-# from settings import *
-
-import matplotlib.pyplot as plt
-plt.rc('text', usetex=True)
-plt.rc('font', family='serif')
-from decimal import Decimal
-FOURPLACES = Decimal(10) ** -4
-TWOPLACES = Decimal(10) ** -2
-ERROR_BAR_TYPE = 'std'
 
 degree_range = np.linspace(0,5,300)
 degree_range_int = np.linspace(0,5,6)
 
 if __name__ == '__main__':
+
+    assert do_plots, "we should be in do_plots mode!"
 
     params_SI_beta_4 = {
         'beta':0.4,
@@ -55,7 +50,7 @@ if __name__ == '__main__':
         'size': 10,
         'fixed_prob': 0.15,
         'fixed_prob_high': 1.0,
-        'zero_at_zer':True,
+        'zero_at_zer': True,
     }
 
     dynamics_4 = SIS(params_SI_beta_4)
@@ -86,9 +81,9 @@ if __name__ == '__main__':
              label='$\\beta  =  0.6$')
     plt.scatter(degree_range_int, activation_probabilities_si_6_int)
 
-    plt.ylabel('Adoption Probability')
-    plt.xlabel('Number of Adopters in the Social Neighborhood')
-    plt.title('Simple Activation Functions')
+    plt.ylabel('Adoption Probability', fontsize=20)
+    plt.xlabel('Number of Neighboring Adopters', fontsize=20)
+    plt.title('Simple Activation Functions', fontsize=20)
     plt.legend()
     plt.show()
 
@@ -150,7 +145,7 @@ if __name__ == '__main__':
              label='Linear Threshold')
     plt.scatter(degree_range_int, activation_probabilities_linear_int)
     plt.plot(degree_range, activation_probabilities_sub_threshold, linewidth=4,
-             label='Sub-Threshold Adoptions')
+             label='Realistic Threshold')
     plt.scatter(degree_range_int, activation_probabilities_sub_threshold_int)
     # plt.plot(degree_range, activation_probabilities_si_threshold,
     # label='Threshold SI',alpha = 0.4, linewidth = 4)
@@ -159,9 +154,9 @@ if __name__ == '__main__':
     # plt.plot(degree_range, activation_probabilities_si_threshold_soft_fixed,
     # label = 'Threshold SI (Fixed  Non-Zero)', alpha = 0.4 ,linewidth = 4)
 
-    plt.ylabel('Adoption Probability')
-    plt.xlabel('Number of Adopters in the Social Neighborhood')
-    plt.title('Complex Activation Functions')
+    plt.ylabel('Adoption Probability', fontsize=20)
+    plt.xlabel('Number of Neighboring Adopters', fontsize=20)
+    plt.title('Complex Activation Functions', fontsize=20)
     plt.text(1.5, 0.2, '$q$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
     plt.legend()
@@ -172,13 +167,13 @@ if __name__ == '__main__':
     plt.plot(degree_range[0:180], activation_probabilities_sub_threshold[0:180], linewidth=4)
     plt.scatter(degree_range_int[0:3], activation_probabilities_sub_threshold_int[0:3])
 
-    plt.ylabel('Adoption Probability')
-    plt.xlabel('Number of Adopters in the Social Neighborhood')
+    plt.ylabel('Adoption Probability', fontsize=20)
+    plt.xlabel('Number of Neighboring Adopters', fontsize=20)
     plt.ylim(ymax=1.3)
     plt.text(2.25, 1.1, '$\\rho$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
     plt.text(1.25, 0.25, '$q$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
-    plt.title('A Realistic Complex Activation Function')
+    plt.title('A Realistic Complex Activation Function',fontsize=20)
     plt.xticks([0,1,2,3])
     plt.show()
