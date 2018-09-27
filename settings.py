@@ -284,6 +284,7 @@ if do_plots:
     import matplotlib.pyplot as plt
     plt.rc('text', usetex=True)
     plt.rc('font', ** {'family': 'sans-serif', 'sans-serif':['Helvetica']})
+    plt.rcParams.update({'font.size': 12})
     from decimal import Decimal
     FOURPLACES = Decimal(10) ** -4
     TWOPLACES = Decimal(10) ** -2
