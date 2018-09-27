@@ -24,7 +24,8 @@ def natural_keys(text):
 
 
 # real world networks simulation settings:
-network_group = 'banerjee_combined_edgelist_'
+network_group = 'cai_edgelist_'
+#'banerjee_combined_edgelist_'
 #'cai_edgelist_' #'fb100_edgelist_'
 # 'banerjee_combined_edgelist_'
 #'chami_friendship_edgelist_'
@@ -124,7 +125,7 @@ print(network_id_list)
 
 
 #  different models:
-model_id = '_model_1'
+model_id = '_model_4'
 
 if model_id == '_model_1':
     MODEL = '(0.05,1)'
@@ -144,6 +145,12 @@ elif model_id == '_model_3':
     fixed_prob_low = 0.05
     alpha = 0.05
     gamma = 0.5
+elif model_id == '_model_4':
+    MODEL = '(ORG-0.05,1)'
+    fixed_prob_high = 1.0
+    fixed_prob_low = 0.05
+    alpha = 1.0
+    gamma = 0.0
 else:
     print('model_id is not valid')
     exit()
@@ -292,7 +299,7 @@ if do_plots:
 if do_multiprocessing:
     import multiprocessing
     from itertools import product
-    number_CPU = 2
+    number_CPU = 7
 
 
 def combine(list_of_names,output_name):

@@ -12,9 +12,11 @@ percent_more_edges_list = [5, 10, 15, 20, 25]
 
 do_computations_for_original_network = False
 
-intervention_type = 'rewiring' #'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
+intervention_type = 'addition'  # 'rewiring' #'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
 
 all_interventions = ['triad-addition', 'random-addition', 'rewiring']
+
+addition_interventions = ['triad-addition', 'random-addition']
 
 number_initial_seeds = 2
 
@@ -42,6 +44,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
         print('network id', network_id, 'original')
         params_original = {
             'network': G,
+            'original_network': G,
             'size': network_size,
             'add_edges': False,
             'initialization_mode': 'fixed_number_initial_infection',
@@ -56,8 +59,13 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
             'rewiring_mode': 'random_random',
             'num_edges_for_random_random_rewiring': None,
         }
-
-        dynamics_original = DeterministicLinear(params_original)
+        if model_id == '_model_4':
+            dynamics_original = SimpleOnlyAlongOriginalEdges(params_original)
+        elif model_id in ['_model_1', '_model_2', '_model_3']:
+            dynamics_original = DeterministicLinear(params_original)
+        else:
+            print('model_id is not valid')
+            exit()
         speed_original, std_original, _, _, speed_samples_original = \
             dynamics_original.avg_speed_of_spread(
                 dataset_size=size_of_dataset,
@@ -77,6 +85,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
 
         params_rewired = {
             'network': G,
+            'original_network': G,
             'size': network_size,
             'add_edges': False,
             'initialization_mode': 'fixed_number_initial_infection',
@@ -92,7 +101,14 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
             'num_edges_for_random_random_rewiring': 0.01 * rewiring_percentage * G.number_of_edges(),
         }
 
-        dynamics_rewired = DeterministicLinear(params_rewired)
+        if model_id == '_model_4':
+            dynamics_rewired = SimpleOnlyAlongOriginalEdges(params_rewired)
+        elif model_id in ['_model_1', '_model_2', '_model_3']:
+            dynamics_rewired = DeterministicLinear(params_rewired)
+        else:
+            print('model_id is not valid')
+            exit()
+
         speed_rewired, std_rewired, _, _, speed_samples_rewired = \
             dynamics_rewired.avg_speed_of_spread(dataset_size=size_of_dataset,
                                                  cap=CAP,
@@ -110,7 +126,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
 
 
 def measure_triad_addition_spread_time(network_id, percent_more_edges):
-    print('network id', network_id, 'traid edge addition: ', percent_more_edges)
+    print('network id', network_id, 'triad edge addition: ', percent_more_edges)
     #  load in the network and extract preliminary data
     fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
     G = NX.read_edgelist(fh, delimiter=DELIMITER)
@@ -130,6 +146,7 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
 
     params_add_triad = {
         'network': G,
+        'original_network': G,
         'size': network_size,
         'add_edges': True,
         'edge_addition_mode': 'triadic_closures',
@@ -145,7 +162,13 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
         'rewire': False,
     }
 
-    dynamics_add_triad = DeterministicLinear(params_add_triad)
+    if model_id == '_model_4':
+        dynamics_add_triad = SimpleOnlyAlongOriginalEdges(params_add_triad)
+    elif model_id in ['_model_1', '_model_2', '_model_3']:
+        dynamics_add_triad = DeterministicLinear(params_add_triad)
+    else:
+        print('model_id is not valid')
+        exit()
 
     speed_add_triad, std_add_triad, _, _, speed_samples_add_triad = \
         dynamics_add_triad.avg_speed_of_spread(
@@ -163,7 +186,7 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
     return
 
 
-def measure_random_addition_spread_time(network_id,percent_more_edges):
+def measure_random_addition_spread_time(network_id, percent_more_edges):
     print('network id', network_id, 'traid edge addition: ', percent_more_edges)
     #  load in the network and extract preliminary data
     fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
@@ -184,6 +207,7 @@ def measure_random_addition_spread_time(network_id,percent_more_edges):
 
     params_add_random = {
         'network': G,
+        'original_network': G,
         'size': network_size,
         'add_edges': True,
         'edge_addition_mode': 'random',
@@ -199,7 +223,13 @@ def measure_random_addition_spread_time(network_id,percent_more_edges):
         'rewire': False,
     }
 
-    dynamics_add_random = DeterministicLinear(params_add_random)
+    if model_id == '_model_4':
+        dynamics_add_random = SimpleOnlyAlongOriginalEdges(params_add_random)
+    elif model_id in ['_model_1', '_model_2', '_model_3']:
+        dynamics_add_random = DeterministicLinear(params_add_random)
+    else:
+        print('model_id is not valid')
+        exit()
 
     speed_add_random, std_add_random, _, _, speed_samples_add_random = \
         dynamics_add_random.avg_speed_of_spread(
@@ -251,6 +281,11 @@ if __name__ == '__main__':
             elif intervention_type == 'all':
                 pool.starmap(measure_any_intervention_spread_time,
                              product(all_interventions, network_id_list, percent_more_edges_list))
+                pool.close()
+                pool.join()
+            elif intervention_type == 'addition':
+                pool.starmap(measure_any_intervention_spread_time,
+                             product(addition_interventions, network_id_list, percent_more_edges_list))
                 pool.close()
                 pool.join()
             else:

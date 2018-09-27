@@ -355,6 +355,14 @@ class network_model():
             else:
                 assert False, 'undefined network type'
 
+        # when considering real network and interventions on them we may need to record the original network.
+        # This is currently only used in SimpleOnlyAlongOriginalEdges(contagion_model)
+
+        if 'original_network' in self.fixed_params:
+            self.params['original_network'] = self.fixed_params['original_network']
+        else:
+            self.params['original_network'] = None
+
         # additional modifications / structural interventions to the network topology which include rewiring
         # and edge additions
 
@@ -824,6 +832,7 @@ class contagion_model(network_model):
         # implement this is activation class children
         pass
 
+
 class activation(contagion_model):
     """
     allows for the probability of infection to be set dependent on the number of infected neighbors, according to
@@ -916,9 +925,6 @@ class activation(contagion_model):
                                                                                      'time_since_activation mishandled!'
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
-
-                if self.classification_label is COMPLEX:
-                    pass
 
                 if RD.random() < self.activation_probabilities[count_node]:
                     self.params['network'].node[i]['state'] = infected*active
@@ -1250,7 +1256,6 @@ class DeterministicLinear(activation):
         self.activation_functions_is_set = True
 
 
-
 class SimpleOnlyAlongC1(contagion_model):
     """
     Implements an a special contagion model that is useful for interpolating C_1 and C_2 when studying the effect
@@ -1294,6 +1299,121 @@ class SimpleOnlyAlongC1(contagion_model):
 
                         if (current_network.node[j]['state'] == infected*active
                                 and j_is_a_cycle_neighbor):
+                            if RD.random() < self.params['fixed_prob']:
+                                self.params['network'].node[i]['state'] = infected*active
+                                for k in self.params['network'].neighbors(i):
+                                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
+                                break
+
+                self.number_of_active_infected_neighbors_is_updated = True
+                # the updating should happen in
+                # self.params['network'] not the current network
+
+            # if node i is already infected (infected active or infected inactive) but recovers
+            elif RD.random() < self.params['delta']:
+
+                assert 2 * abs(current_network.node[i]['state']) == infected, \
+                    "error: node states are mishandled"
+                #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
+
+                self.params['network'].node[i]['state'] = susceptible
+
+                if current_network.node[i]['state'] == infected * active:
+                    for k in self.params['network'].neighbors(i):
+                        assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
+                            'error: number_of_active_infected_neighbors is mishandled'
+                        # here number_of_active_infected_neighbors for neighbor k should be at least one
+                        self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
+                self.number_of_active_infected_neighbors_is_updated = True
+                self.params['network'].node[i]['time_since_infection'] = 0
+                self.params['network'].node[i]['time_since_activation'] = 0
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+
+            # transition from active infected to inactive infected:
+
+            elif current_network.node[i]['state'] == infected*active and RD.random() < self.params['gamma']:
+                self.params['network'].node[i]['state'] = infected*inactive
+                for k in self.params['network'].neighbors(i):
+                    assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
+                        'error: number_of_active_infected_neighbors is mishandled'
+                    # here number_of_active_infected_neighbors for neighbor k should be at least one
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
+                self.number_of_active_infected_neighbors_is_updated = True
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+
+            # transition from inactive infected to active infected:
+
+            elif current_network.node[i]['state'] == infected*inactive and RD.random() < self.params['alpha']:
+                self.params['network'].node[i]['state'] = infected * active
+                for k in self.params['network'].neighbors(i):
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
+                self.number_of_active_infected_neighbors_is_updated = True
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+
+            # else the node state is either active or inactive infected and
+            # there are no state transitions, but we still need to update the time_since variables:
+
+            else:
+                self.params['network'].node[i]['time_since_infection'] += 1
+                if current_network.node[i]['state'] == infected * active:
+                    self.params['network'].node[i]['time_since_activation'] += 1
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+                self.number_of_active_infected_neighbors_is_updated = True
+
+
+class SimpleOnlyAlongOriginalEdges(contagion_model):
+    """
+    Implements an a special contagion model that is useful for measuring spread time over real networks when studying
+    the effect of edge addition interventions. It allows simple contagion along only the edges of the original network.
+    The complex contagion happens along all edges (original and added) as before.
+    """
+
+    def __init__(self, params):
+        super(SimpleOnlyAlongOriginalEdges, self).__init__(params)
+        self.classification_label = COMPLEX
+        assert self.params['add_edges'] or self.params['rewire'], \
+            "This contagion model is only suitable when there is some edge addition or " \
+            "rewiring intervention done to the original network."
+        assert self.params['original_network'] is not None, \
+            "original_network should be supplied to work with SimpleOnlyAlongOriginalEdges(contagion_model)"
+
+    def step(self):
+        current_network = copy.deepcopy(self.params['network'])
+        for i in current_network.nodes():
+
+            if current_network.node[i]['state'] == susceptible:
+                assert self.params['network'].node[i]['time_since_infection'] == 0 \
+                       and self.params['network'].node[i]['time_since_activation'] == 0, 'error: ' \
+                                                                                         'time_since_infection or ' \
+                                                                                         'timr_since_activation ' \
+                                                                                         'mishandle'
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+
+                if (current_network.node[i]['threshold'] <=
+                        current_network.node[i]['number_of_active_infected_neighbors']):
+                    # print('we are here')
+                    if RD.random() < self.params['fixed_prob_high']:
+                        self.params['network'].node[i]['state'] = infected*active
+                        for k in self.params['network'].neighbors(i):
+                            self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
+
+                else:  # if the node cannot be infected through complex contagion
+                    # see if it can be infected through simple contagion along the "original" edges
+                    for j in current_network.neighbors(i):
+
+                        j_is_an_original_neighbor = self.params['original_network'].has_edge(i, j)
+
+                        if (current_network.node[j]['state'] == infected*active
+                                and j_is_an_original_neighbor):
                             if RD.random() < self.params['fixed_prob']:
                                 self.params['network'].node[i]['state'] = infected*active
                                 for k in self.params['network'].neighbors(i):
