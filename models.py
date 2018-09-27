@@ -917,6 +917,9 @@ class activation(contagion_model):
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
+                if self.classification_label is COMPLEX:
+                    pass
+
                 if RD.random() < self.activation_probabilities[count_node]:
                     self.params['network'].node[i]['state'] = infected*active
                     for k in self.params['network'].neighbors(i):

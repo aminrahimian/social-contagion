@@ -151,9 +151,8 @@ else:
 
 # theory simulations settings:
 
-simulation_type = 'c1_union_ER'
+simulation_type = 'c1_c2_interpolation'
 #'c1_union_ER'
-#'c1_c2_interpolation_SimpleOnlyAlongC1'
 # 'c1_c2_interpolation_SimpleOnlyAlongC1'
 
 root_theory_simulations_address = './data/theory-simulations/'
@@ -182,12 +181,12 @@ except OSError as e:
 
 # general settings:
 
-do_computations = False
-do_multiprocessing = False
-save_computations = False
-load_computations = True
-do_plots = True
-save_plots = True
+do_computations = True
+do_multiprocessing = True
+save_computations = True
+load_computations = False
+do_plots = False
+save_plots = False
 show_plots = False
 data_dump = False
 simulator_mode = False
@@ -284,7 +283,7 @@ if do_plots:
     import matplotlib.pyplot as plt
     plt.rc('text', usetex=True)
     plt.rc('font', ** {'family': 'sans-serif', 'sans-serif':['Helvetica']})
-    plt.rcParams.update({'font.size': 12})
+    plt.rcParams.update({'font.size': 15})
     from decimal import Decimal
     FOURPLACES = Decimal(10) ** -4
     TWOPLACES = Decimal(10) ** -2
