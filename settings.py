@@ -182,12 +182,12 @@ except OSError as e:
 
 # general settings:
 
-do_computations = True
-do_multiprocessing = True
-save_computations = True
-load_computations = False
-do_plots = False
-save_plots = False
+do_computations = False
+do_multiprocessing = False
+save_computations = False
+load_computations = True
+do_plots = True
+save_plots = True
 show_plots = False
 data_dump = False
 simulator_mode = False
@@ -283,7 +283,7 @@ if simulator_mode:
 if do_plots:
     import matplotlib.pyplot as plt
     plt.rc('text', usetex=True)
-    plt.rc('font', family='serif')
+    plt.rc('font', ** {'family': 'sans-serif', 'sans-serif':['Helvetica']})
     from decimal import Decimal
     FOURPLACES = Decimal(10) ** -4
     TWOPLACES = Decimal(10) ** -2
