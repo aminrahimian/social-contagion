@@ -320,6 +320,11 @@ if __name__ == '__main__':
                 for percent_more_edges in percent_more_edges_list:
                     measure_triad_addition_spread_time(network_id, percent_more_edges)
                     measure_random_addition_spread_time(network_id, percent_more_edges)
-
+        elif intervention_type == 'addition':
+            # spreading time computations for all interventions
+            for network_id in network_id_list:
+                for percent_more_edges in percent_more_edges_list:
+                    measure_triad_addition_spread_time(network_id, percent_more_edges)
+                    measure_random_addition_spread_time(network_id, percent_more_edges)
         else:
             assert False, "intervention type not supported"
