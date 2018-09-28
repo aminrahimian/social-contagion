@@ -24,7 +24,7 @@ def natural_keys(text):
 
 
 # real world networks simulation settings:
-network_group = 'cai_edgelist_'
+network_group = 'chami_advice_edgelist_'#'cai_edgelist_'
 #'banerjee_combined_edgelist_'
 #'cai_edgelist_' #'fb100_edgelist_'
 # 'banerjee_combined_edgelist_'
@@ -125,7 +125,7 @@ print(network_id_list)
 
 
 #  different models:
-model_id = '_model_4'
+model_id = '_model_5'
 
 if model_id == '_model_1':
     MODEL = '(0.05,1)'
@@ -151,6 +151,13 @@ elif model_id == '_model_4':
     fixed_prob_low = 0.05
     alpha = 1.0
     gamma = 0.0
+elif model_id == '_model_5':
+    MODEL = '(REL-0.05,1)'
+    fixed_prob_high = 1.0
+    fixed_prob_low = 0.05
+    alpha = 1.0
+    gamma = 0.0
+    zeta = 0.5  # the relative threshold
 else:
     print('model_id is not valid')
     exit()

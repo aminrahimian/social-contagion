@@ -12,7 +12,7 @@ percent_more_edges_list = [5, 10, 15, 20, 25]
 
 do_computations_for_original_network = False
 
-intervention_type = 'addition'  # 'rewiring' #'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
+intervention_type = 'all'  # 'rewiring' #'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
 
 all_interventions = ['triad-addition', 'random-addition', 'rewiring']
 
@@ -61,6 +61,9 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
         }
         if model_id == '_model_4':
             dynamics_original = SimpleOnlyAlongOriginalEdges(params_original)
+        elif model_id == '_model_5':
+            params_original['relative_threshold'] = zeta
+            dynamics_original = RelativeLinear(params_original)
         elif model_id in ['_model_1', '_model_2', '_model_3']:
             dynamics_original = DeterministicLinear(params_original)
         else:
@@ -103,6 +106,9 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
 
         if model_id == '_model_4':
             dynamics_rewired = SimpleOnlyAlongOriginalEdges(params_rewired)
+        elif model_id == '_model_5':
+            params_rewired['relative_threshold'] = zeta
+            dynamics_rewired = RelativeLinear(params_rewired)
         elif model_id in ['_model_1', '_model_2', '_model_3']:
             dynamics_rewired = DeterministicLinear(params_rewired)
         else:
@@ -164,6 +170,9 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
 
     if model_id == '_model_4':
         dynamics_add_triad = SimpleOnlyAlongOriginalEdges(params_add_triad)
+    elif model_id == '_model_5':
+        params_add_triad['relative_threshold'] = zeta
+        dynamics_add_triad = RelativeLinear(params_add_triad)
     elif model_id in ['_model_1', '_model_2', '_model_3']:
         dynamics_add_triad = DeterministicLinear(params_add_triad)
     else:
@@ -225,6 +234,9 @@ def measure_random_addition_spread_time(network_id, percent_more_edges):
 
     if model_id == '_model_4':
         dynamics_add_random = SimpleOnlyAlongOriginalEdges(params_add_random)
+    elif model_id == '_model_5':
+        params_add_random['relative_threshold'] = zeta
+        dynamics_add_random = RelativeLinear(params_add_random)
     elif model_id in ['_model_1', '_model_2', '_model_3']:
         dynamics_add_random = DeterministicLinear(params_add_random)
     else:
