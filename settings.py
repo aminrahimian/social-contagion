@@ -158,6 +158,12 @@ elif model_id == '_model_5':
     alpha = 1.0
     gamma = 0.0
     zeta = 0.5  # the relative threshold
+elif model_id == '_model_6':
+    MODEL = '(0.001,1)'
+    fixed_prob_high = 1
+    fixed_prob_low = 0.001
+    alpha = 1.0
+    gamma = 0.0
 else:
     print('model_id is not valid')
     exit()
@@ -195,14 +201,14 @@ except OSError as e:
 
 # general settings:
 
-do_computations = False
-do_multiprocessing = False
-save_computations = False
-load_computations = True
+do_computations = True
+do_multiprocessing = True
+save_computations = True
+load_computations = False
 do_plots = False
 save_plots = False
 show_plots = False
-data_dump = True
+data_dump = False
 simulator_mode = False
 
 
@@ -306,7 +312,7 @@ if do_plots:
 if do_multiprocessing:
     import multiprocessing
     from itertools import product
-    number_CPU = 7
+    number_CPU = 27
 
 
 def combine(list_of_names,output_name):
