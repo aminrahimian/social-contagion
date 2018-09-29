@@ -18,6 +18,10 @@ all_properties = old_properties + new_properties
 
 included_properties = all_properties
 
+include_original_networks = False
+include_rewiring_networks = False
+include_addition_networks = True
+
 if __name__ == '__main__':
 
     assert data_dump and load_computations, "we should be in data_dump and load_computations mode!"
@@ -33,61 +37,63 @@ if __name__ == '__main__':
         print('New ' + network_group + 'clustering_data_dump file will be generated.')
         generating_new_dump = True
 
-    #  dump the properties of the original networks (no interventions):
+    if include_original_networks:
 
-    original_properties = [[] for ii in range(len(included_properties))]
+        #  dump the properties of the original networks (no interventions):
 
-    for network_id in network_id_list:
+        original_properties = [[] for ii in range(len(included_properties))]
 
-        print(network_id)
+        for network_id in network_id_list:
 
-        #  load in the network and extract preliminary data
+            print(network_id)
 
-        fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
+            #  load in the network and extract preliminary data
 
-        G = NX.read_edgelist(fh, delimiter=DELIMITER)
+            fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
 
-        print('original size ', len(G.nodes()))
+            G = NX.read_edgelist(fh, delimiter=DELIMITER)
 
-        #  get the largest connected component:
-        if not NX.is_connected(G):
-            G = max(NX.connected_component_subgraphs(G), key=len)
-            print('largest connected component extracted with size ', len(G.nodes()))
+            print('original size ', len(G.nodes()))
 
-        #  remove self loops:
-        if len(list(G.selfloop_edges())) > 0:
-            print('warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
-            print('number of edges before self loop removal: ', G.size())
-            G.remove_edges_from(G.selfloop_edges())
-            print('number of edges before self loop removal: ', G.size())
+            #  get the largest connected component:
+            if not NX.is_connected(G):
+                G = max(NX.connected_component_subgraphs(G), key=len)
+                print('largest connected component extracted with size ', len(G.nodes()))
 
-        network_size = NX.number_of_nodes(G)
+            #  remove self loops:
+            if len(list(G.selfloop_edges())) > 0:
+                print('warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
+                print('number of edges before self loop removal: ', G.size())
+                G.remove_edges_from(G.selfloop_edges())
+                print('number of edges before self loop removal: ', G.size())
 
-        G_list = [G]
-        for included_property in included_properties:
-            original_properties[included_properties.index(included_property)] += \
-                measure_property(G_list, included_property)
-            print(included_property, original_properties[included_properties.index(included_property)][-1])
-        print(network_id_list.index(network_id))
-        print(original_properties)
-        print([this_property[network_id_list.index(network_id)] for this_property in original_properties])
+            network_size = NX.number_of_nodes(G)
 
-        print('we are in data_dump mode')
+            G_list = [G]
+            for included_property in included_properties:
+                original_properties[included_properties.index(included_property)] += \
+                    measure_property(G_list, included_property)
+                print(included_property, original_properties[included_properties.index(included_property)][-1])
+            print(network_id_list.index(network_id))
+            print(original_properties)
+            print([this_property[network_id_list.index(network_id)] for this_property in original_properties])
 
-        dataset = [[network_group, network_id, network_size,
-                    'none', 0.0]
-                   + [this_property[network_id_list.index(network_id)] for this_property in original_properties]]
+            print('we are in data_dump mode')
 
-        new_df = pd.DataFrame(data=dataset, columns=['network_group', 'network_id', 'network_size',
-                                                     'intervention_type',
-                                                     'intervention_size'] + included_properties)
+            dataset = [[network_group, network_id, network_size,
+                        'none', 0.0]
+                       + [this_property[network_id_list.index(network_id)] for this_property in original_properties]]
 
-        print(new_df)
+            new_df = pd.DataFrame(data=dataset, columns=['network_group', 'network_id', 'network_size',
+                                                         'intervention_type',
+                                                         'intervention_size'] + included_properties)
 
-        extended_frame = [df, new_df]  # , df_add_triad, df_rewired, df_original]
+            print(new_df)
 
-        df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(
-            drop=True)
+            extended_frame = [df, new_df]  # , df_add_triad, df_rewired, df_original]
+
+            df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(
+                drop=True)
 
     # interventions
 
@@ -136,38 +142,46 @@ if __name__ == '__main__':
 
             for included_property in included_properties:
 
-                properties_sample_add_random += \
-                    [pickle.load(open(properties_pickled_samples_directory_address + included_property + '_'
-                                      + str(intervention_size) + '_percent_' + 'add_random_'
-                                      + network_group + network_id + '.pkl', 'rb'))]
+                if include_addition_networks:
 
-                properties_sample_add_triad += \
-                    [pickle.load(open(properties_pickled_samples_directory_address + included_property + '_'
-                                      + str(intervention_size) + '_percent_' + 'add_triad_'
-                                      + network_group + network_id + '.pkl', 'rb'))]
+                    properties_sample_add_random += \
+                        [pickle.load(open(properties_pickled_samples_directory_address + included_property + '_'
+                                          + str(intervention_size) + '_percent_' + 'add_random_'
+                                          + network_group + network_id + '.pkl', 'rb'))]
 
-                properties_sample_rewired += \
-                    [pickle.load(open(properties_pickled_samples_directory_address + included_property + '_'
-                                      + str(intervention_size) + '_percent_' + 'rewiring_'
-                                      + network_group + network_id + '.pkl', 'rb'))]
+                    properties_sample_add_triad += \
+                        [pickle.load(open(properties_pickled_samples_directory_address + included_property + '_'
+                                          + str(intervention_size) + '_percent_' + 'add_triad_'
+                                          + network_group + network_id + '.pkl', 'rb'))]
 
-                mean_properties_add_random[included_properties.index(included_property)] \
-                    += [np.mean(properties_sample_add_random[-1])]
+                    mean_properties_add_random[included_properties.index(included_property)] \
+                        += [np.mean(properties_sample_add_random[-1])]
 
-                mean_properties_add_triad[included_properties.index(included_property)] \
-                    += [np.mean(properties_sample_add_triad[-1])]
+                    mean_properties_add_triad[included_properties.index(included_property)] \
+                        += [np.mean(properties_sample_add_triad[-1])]
 
-                mean_properties_rewired[included_properties.index(included_property)] \
-                    += [np.mean(properties_sample_rewired[-1])]
+                    std_properties_add_random[included_properties.index(included_property)] \
+                        += [np.std(properties_sample_add_random[-1])]
 
-                std_properties_add_random[included_properties.index(included_property)] \
-                    += [np.std(properties_sample_add_random[-1])]
+                    std_properties_add_triad[included_properties.index(included_property)] \
+                        += [np.std(properties_sample_add_triad[-1])]
 
-                std_properties_add_triad[included_properties.index(included_property)] \
-                    += [np.std(properties_sample_add_triad[-1])]
+                if include_rewiring_networks:
 
-                std_properties_rewired[included_properties.index(included_property)] \
-                    += [np.std(properties_sample_rewired[-1])]
+                    properties_sample_rewired += \
+                        [pickle.load(open(properties_pickled_samples_directory_address + included_property + '_'
+                                          + str(intervention_size) + '_percent_' + 'rewiring_'
+                                          + network_group + network_id + '.pkl', 'rb'))]
+
+
+
+                    mean_properties_rewired[included_properties.index(included_property)] \
+                        += [np.mean(properties_sample_rewired[-1])]
+
+
+
+                    std_properties_rewired[included_properties.index(included_property)] \
+                        += [np.std(properties_sample_rewired[-1])]
 
                 print('loaded ' + included_property + '_'
                       + str(intervention_size) + '_percent_' + 'interventions_'
@@ -177,18 +191,37 @@ if __name__ == '__main__':
 
             # dumping the loaded data:
 
-            dataset = [[network_group, network_id, network_size,
-                        'random_addition', intervention_size]
-                       + [this_property[network_id_list.index(network_id)]
-                          for this_property in mean_properties_add_random],
-                       [network_group, network_id, network_size,
-                        'triad_addition', intervention_size]
-                       + [this_property[network_id_list.index(network_id)]
-                          for this_property in mean_properties_add_triad],
-                       [network_group, network_id, network_size,
-                        'rewiring', intervention_size]
-                       + [this_property[network_id_list.index(network_id)]
-                          for this_property in mean_properties_rewired]]
+            dataset = []
+
+            if include_addition_networks:
+                dataset += [[network_group, network_id, network_size,
+                            'random_addition', intervention_size]
+                            + [this_property[network_id_list.index(network_id)]
+                               for this_property in mean_properties_add_random],
+                            [network_group, network_id, network_size,
+                            'triad_addition', intervention_size]
+                            + [this_property[network_id_list.index(network_id)]
+                               for this_property in mean_properties_add_triad]]
+
+            if include_rewiring_networks:
+                dataset += [[network_group, network_id, network_size,
+                            'rewiring', intervention_size]
+                            + [this_property[network_id_list.index(network_id)]
+                               for this_property in mean_properties_rewired]]
+
+
+            # dataset = [[network_group, network_id, network_size,
+            #             'random_addition', intervention_size]
+            #            + [this_property[network_id_list.index(network_id)]
+            #               for this_property in mean_properties_add_random],
+            #            [network_group, network_id, network_size,
+            #             'triad_addition', intervention_size]
+            #            + [this_property[network_id_list.index(network_id)]
+            #               for this_property in mean_properties_add_triad],
+            #            [network_group, network_id, network_size,
+            #             'rewiring', intervention_size]
+            #            + [this_property[network_id_list.index(network_id)]
+            #               for this_property in mean_properties_rewired]]
 
             new_df = pd.DataFrame(data=dataset, columns=['network_group', 'network_id', 'network_size',
                                                          'intervention_type',
