@@ -152,7 +152,7 @@ elif model_id == '_model_4':
     alpha = 1.0
     gamma = 0.0
 elif model_id == '_model_5':
-    MODEL = '(REL-0.05,1)'
+    MODEL = 'REL(0.05,1)'
     fixed_prob_high = 1.0
     fixed_prob_low = 0.05
     alpha = 1.0
