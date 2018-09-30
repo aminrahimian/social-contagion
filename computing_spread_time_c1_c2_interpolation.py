@@ -6,17 +6,23 @@
 from models import *
 
 
-size_of_dataset = 1000 #20
+size_of_dataset = 1000
 
 network_size = 500
 
-etas = list(np.linspace(0, 100, 50))#list(np.linspace(0, 80, 10))
+etas = list(np.linspace(0, 100, 50))  # list(np.linspace(0, 80, 10))
 
-qs = [1 / network_size ** x for x in [0.74,0.76,0.78]]
+qs_old = [1 / network_size ** x for x in [0.74,0.76,0.78]] # these are previously collected samples
+#  their pkl files already exist
+
+qs = [1 / network_size ** x for x in [0.6, 0.7]]
+
 # [1 / network_size ** x for x in [0.1, 0.35, 0.6, 0.7, 0.8]]
 #[1 / network_size ** x for x in [0.1,0.6,0.8]]#
 
-q_labels = ['00'+str(x) for x in range(len(qs))]
+q_labels_old = ['00'+str(x) for x in range(len(qs_old))]
+
+q_labels = [str(x) for x in range(len(qs))]
 
 eta_labels = [str(x) for x in range(len(etas))]
 
@@ -104,7 +110,7 @@ if __name__ == '__main__':
     if save_computations:
         avg_spread_times = []
         std_spread_times = []
-        for q_label in q_labels:
+        for q_label in q_labels+q_labels_old:
             spread_avg = []
             spread_std = []
             for eta in etas:

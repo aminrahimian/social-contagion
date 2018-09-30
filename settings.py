@@ -171,7 +171,7 @@ else:
 
 # theory simulations settings:
 
-simulation_type = 'c1_c2_interpolation'
+simulation_type = 'c1_c2_interpolation_SimpleOnlyAlongC1'
 #'c1_union_ER'
 # 'c1_c2_interpolation_SimpleOnlyAlongC1'
 
@@ -312,7 +312,7 @@ if do_plots:
 if do_multiprocessing:
     import multiprocessing
     from itertools import product
-    number_CPU = 27
+    number_CPU = 18
 
 
 def combine(list_of_names,output_name):

@@ -3,8 +3,11 @@
 
 from models import *
 
-from computing_spread_time_c1_c2_interpolation import etas, eta_labels, q_labels, qs, size_of_dataset
+from computing_spread_time_c1_c2_interpolation import etas, q_labels, q_labels_old, qs, qs_old, size_of_dataset
 
+all_q_labels = q_labels + q_labels_old
+
+all_qs = qs + qs_old
 
 if __name__ == '__main__':
 
@@ -24,11 +27,11 @@ if __name__ == '__main__':
 
     plt.figure()
 
-    for q_label in q_labels:
+    for q_label in all_q_labels:
 
-        plt.errorbar(etas, avg_spread_times[q_labels.index(q_label)],
-                     yerr=[1.96 * s / np.sqrt(size_of_dataset) for s in std_spread_times[q_labels.index(q_label)]],
-                     linewidth=2.5, label='$q = '+str(Decimal(qs[q_labels.index(q_label)]).quantize(FOURPLACES))+'$')
+        plt.errorbar(etas, avg_spread_times[all_q_labels.index(q_label)],
+                     yerr=[1.96 * s / np.sqrt(size_of_dataset) for s in std_spread_times[all_q_labels.index(q_label)]],
+                     linewidth=2.5, label='$q = '+str(Decimal(all_qs[all_q_labels.index(q_label)]).quantize(FOURPLACES))+'$')
 
     plt.ylabel('time to spread')
     plt.xlabel('edges rewired ($\\eta$)')
