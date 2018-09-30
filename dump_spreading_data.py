@@ -11,6 +11,7 @@ include_original_networks = False
 include_rewiring_networks = False
 include_addition_networks = True
 
+update_existing_dump = True
 
 if __name__ == "__main__":
 
@@ -32,6 +33,9 @@ if __name__ == "__main__":
                                    'intervention_size', 'sample_id', 'time_to_spread', 'model'], dtype='float')
         print('New ' + network_group + 'spreading_data_dump file will be generated.')
         generating_new_dump = True
+
+    if update_existing_dump:
+        assert not generating_new_dump, "we should not be generating a new spreading_data_dump file."
 
     for network_id in network_id_list:
 
