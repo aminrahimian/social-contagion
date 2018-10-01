@@ -11,6 +11,18 @@ import errno
 import networkx as NX
 import re
 
+
+susceptible = 0.0
+infected = 1.0
+
+active = 0.5
+inactive = -0.5
+
+SIMPLE = 0
+COMPLEX = 1
+
+SENTINEL = object()
+
 def atoi(text):
     return int(text) if text.isdigit() else text
 
@@ -201,15 +213,15 @@ except OSError as e:
 
 # general settings:
 
-do_computations = True
-do_multiprocessing = True
-save_computations = True
-load_computations = False
+do_computations = False
+do_multiprocessing = False
+save_computations = False
+load_computations = True
 do_plots = False
 save_plots = False
 show_plots = False
 data_dump = False
-simulator_mode = False
+simulator_mode = True
 
 
 #  check that different modes are set consistently
@@ -238,7 +250,7 @@ assert not (simulator_mode and do_plots), "simulator_mode and do_plots use diffe
                                           "(conflicting) matplotlib settings, and " \
                                           "cannot be both true"
 
-layout = 'spring'  # layout could be circular, spring, this the graph visualization layout
+layout = 'circular'  # layout could be circular, spring, this the graph visualization layout
 
 # import the required packages for different modes:
 
@@ -251,53 +263,93 @@ if simulator_mode:
     matplotlib.use('TkAgg')
     import matplotlib.pyplot as plt
     import pickle
+    import pycxsimulator
+    import pylab as PL
 
-    simulator_ID = 'cai_edgelist_1'
+    simulate_real_networks = False
 
-    root_data_address = './data/cai-data/'
+    highlight_infecting_edges = True
 
-    edgelist_directory_address = root_data_address + 'edgelists/'
+    show_times = False
 
-    pickled_samples_directory_address = root_data_address + 'pickled_samples/'
+    save_snapshots = True
 
-    output_directory_address = root_data_address + 'output/'
+    if simulate_real_networks:
+
+        simulator_ID = 'cai_edgelist_1'
+
+        root_data_address = './data/cai-data/'
+
+        edgelist_directory_address = root_data_address + 'edgelists/'
+
+        fh = open(edgelist_directory_address + simulator_ID + '.txt', 'rb')
+
+        G = NX.read_edgelist(fh)
+
+        print(NX.is_connected(G))
+
+        network_size = NX.number_of_nodes(G)
+
+        initial_seeds = 2
+
+        simulator_params = {
+            'network': G,
+            # 'size': network_size,  # populationSize,
+            'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
+            # two initial seeds, next to each other
+            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            # 'nearest_neighbors': 4,
+            # 'fixed_number_edges_added': 2,
+            'fixed_prob_high': 1.0,
+            'fixed_prob': 0.05,
+            'theta': 2,
+            'alpha': 0.05,
+            'gamma': 0.5,
+        }
+    else:
+        simulator_ID = '60_net'
+
+        initial_seeds = 2
+
+        network_size = 60
+
+        simulator_params = {
+            'size': network_size,  # populationSize,
+            'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
+            # two initial seeds, next to each other
+            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'nearest_neighbors': 4,
+            'fixed_number_edges_added': 2,
+            'fixed_prob_high': 1.0,
+            'fixed_prob': 0,
+            'theta': 2,
+            'alpha': 1,
+            'gamma': 0,
+        }
+
+    root_visualizing_spread_address = './data/visualizing-spread/'
+
+    visualizing_spread_output_address = root_visualizing_spread_address + simulator_ID + '/output/'
+
+    visualizing_spread_pickle_address = root_visualizing_spread_address + simulator_ID + '/pickled_samples/'
+
+    try:
+        os.makedirs(visualizing_spread_output_address)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+    try:
+        os.makedirs(visualizing_spread_pickle_address)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 
     try:
         os.makedirs(output_directory_address)
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
-
-    try:
-        os.makedirs(pickled_samples_directory_address)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-
-    fh = open(edgelist_directory_address + simulator_ID + '.txt', 'rb')
-
-    G = NX.read_edgelist(fh)
-
-    print(NX.is_connected(G))
-
-    network_size = NX.number_of_nodes(G)
-
-    initial_seeds = 2
-
-    simulator_params = {
-        'network': G,
-        # 'size': network_size,  # populationSize,
-        'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
-        # two initial seeds, next to each other
-        'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
-        # 'nearest_neighbors': 4,
-        # 'fixed_number_edges_added': 2,
-        'fixed_prob_high': 1.0,
-        'fixed_prob': 0.05,
-        'theta': 2,
-        'alpha': 0.05,
-        'gamma': 0.5,
-    }
 
 if do_plots:
     import matplotlib.pyplot as plt

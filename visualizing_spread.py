@@ -1,29 +1,20 @@
-# Measures the correct asymptotic rate of the spread for complex contagion in a specific variation of the Watts-Newman
-# small world random graph model. We use the (0,1) threshold model for complex contagion with theta = 2, if two
-# neighbors are infected then the agent gets infected. If less than two neighbors are infected then the agent does not
-# get infected.
+# Network contagion simulator using pycxsimulator.GUI
 
 from models import *
-
-import pylab as PL
-import pycxsimulator
-
-assert settings.simulator_mode, "we should be in simulator mode!"
-
-RD.seed()
 
 
 def init_viz():
     global positions, time, time_networks, labeldict
     time = 0
-    if settings.layout == 'circular':
+    if layout == 'circular':
         positions = NX.circular_layout(time_networks[time], scale=4)
-    elif settings.layout == 'spring':
+    elif layout == 'spring':
         positions = NX.spring_layout(time_networks[time], scale=4)
     # set position to the network
     for t in range(len(time_networks)):
         for name, pos in positions.items():
             time_networks[t].node[name]['position'] = pos
+
 
 def draw():
     global positions, time, time_networks
@@ -31,15 +22,29 @@ def draw():
     PL.cla()
     NX.draw(time_networks[time],
             pos=positions,
-            node_color=[time_networks[time].node[i]['state']+0.75 for i in time_networks[time].nodes()],
+            node_color=[time_networks[time].node[i]['state']*2 for i in time_networks[time].nodes()],
             with_labels=False,
             edge_color='c',
             cmap=PL.cm.YlOrRd,
             vmin=0,
             vmax=1)
+    if highlight_infecting_edges:
+        G = copy.deepcopy(time_networks[time])
+        infected_nodes = [x for x, y in time_networks[time].nodes(data=True) if y['state'] == infected * active]
+        # edges_incident_to_infected_nodes = G.edges(infected_nodes)
+        edges_between_infected_nodes = G.subgraph(infected_nodes).edges()
+        print(infected_nodes)
+        print(edges_between_infected_nodes)
+        NX.draw_networkx_edges(G, positions, edgelist=edges_between_infected_nodes, edge_color='r', width=1)
+
     PL.axis('image')
-    PL.title('t = ' + str(time))
-    PL.savefig('./data/real_net/' + str(time) + '.png')
+
+    if show_times:
+        PL.title('t = ' + str(time))
+
+    if save_snapshots:
+        PL.savefig(visualizing_spread_output_address + str(time) + '.png',bbox_inches='tight')
+
 
 def step_viz():
     global time
@@ -49,24 +54,34 @@ def step_viz():
 
 if __name__ == '__main__':
 
-    if settings.do_computations:
-        dynamics = DeterministicLinear(settings.simulator_params)
-        _, network_time_series = dynamics.time_the_total_spread(get_network_time_series=True, verbose = True)
+    assert simulator_mode, "we should be in simulator mode!"
+
+    if do_computations:
+        dynamics = DeterministicLinear(simulator_params)
+        _, network_time_series, _ = dynamics.time_the_total_spread(get_network_time_series=True, verbose = True)
         print(network_time_series)
 
-    if settings.save_computations:
-        pickle.dump(network_time_series, open(pickled_samples_directory_address
+    if save_computations:
+        pickle.dump(network_time_series, open(visualizing_spread_pickle_address
                                               + 'simulator_network_time_series_'
                                               + simulator_ID
                                               + '.pkl', 'wb'))
 
-    if settings.load_computations:
-        network_time_series = pickle.load(open(pickled_samples_directory_address
-                                              + 'simulator_network_time_series_'
-                                              + simulator_ID
-                                              + '.pkl', 'rb'))
+    if load_computations:
+        network_time_series = pickle.load(open(visualizing_spread_pickle_address
+                                               + 'simulator_network_time_series_'
+                                               + simulator_ID
+                                               + '.pkl', 'rb'))
+
+        # convert the infected=1 state from old versions to infected*active = 0.5 states
+
+        for i in range(len(network_time_series)):
+            for node_i in network_time_series[i].nodes():
+                if network_time_series[i].node[node_i]['state'] == 1:
+                    network_time_series[i].node[node_i]['state'] = infected*active
 
     # visualize time series
+
     global time_networks
     time_networks = network_time_series
 

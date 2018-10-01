@@ -4,16 +4,7 @@ import copy
 
 from scipy.stats import norm
 
-susceptible = 0.0
-infected = 1.0
 
-active = 0.5
-inactive = -0.5
-
-SIMPLE = 0
-COMPLEX = 1
-
-SENTINEL = object()
 
 
 def measure_property(network_intervention_dataset, property='avg_clustering', sample_size=None):
