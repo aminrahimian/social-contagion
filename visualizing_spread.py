@@ -17,7 +17,7 @@ def init_viz():
 
 
 def draw():
-    global positions, time, time_networks
+    global positions, time, time_networks, newly_infected_nodes, previously_infected_nodes
 
     PL.cla()
     NX.draw(time_networks[time],
@@ -31,11 +31,23 @@ def draw():
     if highlight_infecting_edges:
         G = copy.deepcopy(time_networks[time])
         infected_nodes = [x for x, y in time_networks[time].nodes(data=True) if y['state'] == infected * active]
+        if time == 0:
+            newly_infected_nodes = []
+            previously_infected_nodes = infected_nodes
+        else:
+            newly_infected_nodes = list(set(infected_nodes) - set(previously_infected_nodes))
+            previously_infected_nodes = infected_nodes
         # edges_incident_to_infected_nodes = G.edges(infected_nodes)
-        edges_between_infected_nodes = G.subgraph(infected_nodes).edges()
+        infecting_edges = [e for e in time_networks[time].edges if ((e[0] in newly_infected_nodes)
+                                                                    and ((e[1] in previously_infected_nodes)) or
+                                                                    (e[0] in previously_infected_nodes)
+                                                                    and ((e[1] in newly_infected_nodes)))]
+        # edges_between_infected_nodes = G.subgraph(infected_nodes).edges()
         print(infected_nodes)
-        print(edges_between_infected_nodes)
-        NX.draw_networkx_edges(G, positions, edgelist=edges_between_infected_nodes, edge_color='r', width=1)
+        # print(edges_between_infected_nodes)
+        print(infecting_edges)
+        # NX.draw_networkx_nodes(G, positions, nodelist=infected_nodes, node_color='r')
+        NX.draw_networkx_edges(G, positions, edgelist=infecting_edges, edge_color='r', width=1)
 
     PL.axis('image')
 
@@ -44,6 +56,8 @@ def draw():
 
     if save_snapshots:
         PL.savefig(visualizing_spread_output_address + str(time) + '.png',bbox_inches='tight')
+
+
 
 
 def step_viz():
