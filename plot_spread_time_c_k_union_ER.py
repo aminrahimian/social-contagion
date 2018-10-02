@@ -38,9 +38,9 @@ if __name__ == '__main__':
                          linewidth=1.5,
                          label='$k = ' + str(number_of_cycle_neighbors // 2) + '$')
 
-        plt.ylabel('Time to Spread', fontsize=15)
+        plt.ylabel('time to spread (normalized by $\\times n^{-3/4}$)', fontsize=15)
 
-        plt.xlabel('Network Size ($n$)', fontsize=15)
+        plt.xlabel('network size ($n$)', fontsize=15)
         plt.title('{\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
                   '\\vspace{-5pt}  \\begin{center}  with $p_n = (13 - 2k)/n$ \\end{center}', fontsize=15)
         plt.legend()
@@ -60,9 +60,9 @@ if __name__ == '__main__':
                          linewidth=1.5,
                          label='$n = ' + str(network_size) + '$')
 
-        plt.ylabel('Time to Spread', fontsize=15)
+        plt.ylabel('time to spread', fontsize=15)
 
-        plt.xlabel('Number of Cycle Edges ($k$)', fontsize=15)
+        plt.xlabel('order of cycle-power ($k$)', fontsize=15)
         plt.title('{\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
                   '\\vspace{-5pt}  \\begin{center}  with $p_n = (15 - 2k)/n$ \\end{center}', fontsize=15)
         plt.legend()
