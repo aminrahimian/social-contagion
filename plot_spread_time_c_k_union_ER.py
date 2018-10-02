@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
         for network_size in network_sizes:
             network_size_index = network_sizes.index(network_size)
-            plt.errorbar(number_of_cycle_neighbors_list,
+            plt.errorbar([x//2 for x in number_of_cycle_neighbors_list],
                          spread_time_avgs[network_size_index],
                          yerr=[1.96 * s / np.sqrt(size_of_dataset) for s in spread_time_stds[network_size_index]],
                          linewidth=1.5,
