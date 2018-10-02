@@ -77,7 +77,8 @@ if __name__ == '__main__':
 
     assert do_computations, "we should be in do_computations mode!"
 
-    assert simulation_type is 'ck_union_ER_vs_size' or 'ck_union_ER_vs_k', \
+    assert (simulation_type == 'ck_union_ER_vs_size') or \
+           (simulation_type == 'ck_union_ER_vs_k'), \
         "simulation_type not set properly: " + simulation_type
 
     if do_multiprocessing:

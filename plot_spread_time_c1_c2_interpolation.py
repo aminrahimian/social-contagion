@@ -13,8 +13,9 @@ if __name__ == '__main__':
 
     assert do_plots and load_computations, "we should be in load_computations and do_plots mode!"
 
-    assert simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1' \
-           or 'c1_c2_interpolation_SimpleOnlyAlongC1', "we are not in the right simulation_type:" + simulation_type
+    assert (simulation_type == 'c1_c2_interpolation_SimpleOnlyAlongC1') \
+           or (simulation_type =='c1_c2_interpolation_SimpleOnlyAlongC1'), \
+        "we are not in the right simulation_type:" + simulation_type
 
     avg_spread_times = pickle.load(open(theory_simulation_pickle_address
                                         + 'spreading_time_avg_'
@@ -28,6 +29,9 @@ if __name__ == '__main__':
     plt.figure()
 
     for q_label in all_q_labels:
+
+        print(etas)
+        print(avg_spread_times)
 
         plt.errorbar(etas, avg_spread_times[all_q_labels.index(q_label)],
                      yerr=[1.96 * s / np.sqrt(size_of_dataset) for s in std_spread_times[all_q_labels.index(q_label)]],

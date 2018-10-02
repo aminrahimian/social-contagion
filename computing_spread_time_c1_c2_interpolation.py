@@ -94,7 +94,8 @@ if __name__ == '__main__':
 
     assert do_computations, "we should be in do_computations mode!"
 
-    assert simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1' or 'c1_c2_interpolation', \
+    assert (simulation_type == 'c1_c2_interpolation_SimpleOnlyAlongC1') or \
+           (simulation_type == 'c1_c2_interpolation'), \
         "simulation_type not set properly: " + simulation_type
 
     if do_multiprocessing:

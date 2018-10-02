@@ -9,7 +9,8 @@ if __name__ == '__main__':
 
     assert do_plots and load_computations, "we should be in load_computations and do_plots mode!"
 
-    assert simulation_type is 'ck_union_ER_vs_size' or 'ck_union_ER_vs_k', \
+    assert (simulation_type == 'ck_union_ER_vs_size') or \
+           (simulation_type == 'ck_union_ER_vs_k'), \
         "we are not in the right simulation_type:" + simulation_type
 
     spread_time_avgs = pickle.load(open(theory_simulation_pickle_address
