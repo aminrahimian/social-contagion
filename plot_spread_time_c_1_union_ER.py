@@ -1,7 +1,7 @@
 # plotting the computed spread times in computing_spread_time_c_1_union_ER
 
 from settings import *
-from computing_spread_time_c_1_union_ER import models_list,size_of_dataset
+from computing_spread_time_c_1_union_ER import models_list, size_of_dataset, NET_SIZE
 
 
 if __name__ == '__main__':
@@ -41,7 +41,8 @@ if __name__ == '__main__':
     plt.xscale("log")
     plt.ylabel('Time to Spread', fontsize=15)
     plt.xlabel('Probability of Adoptions below Threshold $(q)$', fontsize=15)
-    plt.title('{\centering Complex Contagion over $\mathcal{C}_{1} \\cup \mathcal{G}_{n,2/n},n = 1000$'
+    plt.title('{\centering Complex Contagion over $\mathcal{C}_{1} \\cup \mathcal{G}_{n,2/n},n = '
+              + str(NET_SIZE) + '$'
               '\\vspace{-5pt}  \\begin{center}  with Sub-threshold Adoptions \\end{center}', fontsize=15)
     plt.legend()
     plt.arrow(0.0074, 500, 0, -500, width=0.0001, head_width=0.0006,

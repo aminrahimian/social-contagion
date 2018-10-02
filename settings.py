@@ -183,8 +183,11 @@ else:
 
 # theory simulations settings:
 
-simulation_type = 'ck_union_ER_vs_k'#'ck_union_ER_vs_size' # 'ck_union_ER_vs_k'
-#'c1_c2_interpolation_SimpleOnlyAlongC1'
+simulation_type = 'c1_c2_interpolation_SimpleOnlyAlongC1'
+#'ck_union_ER_vs_k'
+#'ck_union_ER_vs_size'
+#  'ck_union_ER_vs_k'
+#'c1_c2_interpolation'
 #'c1_union_ER'
 # 'c1_c2_interpolation_SimpleOnlyAlongC1'
 
@@ -216,27 +219,27 @@ except OSError as e:
 
 # for computations:
 #
-# do_computations = True
-# do_multiprocessing = True
-# save_computations = True
-# load_computations = False
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = False
-# simulator_mode = False
-
-# for plotting:
-
-do_computations = False
-do_multiprocessing = False
-save_computations = False
-load_computations = True
-do_plots = True
-save_plots = True
+do_computations = True
+do_multiprocessing = True
+save_computations = True
+load_computations = False
+do_plots = False
+save_plots = False
 show_plots = False
 data_dump = False
 simulator_mode = False
+
+# for plotting:
+#
+# do_computations = False
+# do_multiprocessing = False
+# save_computations = False
+# load_computations = True
+# do_plots = True
+# save_plots = True
+# show_plots = False
+# data_dump = False
+# simulator_mode = False
 
 # for data_dump:
 #
@@ -392,7 +395,7 @@ if do_plots:
 if do_multiprocessing:
     import multiprocessing
     from itertools import product
-    number_CPU = 18
+    number_CPU = 37
 
 
 def combine(list_of_names,output_name):

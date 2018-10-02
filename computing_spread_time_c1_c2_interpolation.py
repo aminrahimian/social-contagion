@@ -15,7 +15,10 @@ etas = list(np.linspace(0, 100, 50))  # list(np.linspace(0, 80, 10))
 qs_old = [1 / network_size ** x for x in [0.74,0.76,0.78]] # these are previously collected samples
 #  their pkl files already exist
 
-qs = [1 / network_size ** x for x in [0.6, 0.7]]
+qs = [1 / network_size ** x for x in [0.6, 0.7]]# these are previously collected samples
+#  their pkl files already exist
+
+qs_new = [1 / network_size ** x for x in [0.4, 0.5]]
 
 # [1 / network_size ** x for x in [0.1, 0.35, 0.6, 0.7, 0.8]]
 #[1 / network_size ** x for x in [0.1,0.6,0.8]]#
@@ -23,6 +26,8 @@ qs = [1 / network_size ** x for x in [0.6, 0.7]]
 q_labels_old = ['00'+str(x) for x in range(len(qs_old))]
 
 q_labels = [str(x) for x in range(len(qs))]
+
+q_labels_new = ['000'+str(x) for x in range(len(qs_new))]
 
 eta_labels = [str(x) for x in range(len(etas))]
 
@@ -72,7 +77,8 @@ def compute_spread_time_for_q_eta(q, eta):
     elif simulation_type is 'c1_c2_interpolation':
         dynamics = DeterministicLinear(params)
 
-    spread_time_avg, spread_time_std, _, _, samples = dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
+    spread_time_avg, spread_time_std, _, _, samples = \
+        dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
 
     print('spread_time_avg: ', spread_time_avg)
     print('spread_time_std: ', spread_time_std)
@@ -81,12 +87,12 @@ def compute_spread_time_for_q_eta(q, eta):
         pickle.dump(spread_time_avg, open(theory_simulation_pickle_address
                                           + 'spreading_time_avg'
                                           + '_eta_' + eta_labels[etas.index(eta)] + '_q_'
-                                          + q_labels[qs.index(q)]
+                                          + q_labels_new[qs_new.index(q)]
                                           + '.pkl', 'wb'))
         pickle.dump(spread_time_std, open(theory_simulation_pickle_address
                                           + 'spreading_time_std'
                                           + '_eta_' + eta_labels[etas.index(eta)]
-                                          + '_q_' + q_labels[qs.index(q)]
+                                          + '_q_' + q_labels_new[qs_new.index(q)]
                                           + '.pkl', 'wb'))
 
 
@@ -100,18 +106,18 @@ if __name__ == '__main__':
 
     if do_multiprocessing:
         with multiprocessing.Pool(processes=number_CPU) as pool:
-            pool.starmap(compute_spread_time_for_q_eta, product(qs,etas))
+            pool.starmap(compute_spread_time_for_q_eta, product(qs_new,etas))
             pool.close()
             pool.join()
     else:  # no multi-processing:
-        for q in qs:
+        for q in qs_new:
             for eta in etas:
                 compute_spread_time_for_q_eta(q, eta)
 
     if save_computations:
         avg_spread_times = []
         std_spread_times = []
-        for q_label in q_labels+q_labels_old:
+        for q_label in q_labels+q_labels_old+q_labels_new:
             spread_avg = []
             spread_std = []
             for eta in etas:
