@@ -31,6 +31,14 @@ q_labels_new = ['000'+str(x) for x in range(len(qs_new))]
 
 eta_labels = [str(x) for x in range(len(etas))]
 
+all_q_labels = q_labels_old[::-1] + q_labels[::-1] + q_labels_new[::-1]
+
+# all_q_labels.reverse()
+
+all_qs = qs_old[::-1] + qs[::-1] + qs_new[::-1]
+
+# all_qs.reverse()
+
 supply_the_exponentials = False
 
 if supply_the_exponentials:
@@ -117,7 +125,7 @@ if __name__ == '__main__':
     if save_computations:
         avg_spread_times = []
         std_spread_times = []
-        for q_label in q_labels+q_labels_old+q_labels_new:
+        for q_label in all_q_labels:
             spread_avg = []
             spread_std = []
             for eta in etas:
@@ -153,5 +161,3 @@ if __name__ == '__main__':
                                            + 'spreading_time_std_'
                                            + simulation_type
                                            + '.pkl', 'wb'))
-
-

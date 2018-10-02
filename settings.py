@@ -218,7 +218,6 @@ except OSError as e:
 # commonly used settings:
 
 # for computations:
-#
 do_computations = True
 do_multiprocessing = True
 save_computations = True
@@ -230,7 +229,6 @@ data_dump = False
 simulator_mode = False
 
 # for plotting:
-#
 # do_computations = False
 # do_multiprocessing = False
 # save_computations = False
@@ -242,7 +240,6 @@ simulator_mode = False
 # simulator_mode = False
 
 # for data_dump:
-#
 # do_computations = False
 # do_multiprocessing = False
 # save_computations = False

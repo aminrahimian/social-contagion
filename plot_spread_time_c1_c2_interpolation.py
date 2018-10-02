@@ -3,12 +3,8 @@
 
 from models import *
 
-from computing_spread_time_c1_c2_interpolation import etas, q_labels, q_labels_old, qs, qs_old, size_of_dataset, \
-    network_size, q_labels_new, qs_new
-
-all_q_labels = q_labels_old + q_labels + q_labels_new
-
-all_qs = qs_old[::-1] + qs[::-1] + qs_new[::-1]
+from computing_spread_time_c1_c2_interpolation import etas, all_q_labels, all_qs, size_of_dataset, \
+    network_size
 
 if __name__ == '__main__':
 
