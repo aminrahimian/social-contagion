@@ -20,6 +20,9 @@ qs = [1 / network_size ** x for x in [0.6, 0.7]]# these are previously collected
 
 qs_new = [1 / network_size ** x for x in [0.4, 0.5]]
 
+
+qs_new_new = [1 / network_size ** x for x in [0.25, 0.3]]
+
 # [1 / network_size ** x for x in [0.1, 0.35, 0.6, 0.7, 0.8]]
 #[1 / network_size ** x for x in [0.1,0.6,0.8]]#
 
@@ -29,13 +32,15 @@ q_labels = [str(x) for x in range(len(qs))]
 
 q_labels_new = ['000'+str(x) for x in range(len(qs_new))]
 
+q_labels_new_new = ['0000'+str(x) for x in range(len(qs_new))]
+
 eta_labels = [str(x) for x in range(len(etas))]
 
-all_q_labels = q_labels_old[::-1] + q_labels[::-1] + q_labels_new[::-1]
+all_q_labels = q_labels_old[::-1] + q_labels[::-1] + q_labels_new[::-1]+ q_labels_new_new[::-1]
 
 # all_q_labels.reverse()
 
-all_qs = qs_old[::-1] + qs[::-1] + qs_new[::-1]
+all_qs = qs_old[::-1] + qs[::-1] + qs_new[::-1] + qs_new_new[::-1]
 
 # all_qs.reverse()
 
@@ -114,11 +119,11 @@ if __name__ == '__main__':
 
     if do_multiprocessing:
         with multiprocessing.Pool(processes=number_CPU) as pool:
-            pool.starmap(compute_spread_time_for_q_eta, product(qs_new,etas))
+            pool.starmap(compute_spread_time_for_q_eta, product(qs_new_new, etas))
             pool.close()
             pool.join()
     else:  # no multi-processing:
-        for q in qs_new:
+        for q in qs_new_new:
             for eta in etas:
                 compute_spread_time_for_q_eta(q, eta)
 

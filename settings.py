@@ -184,12 +184,13 @@ else:
 # theory simulations settings:
 
 simulation_type = 'c1_c2_interpolation_SimpleOnlyAlongC1'
-#'ck_union_ER_vs_k'
-#'ck_union_ER_vs_size'
 #  'ck_union_ER_vs_k'
-#'c1_c2_interpolation'
-#'c1_union_ER'
-# 'c1_c2_interpolation_SimpleOnlyAlongC1'
+#  'ck_union_ER_vs_k'
+#  'ck_union_ER_vs_size'
+#  'ck_union_ER_vs_k'
+#  'c1_c2_interpolation'
+#  'c1_union_ER'
+#  'c1_c2_interpolation_SimpleOnlyAlongC1'
 
 root_theory_simulations_address = './data/theory-simulations/'
 
@@ -249,8 +250,6 @@ simulator_mode = False
 # show_plots = False
 # data_dump = True
 # simulator_mode = False
-
-
 
 #  check that different modes are set consistently
 

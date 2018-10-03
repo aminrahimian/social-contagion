@@ -40,7 +40,7 @@ if __name__ == '__main__':
     plt.title('\centering Complex Contagion over $\mathcal{C}_2^{\eta}, n = ' + str(network_size) + '$'
               '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions $(q)$ '
               'and Rewiring $(\eta)$   \\end{center}')
-    plt.legend(loc='lower right', bbox_to_anchor=(1, 0.065),fontsize=11)
+    plt.legend(loc='upper left', fontsize=11)#bbox_to_anchor=(1, 0.065),
     if show_plots:
         plt.show()
     if save_plots:
