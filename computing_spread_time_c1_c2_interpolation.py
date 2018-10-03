@@ -32,7 +32,7 @@ q_labels = [str(x) for x in range(len(qs))]
 
 q_labels_new = ['000'+str(x) for x in range(len(qs_new))]
 
-q_labels_new_new = ['0000'+str(x) for x in range(len(qs_new))]
+q_labels_new_new = ['0000'+str(x) for x in range(len(qs_new_new))]
 
 eta_labels = [str(x) for x in range(len(etas))]
 
@@ -100,12 +100,12 @@ def compute_spread_time_for_q_eta(q, eta):
         pickle.dump(spread_time_avg, open(theory_simulation_pickle_address
                                           + 'spreading_time_avg'
                                           + '_eta_' + eta_labels[etas.index(eta)] + '_q_'
-                                          + q_labels_new[qs_new.index(q)]
+                                          + q_labels_new_new[qs_new_new.index(q)]
                                           + '.pkl', 'wb'))
         pickle.dump(spread_time_std, open(theory_simulation_pickle_address
                                           + 'spreading_time_std'
                                           + '_eta_' + eta_labels[etas.index(eta)]
-                                          + '_q_' + q_labels_new[qs_new.index(q)]
+                                          + '_q_' + q_labels_new_new[qs_new_new.index(q)]
                                           + '.pkl', 'wb'))
 
 
