@@ -39,8 +39,8 @@ if __name__ == '__main__':
              label='$\mathcal{C}_2$ benchmark')
 
     plt.xscale("log")
-    plt.ylabel('Time to Spread', fontsize=15)
-    plt.xlabel('Probability of Adoptions below Threshold $(q)$', fontsize=15)
+    plt.ylabel('time to spread', fontsize=15)
+    plt.xlabel('probability of adoptions below threshold $(q)$', fontsize=15)
     plt.title('{\centering Complex Contagion over $\mathcal{C}_{1} \\cup \mathcal{G}_{n,2/n},n = '
               + str(NET_SIZE) + '$'
               '\\vspace{-5pt}  \\begin{center}  with Sub-threshold Adoptions \\end{center}', fontsize=15)
