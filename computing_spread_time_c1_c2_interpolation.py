@@ -27,7 +27,7 @@ all_qs = qs_old[::-1] + qs[::-1] + qs_new[::-1]+ qs_new_new_old[::-1] + qs_new_n
 q_labels_old = ['00'+str(x) for x in range(len(qs_old))]
 q_labels = [str(x) for x in range(len(qs))]
 q_labels_new = ['000'+str(x) for x in range(len(qs_new))]
-q_labels_new_new_old = ['0000'+str(x) for x in range(len(qs_new_new))]
+q_labels_new_new_old = ['0000'+str(x) for x in range(len(qs_new_new_old))]
 q_labels_new_new = ['00000'+str(x) for x in range(len(qs_new_new))]
 all_q_labels = q_labels_old[::-1] + q_labels[::-1] + q_labels_new[::-1]+ q_labels_new_new_old[::-1] + q_labels_new_new[::-1]
 
@@ -107,15 +107,15 @@ if __name__ == '__main__':
            (simulation_type == 'c1_c2_interpolation'), \
         "simulation_type not set properly: " + simulation_type
 
-    if do_multiprocessing:
-        with multiprocessing.Pool(processes=number_CPU) as pool:
-            pool.starmap(compute_spread_time_for_q_eta, product(qs_new_new, etas))
-            pool.close()
-            pool.join()
-    else:  # no multi-processing:
-        for q in qs_new_new:
-            for eta in etas:
-                compute_spread_time_for_q_eta(q, eta)
+    # if do_multiprocessing:
+    #     with multiprocessing.Pool(processes=number_CPU) as pool:
+    #         pool.starmap(compute_spread_time_for_q_eta, product(qs_new_new, etas))
+    #         pool.close()
+    #         pool.join()
+    # else:  # no multi-processing:
+    #     for q in qs_new_new:
+    #         for eta in etas:
+    #             compute_spread_time_for_q_eta(q, eta)
 
     if save_computations:
         avg_spread_times = []

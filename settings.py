@@ -183,7 +183,7 @@ else:
 
 # theory simulations settings:
 
-simulation_type = 'c1_c2_interpolation_SimpleOnlyAlongC1'
+simulation_type = 'c1_c2_interpolation_SimpleOnlyAlongC1'#
 #  'ck_union_ER_vs_k'
 #  'ck_union_ER_vs_k'
 #  'ck_union_ER_vs_size'
@@ -219,26 +219,26 @@ except OSError as e:
 # commonly used settings:
 
 # for computations:
-do_computations = True
-do_multiprocessing = True
-save_computations = True
-load_computations = False
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = False
-simulator_mode = False
-
-# for plotting:
-# do_computations = False
-# do_multiprocessing = False
-# save_computations = False
-# load_computations = True
-# do_plots = True
-# save_plots = True
+# do_computations = True
+# do_multiprocessing = True
+# save_computations = True
+# load_computations = False
+# do_plots = False
+# save_plots = False
 # show_plots = False
 # data_dump = False
 # simulator_mode = False
+
+# for plotting:
+do_computations = False
+do_multiprocessing = False
+save_computations = False
+load_computations = True
+do_plots = True
+save_plots = True
+show_plots = False
+data_dump = False
+simulator_mode = False
 
 # for data_dump:
 # do_computations = False
