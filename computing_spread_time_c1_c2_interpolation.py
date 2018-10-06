@@ -12,7 +12,6 @@ network_size = 500
 
 etas = list(np.linspace(0, 100, 50))  # list(np.linspace(0, 80, 10))
 
-
 # these are previously collected samples
 #  their pkl files already exist:
 qs_old = [1 / network_size ** x for x in [0.74,0.76,0.78]]
@@ -23,13 +22,12 @@ qs_new_new_old = [1 / network_size ** x for x in [0.25, 0.3]]
 qs_new_new = [1 / network_size ** x for x in [0.2]]
 all_qs = qs_old[::-1] + qs[::-1] + qs_new[::-1]+ qs_new_new_old[::-1] + qs_new_new[::-1]
 
-
 q_labels_old = ['00'+str(x) for x in range(len(qs_old))]
 q_labels = [str(x) for x in range(len(qs))]
 q_labels_new = ['000'+str(x) for x in range(len(qs_new))]
 q_labels_new_new_old = ['0000'+str(x) for x in range(len(qs_new_new_old))]
 q_labels_new_new = ['00000'+str(x) for x in range(len(qs_new_new))]
-all_q_labels = q_labels_old[::-1] + q_labels[::-1] + q_labels_new[::-1]+ q_labels_new_new_old[::-1] + q_labels_new_new[::-1]
+all_q_labels = q_labels_old[::-1] + q_labels[::-1] + q_labels_new[::-1] + q_labels_new_new_old[::-1] + q_labels_new_new[::-1]
 
 
 eta_labels = [str(x) for x in range(len(etas))]

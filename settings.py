@@ -183,9 +183,7 @@ else:
 
 # theory simulations settings:
 
-simulation_type = 'c1_c2_interpolation_SimpleOnlyAlongC1'#
-#  'ck_union_ER_vs_k'
-#  'ck_union_ER_vs_k'
+simulation_type = 'c1_c2_interpolation'
 #  'ck_union_ER_vs_size'
 #  'ck_union_ER_vs_k'
 #  'c1_c2_interpolation'

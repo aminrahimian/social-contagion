@@ -41,9 +41,9 @@ if __name__ == '__main__':
     plt.xscale("log")
     plt.ylabel('time to spread', fontsize=15)
     plt.xlabel('probability of adoptions below threshold $(q)$', fontsize=15)
-    plt.title('{\centering Complex Contagion over $\mathcal{C}_{1} \\cup \mathcal{G}_{n,2/n},n = '
-              + str(NET_SIZE) + '$'
-              '\\vspace{-5pt}  \\begin{center}  with Sub-threshold Adoptions \\end{center}', fontsize=15)
+    # plt.title('\centering Complex Contagion over $\mathcal{C}_{1} \\cup \mathcal{G}_{n,2/n},n = '
+    #           + str(NET_SIZE) + '$'
+    #           '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions \\end{center}', fontsize=18)
     plt.legend()
     plt.arrow(0.0074, 500, 0, -500, width=0.0001, head_width=0.0006,
               head_length=50, capstyle='projecting',

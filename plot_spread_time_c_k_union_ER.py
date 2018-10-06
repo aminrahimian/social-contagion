@@ -41,8 +41,8 @@ if __name__ == '__main__':
         plt.ylabel('time to spread (normalized by $\\times n^{-3/4}$)', fontsize=15)
 
         plt.xlabel('network size ($n$)', fontsize=15)
-        plt.title('{\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
-                  '\\vspace{-5pt}  \\begin{center}  with $p_n = (13 - 2k)/n$ \\end{center}', fontsize=15)
+        # plt.title('\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
+        #           '\\vspace{-10pt}  \\begin{center}  with $p_n = (13 - 2k)/n$ \\end{center}', fontsize=18)
         plt.legend()
 
         if show_plots:
@@ -63,8 +63,8 @@ if __name__ == '__main__':
         plt.ylabel('time to spread', fontsize=15)
 
         plt.xlabel('order of cycle-power ($k$)', fontsize=15)
-        plt.title('{\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
-                  '\\vspace{-5pt}  \\begin{center}  with $p_n = (15 - 2k)/n$ \\end{center}', fontsize=15)
+        # plt.title('\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
+        #           '\\vspace{-10pt}  \\begin{center}  with $p_n = (15 - 2k)/n$ \\end{center}', fontsize=18)
         plt.legend()
 
         if show_plots:
