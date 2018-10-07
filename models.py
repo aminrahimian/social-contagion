@@ -5,8 +5,6 @@ import copy
 from scipy.stats import norm
 
 
-
-
 def measure_property(network_intervention_dataset, property='avg_clustering', sample_size=None):
 
     if sample_size is not None:
@@ -1231,33 +1229,6 @@ class RandomLinear(LinearThreshold):
         all_degrees = self.params['network'].degree()
         self.params['thresholds'] = list(map(lambda x, y: float(x[1]) * y, all_degrees, relative_thresholds))
 
-    # def set_activation_functions(self):
-    #     """
-    #     sets the linear threshold activation functions for each of the nodes
-    #     """
-    #     current_network = copy.deepcopy(self.params['network'])
-    #
-    #     for i in current_network.nodes():  # thresholds are heterogeneous by definition of the linear threshold model
-    #         # they are set random uniform (0,1) ratios.
-    #         if self.params['zero_at_zero']:
-    #             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-    #                                              self.params['fixed_prob_high'] * 1.0 *
-    #                                              (current_network.node[i]['threshold'] <= number_of_infected_neighbors)
-    #                                              + self.params['fixed_prob'] * 1.0 * (
-    #                                                  (current_network.node[i]['threshold'] >
-    #                                                   number_of_infected_neighbors)
-    #                                                  and (number_of_infected_neighbors != 0)) +
-    #                                              0.0 * 1.0 * (number_of_infected_neighbors == 0))
-    #         else: # not zero_at_zero
-    #             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-    #                                              self.params['fixed_prob_high'] * 1.0 *
-    #                                              (current_network.node[i]['threshold'] <= number_of_infected_neighbors)
-    #                                              + self.params['fixed_prob'] * 1.0 * (
-    #                                                      (current_network.node[i]['threshold'] >
-    #                                                       number_of_infected_neighbors)))
-    #
-    #     self.activation_functions_is_set = True
-
 
 class RelativeLinear(LinearThreshold):
     """
@@ -1278,33 +1249,6 @@ class RelativeLinear(LinearThreshold):
         all_degrees = self.params['network'].degree()
         self.params['thresholds'] = list(map(lambda x, y: float(x[1]) * y, all_degrees, relative_thresholds))
 
-    # def set_activation_functions(self):
-    #     """
-    #     sets the relative threshold activation functions for each of the nodes
-    #     """
-    #     current_network = copy.deepcopy(self.params['network'])
-    #
-    #     for i in current_network.nodes():  # thresholds are heterogeneous by definition of the linear threshold model
-    #         # they are set random uniform (0,1) ratios.
-    #         if self.params['zero_at_zero']:
-    #             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-    #                                              self.params['fixed_prob_high'] * 1.0 *
-    #                                              (current_network.node[i]['threshold'] <= number_of_infected_neighbors)
-    #                                              + self.params['fixed_prob'] * 1.0 * (
-    #                                                  (current_network.node[i]['threshold'] >
-    #                                                   number_of_infected_neighbors)
-    #                                                  and (number_of_infected_neighbors != 0)) +
-    #                                              0.0 * 1.0 * (number_of_infected_neighbors == 0))
-    #         else: # not zero_at_zero
-    #             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-    #                                              self.params['fixed_prob_high'] * 1.0 *
-    #                                              (current_network.node[i]['threshold'] <= number_of_infected_neighbors)
-    #                                              + self.params['fixed_prob'] * 1.0 * (
-    #                                                      (current_network.node[i]['threshold'] >
-    #                                                       number_of_infected_neighbors)))
-    #
-    #     self.activation_functions_is_set = True
-
 
 class DeterministicLinear(LinearThreshold):
     """
@@ -1320,33 +1264,6 @@ class DeterministicLinear(LinearThreshold):
         assert 'theta' in self.fixed_params, \
             "Theta should be supplied for DeterministicLinear contagion model."
         self.params['thresholds'] = [self.params['theta']] * self.params['size']
-
-    # def set_activation_functions(self):
-    #     """
-    #     sets the linear threshold activation functions with deterministic thresholds for each of the nodes
-    #     """
-    #     current_network = copy.deepcopy(self.params['network'])
-    #
-    #     for i in current_network.nodes():
-    #         if self.params['zero_at_zero']:
-    #             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-    #                                              self.params['fixed_prob_high'] * 1.0 * (
-    #                                                  current_network.node[i][
-    #                                                      'threshold'] <= number_of_infected_neighbors) +
-    #                                              self.params['fixed_prob'] * 1.0 * (
-    #                                                      (current_network.node[i][
-    #                                                           'threshold'] > number_of_infected_neighbors)
-    #                                                      and (not (number_of_infected_neighbors < 1))) +
-    #                                              0.0 * 1.0 * (number_of_infected_neighbors < 1))
-    #         else:  # not zero at zero
-    #             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-    #                                              self.params['fixed_prob_high'] * 1.0 * (
-    #                                                      current_network.node[i][
-    #                                                          'threshold'] <= number_of_infected_neighbors) +
-    #                                              self.params['fixed_prob'] * 1.0 * ((current_network.node[i][
-    #                                                           'threshold'] > number_of_infected_neighbors)))
-    #
-    #     self.activation_functions_is_set = True
 
 
 class SimpleOnlyAlongC1(contagion_model):
