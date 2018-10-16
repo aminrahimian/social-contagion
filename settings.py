@@ -36,13 +36,14 @@ def natural_keys(text):
 
 
 # real world networks simulation settings:
-network_group = 'chami_advice_edgelist_'#'cai_edgelist_'
-#'banerjee_combined_edgelist_'
-#'cai_edgelist_' #'fb100_edgelist_'
+network_group = 'cai_edgelist_'
+# 'chami_advice_edgelist_'
 # 'banerjee_combined_edgelist_'
-#'chami_friendship_edgelist_'
-#'chami_advice_edgelist_'
-#'cai_edgelist_'
+# 'cai_edgelist_' #'fb100_edgelist_'
+# 'banerjee_combined_edgelist_'
+# 'chami_friendship_edgelist_'
+# 'chami_advice_edgelist_'
+# 'cai_edgelist_'
 
 if network_group == 'cai_edgelist_':
 
@@ -137,7 +138,7 @@ print(network_id_list)
 
 
 #  different models:
-model_id = '_model_4'
+model_id = '_model_1'
 
 if model_id == '_model_1':
     MODEL = '(0.05,1)'
@@ -217,26 +218,26 @@ except OSError as e:
 # commonly used settings:
 
 # for computations:
-# do_computations = True
-# do_multiprocessing = True
-# save_computations = True
-# load_computations = False
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = False
-# simulator_mode = False
-
-# for plotting:
-do_computations = False
-do_multiprocessing = False
-save_computations = False
-load_computations = True
-do_plots = True
-save_plots = True
+do_computations = True
+do_multiprocessing = True
+save_computations = True
+load_computations = False
+do_plots = False
+save_plots = False
 show_plots = False
 data_dump = False
 simulator_mode = False
+#
+# # for plotting:
+# do_computations = False
+# do_multiprocessing = False
+# save_computations = False
+# load_computations = True
+# do_plots = True
+# save_plots = True
+# show_plots = False
+# data_dump = False
+# simulator_mode = False
 
 # for data_dump:
 # do_computations = False

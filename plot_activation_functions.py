@@ -29,13 +29,13 @@ if __name__ == '__main__':
     }
 
     params_probit_5 = {
-        'sigma': 0.5,
+        'sigma': 0.3,
         'theta': 1.5,
         'size': 10,
     }
 
     params_logit_5 = {
-        'sigma': 0.5/1.7,
+        'sigma': 0.3/1.7,
         'theta': 1.5,
         'size': 10,
     }
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     params_sub_threshold_adoption = {
         'theta': 2,
         'size': 10,
-        'fixed_prob': 0.15,
+        'fixed_prob': 0.05,
         'fixed_prob_high': 1.0,
         'zero_at_zer': True,
     }
@@ -136,10 +136,10 @@ if __name__ == '__main__':
     print(degree_range)
 
     plt.plot(degree_range, activation_probabilities_probit, linewidth=3, linestyle='--',
-             label='Probit $(\\sigma = 0.5)$')
+             label='Probit $(\\sigma = 0.3)$')
     plt.scatter(degree_range_int, activation_probabilities_probit_int)
     plt.plot(degree_range, activation_probabilities_logit, linewidth=2,
-             label='Logit $(\\sigma = 0.29)$')
+             label='Logit $(\\sigma = 0.18)$')
     plt.scatter(degree_range_int, activation_probabilities_logit_int)
     plt.plot(degree_range, activation_probabilities_linear, 'r--', linewidth=1.5,
              label='Linear Threshold')
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     plt.ylabel('Adoption Probability', fontsize=20)
     plt.xlabel('Number of Neighboring Adopters', fontsize=20)
     plt.title('Complex Activation Functions', fontsize=20)
-    plt.text(1.5, 0.2, '$q$', fontsize=30,
+    plt.text(1.5, 0.1, '$q$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
     plt.legend()
     plt.show()
@@ -172,7 +172,7 @@ if __name__ == '__main__':
     plt.ylim(ymax=1.3)
     plt.text(2.25, 1.1, '$\\rho$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
-    plt.text(1.25, 0.25, '$q$', fontsize=30,
+    plt.text(1.25, 0.1, '$q$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
     plt.text(2.05, 0.55, '$\\theta$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)

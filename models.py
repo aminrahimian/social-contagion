@@ -85,6 +85,10 @@ def measure_property(network_intervention_dataset, property='avg_clustering', sa
                 property_sample = float('NaN')
             else:
                 property_sample = NX.transitivity(sample_2_core)
+        elif property is 'num_leaves':
+
+            degree_sequence = sorted([d for n, d in network_intervention.degree()], reverse=True)
+            property_sample = degree_sequence.count(int(1))
         else:
             assert False, property + ' property not supported.'
 

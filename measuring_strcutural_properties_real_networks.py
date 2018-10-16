@@ -6,7 +6,7 @@ from models import *
 from multiprocessing import Pool
 
 
-size_of_dataset = 200
+size_of_dataset = 500
 
 intervention_size_list = [5, 10, 15, 20, 25]
 
@@ -15,13 +15,14 @@ old_properties = ['avg_clustering','average_shortest_path_length', 'diameter', '
 new_properties = ['avg_degree','diam_2_core', 'max_degree', 'min_degree',
                   'max_degree_2_core', 'min_degree_2_core',
                   'avg_degree_2_core', 'number_edges', 'number_edges_2_core',
-                  'avg_clustering_2_core', 'transitivity', 'transitivity_2_core']
+                  'avg_clustering_2_core', 'transitivity', 'transitivity_2_core',
+                  'num_leaves']
 
 all_properties = old_properties + new_properties
 
 included_properties = all_properties
 
-generate_network_intervention_dataset = False
+generate_network_intervention_dataset = True
 # determines to whether generate networks (true) or
 # load and use previously generated networks (False)
 

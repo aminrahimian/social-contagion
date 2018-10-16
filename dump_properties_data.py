@@ -12,14 +12,15 @@ old_properties = ['avg_clustering', 'average_shortest_path_length', 'diameter', 
 new_properties = ['avg_degree', 'diam_2_core', 'max_degree', 'min_degree',
                   'max_degree_2_core', 'min_degree_2_core',
                   'avg_degree_2_core', 'number_edges','number_edges_2_core',
-                  'avg_clustering_2_core', 'transitivity', 'transitivity_2_core']
+                  'avg_clustering_2_core', 'transitivity', 'transitivity_2_core',
+                  'num_leaves']
 
 all_properties = old_properties + new_properties
 
 included_properties = all_properties
 
-include_original_networks = False
-include_rewiring_networks = False
+include_original_networks = True
+include_rewiring_networks = True
 include_addition_networks = True
 
 if __name__ == '__main__':
@@ -36,6 +37,8 @@ if __name__ == '__main__':
                                    'intervention_size']+included_properties, dtype='float')
         print('New ' + network_group + 'clustering_data_dump file will be generated.')
         generating_new_dump = True
+
+    assert generating_new_dump, "Need a new data dump!"
 
     if include_original_networks:
 
