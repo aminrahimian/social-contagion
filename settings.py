@@ -230,15 +230,15 @@ except OSError as e:
 # simulator_mode = False
 #
 # for plotting:
-do_computations = False
-do_multiprocessing = False
-save_computations = False
-load_computations = True
-do_plots = True
-save_plots = True
-show_plots = False
-data_dump = False
-simulator_mode = False
+# do_computations = False
+# do_multiprocessing = False
+# save_computations = False
+# load_computations = True
+# do_plots = True
+# save_plots = True
+# show_plots = False
+# data_dump = False
+# simulator_mode = False
 
 # for data_dump:
 # do_computations = False
@@ -250,6 +250,19 @@ simulator_mode = False
 # show_plots = False
 # data_dump = True
 # simulator_mode = False
+
+# for simulator:
+do_computations = True
+do_multiprocessing = False
+save_computations = False
+load_computations = False
+# simulator uses a different mathplotlib setting for plotting
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = False
+simulator_mode = True
+
 
 #  check that different modes are set consistently
 
@@ -334,11 +347,11 @@ if simulator_mode:
             'gamma': 0.5,
         }
     else:
-        simulator_ID = '60_net'
+        simulator_ID = '10_net'
 
         initial_seeds = 2
 
-        network_size = 60
+        network_size = 10
 
         simulator_params = {
             'size': network_size,  # populationSize,
