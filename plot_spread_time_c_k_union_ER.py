@@ -27,18 +27,20 @@ if __name__ == '__main__':
 
     if simulation_type == 'ck_union_ER_vs_size':
 
+        plt.figure(0)
+
         for number_of_cycle_neighbors in number_of_cycle_neighbors_list:
             number_of_cycle_neighbors_index = number_of_cycle_neighbors_list.index(number_of_cycle_neighbors)
             plt.errorbar(network_sizes,
                          (np.asarray(spread_time_avgs[number_of_cycle_neighbors_index]) /
-                          (np.asarray(network_sizes) ** (3 / 4))),
+                          (np.asarray(network_sizes) ** (1 / 2))),
                          yerr=(np.asarray([1.96*s/np.sqrt(size_of_dataset) for s in
                                spread_time_stds[number_of_cycle_neighbors_index]])/
-                               (np.asarray(network_sizes) ** (3 / 4))),
+                               (np.asarray(network_sizes) ** (1 / 2))),
                          linewidth=1.5,
                          label='$k = ' + str(number_of_cycle_neighbors // 2) + '$')
 
-        plt.ylabel('time to spread (normalized by $\\times n^{-3/4}$)', fontsize=15)
+        plt.ylabel('time to spread (normalized by $\\times n^{-1/2}$)', fontsize=15)
 
         plt.xlabel('network size ($n$)', fontsize=15)
         # plt.title('\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
@@ -49,6 +51,32 @@ if __name__ == '__main__':
             plt.show()
         if save_plots:
             plt.savefig(theory_simulation_output_address + simulation_type + '.png')
+
+        plt.figure(1)
+
+        for number_of_cycle_neighbors in number_of_cycle_neighbors_list:
+            number_of_cycle_neighbors_index = number_of_cycle_neighbors_list.index(number_of_cycle_neighbors)
+            plt.plot(np.log(np.asarray(network_sizes)),
+                         np.log((np.asarray(spread_time_avgs[number_of_cycle_neighbors_index]))),
+                         linewidth=1.5,
+                         label='$k = ' + str(number_of_cycle_neighbors // 2) + '$')
+
+        plt.plot(np.log(np.asarray(network_sizes)),
+                 (1/2)*np.log(np.asarray(network_sizes))-1,
+                 linewidth=1.5,
+                 label='$0.5\log(n)$')
+
+        plt.ylabel('log time to spread', fontsize=15)
+
+        plt.xlabel('log network size ($\log(n)$)', fontsize=15)
+        # plt.title('\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
+        #           '\\vspace{-10pt}  \\begin{center}  with $p_n = (13 - 2k)/n$ \\end{center}', fontsize=18)
+        plt.legend()
+
+        if show_plots:
+            plt.show()
+        if save_plots:
+            plt.savefig(theory_simulation_output_address + simulation_type + '_log_log_' + '.png')
 
     elif simulation_type == 'ck_union_ER_vs_k':
 

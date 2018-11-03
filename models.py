@@ -413,12 +413,15 @@ class network_model():
         self.number_of_active_infected_neighbors_is_updated = False
         self.time_since_infection_is_updated = False
         self.time_since_activation_is_updated = False
+        self.list_of_most_recent_switches = []
+        self.list_of_most_recent_switches_is_updated = False
 
         if 'initial_states' in self.fixed_params:
             for i in range(NX.number_of_nodes(self.params['network'])):
                 if self.params['initial_states'][i] not in [susceptible, infected*active, infected*inactive]:
                     self.params['initial_states'][i] = infected*active
                     print('warning: states put to 0.5 for infected*active')
+
 
         elif 'initial_states' not in self.fixed_params:
             if 'initialization_mode' not in self.fixed_params:
@@ -462,17 +465,20 @@ class network_model():
         self.time_since_activation_is_updated = True
 
         count_nodes = 0
+
         for i in self.params['network'].nodes():
             self.params['network'].node[i]['state'] = self.params['initial_states'][count_nodes]
             if self.params['network'].node[i]['state'] == infected * active:
                 for j in self.params['network'].neighbors(i):
                     self.params['network'].node[j]['number_of_active_infected_neighbors'] += 1
+                self.list_of_most_recent_switches.append(i)
             count_nodes += 1
 
         self.number_of_active_infected_neighbors_is_updated = True
+        self.list_of_most_recent_switches_is_updated = True
 
         assert self.number_of_active_infected_neighbors_is_updated and self.time_since_infection_is_updated and \
-               self.time_since_activation_is_updated, \
+               self.time_since_activation_is_updated and self.list_of_most_recent_switches_is_updated, \
             'error: number_of_infected_neighbors or time_since_infection mishandle'
 
     def maslov_sneppen_rewiring(self, num_steps = SENTINEL, return_connected = True):
@@ -714,7 +720,7 @@ class contagion_model(network_model):
                 print('time is', time)
                 print('total_number_of_infected is', total_number_of_infected)
                 print('total size is', self.params['size'])
-            if time > self.params['size']**10:
+            if time > self.params['size']*10:
                 time = float('Inf')
                 print('It is taking too long (10x size) to spread totally.')
                 break
@@ -817,6 +823,10 @@ class contagion_model(network_model):
         self.time_since_infection_is_updated = False
         self.time_since_activation_is_updated = False
         self.step()
+        print(self.params['network'].edges())
+        print('number_of_active_infected_neighbors_is_updated:', self.number_of_active_infected_neighbors_is_updated)
+        print('time_since_infection_is_updated', self.time_since_infection_is_updated)
+        print('self.time_since_activation_is_updated', self.time_since_activation_is_updated)
         assert self.number_of_active_infected_neighbors_is_updated and self.time_since_infection_is_updated \
                and self.time_since_activation_is_updated, \
             'error: number_of_infected_neighbors or time_since_infection mishandle'
@@ -830,6 +840,10 @@ class activation(contagion_model):
     """
     Allows for the probability of infection to be set dependent on the number of infected neighbors, according to
     an activation function. Two main methods implemented here are set_activation_probabilities(self) and step(self)
+    step is the most important method implemented in activation(contagion_model). It is used by all models that inherit
+    activation There models that implement their own step functions (not inheriting activation) are
+    SimpleOnlyAlongOriginalEdges(contagion_model), SimpleOnlyAlongC1(contagion_model),
+    IndependentCascade(contagion_model)
     """
     def __init__(self, params,
                  externally_set_activation_functions=SENTINEL,
@@ -899,14 +913,38 @@ class activation(contagion_model):
 
     def step(self):
 
+        assert self.list_of_most_recent_switches_is_updated, \
+            "list_of_most_recent_switches is mishandled"
+
         self.set_activation_probabilities()
 
         assert self.activation_probabilities_is_set, 'activation_probabilities not set'
 
         current_network = copy.deepcopy(self.params['network'])
-        count_node = 0
 
-        for i in current_network.nodes():
+
+        list_of_potential_switches = []
+        # count_node = 0
+        for recent_switch in self.list_of_most_recent_switches:
+            list_of_potential_switches = list(set(list_of_potential_switches)
+                                              .union(set(list(current_network.neighbors(recent_switch)))))
+
+        print('list_of_most_recent_switches', self.list_of_most_recent_switches)
+
+        print('list_of_potential_switches', list_of_potential_switches)
+
+        self.list_of_most_recent_switches = []
+
+        if not list_of_potential_switches: # the spreading process terminates
+            print('warning the spreading stopped')
+            self.time_since_infection_is_updated = True
+            self.time_since_activation_is_updated = True
+            self.number_of_active_infected_neighbors_is_updated = True
+
+        node_list = list(self.params['network'])
+        for i in list_of_potential_switches:
+            node_i_index = node_list.index(i)
+            self.list_of_most_recent_switches_is_updated = False
             # current_network.node[i]['state'] can either be susceptible (0)
             # or active infected (0.5) or inactive infected (-0.5)
 
@@ -919,11 +957,13 @@ class activation(contagion_model):
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
-                if RD.random() < self.activation_probabilities[count_node]:
+                if RD.random() < self.activation_probabilities[node_i_index]:
                     self.params['network'].node[i]['state'] = infected*active
+                    self.list_of_most_recent_switches.append(i)
                     for k in self.params['network'].neighbors(i):
                         self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                 self.number_of_active_infected_neighbors_is_updated = True
+                self.list_of_most_recent_switches_is_updated = True
 
             # in all the below cases the node is in infected active or infected inactive state.
 
@@ -934,6 +974,10 @@ class activation(contagion_model):
                     "error: node states are mishandled"
                 #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
                 self.params['network'].node[i]['state'] = susceptible
+
+                self.list_of_most_recent_switches.append(i)
+                self.list_of_most_recent_switches_is_updated = True
+
                 if current_network.node[i]['state'] == infected*active:
                     for k in self.params['network'].neighbors(i):
                         assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
@@ -950,6 +994,8 @@ class activation(contagion_model):
 
             elif current_network.node[i]['state'] == infected*active and RD.random() < self.params['gamma']:
                 self.params['network'].node[i]['state'] = infected*inactive
+                self.list_of_most_recent_switches.append(i)
+                self.list_of_most_recent_switches_is_updated = True
                 for k in self.params['network'].neighbors(i):
                     assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                         'error: number_of_active_infected_neighbors is mishandled'
@@ -965,6 +1011,8 @@ class activation(contagion_model):
 
             elif current_network.node[i]['state'] == infected*inactive and RD.random() < self.params['alpha']:
                 self.params['network'].node[i]['state'] = infected*active
+                self.list_of_most_recent_switches.append(i)
+                self.list_of_most_recent_switches_is_updated = True
                 for k in self.params['network'].neighbors(i):
                     self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                 self.number_of_active_infected_neighbors_is_updated = True
@@ -983,8 +1031,9 @@ class activation(contagion_model):
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
+                self.list_of_most_recent_switches_is_updated = True
 
-            count_node += 1
+            # count_node += 1
 
     def get_activation_probabilities(self,degree_range=range(10),node = SENTINEL):
         if self.missing_params_not_set:
@@ -1157,7 +1206,7 @@ class Logit(activation):
         else:  # heterogeneous thresholds
             if self.params['zero_at_zer0']:
                 for i in current_network.nodes():
-                    self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i :
+                    self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                      ((1/(1 + np.exp((1 / self.params['sigma']) *
                                                             (current_network.node[node_index]['threshold'] -
                                                              number_of_infected_neighbors)))) *
@@ -1165,7 +1214,7 @@ class Logit(activation):
                                                      0.0 * 1.0 * (number_of_infected_neighbors == 0))
             else:  # not zero at zero
                 for i in current_network.nodes():
-                    self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i :
+                    self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                      (1/(1 + np.exp((1 / self.params['sigma']) *
                                                             (current_network.node[node_index]['threshold'] -
                                                              number_of_infected_neighbors)))) * 1.0)

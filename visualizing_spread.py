@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     if do_computations:
         dynamics = DeterministicLinear(simulator_params)
-        _, network_time_series, _ = dynamics.time_the_total_spread(get_network_time_series=True, verbose = True)
+        _, network_time_series, _ = dynamics.time_the_total_spread(get_time_series=True, verbose=True)
         print(network_time_series)
 
     if save_computations:
