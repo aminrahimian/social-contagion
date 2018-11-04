@@ -111,7 +111,7 @@ def random_factor_pair(value):
 
 
 def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
-    """Returns a Newman–Watts–Strogatz small-world graph. With a fixed (not random) number of edges
+    """Returns a Newman–Watts–Strogatz small-world graph. With a fixed - p - (not random) number of edges
     added to each node. Modified newman_watts_strogatzr_graph() in NetworkX.
     """
     if seed is not None:
@@ -122,8 +122,8 @@ def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
 
     all_nodes = G.nodes()
     for u in all_nodes:
-        count = 0
-        while count < p:
+        count_added_edges = 0  # track number of edges added to node u
+        while count_added_edges < p:
 
             w = np.random.choice(all_nodes)
 
@@ -135,7 +135,7 @@ def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
                 if G.degree(u) >= n-1:
                     break # skip this rewiring
             G.add_edge(u, w)
-            count += 1
+            count_added_edges += 1
     return G
 
 
@@ -293,8 +293,9 @@ class network_model():
                     self.params['nearest_neighbors'] = 3
                 if 'rewiring_probability' not in self.fixed_params:
                     self.params['rewiring_probability'] = 0.000000005
-                self.params['network'] = NX.connected_watts_strogatz_graph(self.params['size'], self.params['nearest_neighbors'],
-                                                                 self.params['rewiring_probability'])
+                self.params['network'] = NX.connected_watts_strogatz_graph(self.params['size'],
+                                                                           self.params['nearest_neighbors'],
+                                                                           self.params['rewiring_probability'])
             elif self.params['network_model'] == 'grid':
                 if 'number_grid_rows' not in self.fixed_params:
                     if 'number_grid_columns' not in self.fixed_params:
@@ -404,6 +405,10 @@ class network_model():
 
             self.params['network'] = fattened_network
 
+        self.node_list = list(self.params['network'])  # used for indexing nodes in cases where
+        # node attributes are available in a list. A typical application is as follows: self.node_list.index(i)
+        # for i in self.params['network'].nodes():
+
     def init_network_states(self):
         """
         initializes the node states (infected/susceptible) and other node attributes such as number of infected neighbors
@@ -421,7 +426,6 @@ class network_model():
                 if self.params['initial_states'][i] not in [susceptible, infected*active, infected*inactive]:
                     self.params['initial_states'][i] = infected*active
                     print('warning: states put to 0.5 for infected*active')
-
 
         elif 'initial_states' not in self.fixed_params:
             if 'initialization_mode' not in self.fixed_params:
@@ -453,26 +457,21 @@ class network_model():
             else:
                 assert False, "undefined initialization_mode"
 
-        count_nodes = 0
         for i in self.params['network'].nodes():
             self.params['network'].node[i]['number_of_active_infected_neighbors'] = 0
             self.params['network'].node[i]['time_since_infection'] = 0
             self.params['network'].node[i]['time_since_activation'] = 0
-            self.params['network'].node[i]['threshold'] = self.params['thresholds'][count_nodes]
-            count_nodes += 1
+            self.params['network'].node[i]['threshold'] = self.params['thresholds'][self.node_list.index(i)]
 
         self.time_since_infection_is_updated = True
         self.time_since_activation_is_updated = True
 
-        count_nodes = 0
-
         for i in self.params['network'].nodes():
-            self.params['network'].node[i]['state'] = self.params['initial_states'][count_nodes]
+            self.params['network'].node[i]['state'] = self.params['initial_states'][self.node_list.index(i)]
             if self.params['network'].node[i]['state'] == infected * active:
                 for j in self.params['network'].neighbors(i):
                     self.params['network'].node[j]['number_of_active_infected_neighbors'] += 1
                 self.list_of_most_recent_switches.append(i)
-            count_nodes += 1
 
         self.number_of_active_infected_neighbors_is_updated = True
         self.list_of_most_recent_switches_is_updated = True
@@ -645,7 +644,7 @@ class network_model():
             else:
                 self.params['size'] = 100  # np.random.randint(50, 500)
         if 'network_model' not in self.fixed_params:
-            self.params['network_model'] = RD.choice(['erdos_renyi','watts_strogatz','grid','random_regular'])
+            self.params['network_model'] = RD.choice(['erdos_renyi', 'watts_strogatz', 'grid', 'random_regular'])
 
         if 'thresholds' not in self.params:
             assert not hasattr(self, 'isLinearThresholdModel'), \
@@ -824,9 +823,7 @@ class contagion_model(network_model):
         self.time_since_activation_is_updated = False
         self.step()
         print(self.params['network'].edges())
-        print('number_of_active_infected_neighbors_is_updated:', self.number_of_active_infected_neighbors_is_updated)
-        print('time_since_infection_is_updated', self.time_since_infection_is_updated)
-        print('self.time_since_activation_is_updated', self.time_since_activation_is_updated)
+        print(self.params['network_model'])
         assert self.number_of_active_infected_neighbors_is_updated and self.time_since_infection_is_updated \
                and self.time_since_activation_is_updated, \
             'error: number_of_infected_neighbors or time_since_infection mishandle'
@@ -904,11 +901,10 @@ class activation(contagion_model):
         assert self.activation_functions_is_set, 'activation_fucntions are not set'
 
         current_network = copy.deepcopy(self.params['network'])
-        count_nodes = 0
         for i in current_network.nodes():
-            self.activation_probabilities[count_nodes] = \
-                self.activation_functions[count_nodes](current_network.node[i]['number_of_active_infected_neighbors'])
-            count_nodes += 1
+            self.activation_probabilities[self.node_list.index(i)] = \
+                self.activation_functions[self.node_list.index(i)](
+                    current_network.node[i]['number_of_active_infected_neighbors'])
         self.activation_probabilities_is_set = True
 
     def step(self):
@@ -922,16 +918,11 @@ class activation(contagion_model):
 
         current_network = copy.deepcopy(self.params['network'])
 
-
         list_of_potential_switches = []
-        # count_node = 0
+
         for recent_switch in self.list_of_most_recent_switches:
             list_of_potential_switches = list(set(list_of_potential_switches)
                                               .union(set(list(current_network.neighbors(recent_switch)))))
-
-        print('list_of_most_recent_switches', self.list_of_most_recent_switches)
-
-        print('list_of_potential_switches', list_of_potential_switches)
 
         self.list_of_most_recent_switches = []
 
@@ -941,9 +932,8 @@ class activation(contagion_model):
             self.time_since_activation_is_updated = True
             self.number_of_active_infected_neighbors_is_updated = True
 
-        node_list = list(self.params['network'])
         for i in list_of_potential_switches:
-            node_i_index = node_list.index(i)
+            node_i_index = self.node_list.index(i)
             self.list_of_most_recent_switches_is_updated = False
             # current_network.node[i]['state'] can either be susceptible (0)
             # or active infected (0.5) or inactive infected (-0.5)
@@ -1032,8 +1022,6 @@ class activation(contagion_model):
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
                 self.list_of_most_recent_switches_is_updated = True
-
-            # count_node += 1
 
     def get_activation_probabilities(self,degree_range=range(10),node = SENTINEL):
         if self.missing_params_not_set:
