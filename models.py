@@ -293,8 +293,9 @@ class network_model():
                     self.params['nearest_neighbors'] = 3
                 if 'rewiring_probability' not in self.fixed_params:
                     self.params['rewiring_probability'] = 0.000000005
-                self.params['network'] = NX.connected_watts_strogatz_graph(self.params['size'], self.params['nearest_neighbors'],
-                                                                 self.params['rewiring_probability'])
+                self.params['network'] = NX.connected_watts_strogatz_graph(self.params['size'],
+                                                                           self.params['nearest_neighbors'],
+                                                                           self.params['rewiring_probability'])
             elif self.params['network_model'] == 'grid':
                 if 'number_grid_rows' not in self.fixed_params:
                     if 'number_grid_columns' not in self.fixed_params:
@@ -426,7 +427,6 @@ class network_model():
                     self.params['initial_states'][i] = infected*active
                     print('warning: states put to 0.5 for infected*active')
 
-
         elif 'initial_states' not in self.fixed_params:
             if 'initialization_mode' not in self.fixed_params:
                 self.params['initialization_mode'] = 'fixed_probability_initial_infection'
@@ -467,9 +467,6 @@ class network_model():
         self.time_since_activation_is_updated = True
 
         for i in self.params['network'].nodes():
-            print(i)
-            print(self.params['initial_states'])
-            print(self.params['initial_states'][self.node_list.index(i)])
             self.params['network'].node[i]['state'] = self.params['initial_states'][self.node_list.index(i)]
             if self.params['network'].node[i]['state'] == infected * active:
                 for j in self.params['network'].neighbors(i):
@@ -647,7 +644,7 @@ class network_model():
             else:
                 self.params['size'] = 100  # np.random.randint(50, 500)
         if 'network_model' not in self.fixed_params:
-            self.params['network_model'] = RD.choice(['erdos_renyi','watts_strogatz','grid','random_regular'])
+            self.params['network_model'] = RD.choice(['erdos_renyi', 'watts_strogatz', 'grid', 'random_regular'])
 
         if 'thresholds' not in self.params:
             assert not hasattr(self, 'isLinearThresholdModel'), \
@@ -826,9 +823,7 @@ class contagion_model(network_model):
         self.time_since_activation_is_updated = False
         self.step()
         print(self.params['network'].edges())
-        print('number_of_active_infected_neighbors_is_updated:', self.number_of_active_infected_neighbors_is_updated)
-        print('time_since_infection_is_updated', self.time_since_infection_is_updated)
-        print('self.time_since_activation_is_updated', self.time_since_activation_is_updated)
+        print(self.params['network_model'])
         assert self.number_of_active_infected_neighbors_is_updated and self.time_since_infection_is_updated \
                and self.time_since_activation_is_updated, \
             'error: number_of_infected_neighbors or time_since_infection mishandle'
@@ -928,10 +923,6 @@ class activation(contagion_model):
         for recent_switch in self.list_of_most_recent_switches:
             list_of_potential_switches = list(set(list_of_potential_switches)
                                               .union(set(list(current_network.neighbors(recent_switch)))))
-
-        print('list_of_most_recent_switches', self.list_of_most_recent_switches)
-
-        print('list_of_potential_switches', list_of_potential_switches)
 
         self.list_of_most_recent_switches = []
 

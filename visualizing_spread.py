@@ -58,8 +58,6 @@ def draw():
         PL.savefig(visualizing_spread_output_address + str(time) + '.png',bbox_inches='tight')
 
 
-
-
 def step_viz():
     global time
     if time < len(time_networks) - 1:

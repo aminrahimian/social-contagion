@@ -347,15 +347,16 @@ if simulator_mode:
             'gamma': 0.5,
         }
     else:
-        simulator_ID = '10_net'
+        simulator_ID = '10000_net'
 
         initial_seeds = 2
 
-        network_size = 10
+        network_size = 10000
 
         simulator_params = {
             'size': network_size,  # populationSize,
             'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
+            'network_model': 'newman_watts_fixed_number',
             # two initial seeds, next to each other
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 4,
