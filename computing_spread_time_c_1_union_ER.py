@@ -31,7 +31,7 @@ def compute_spread_time(model,alpha):
             'size': NET_SIZE,  # populationSize,
             'initial_states': [infected*active] + [infected*active] + [susceptible] * (NET_SIZE - 2),
             # two initial seeds, next to each other
-            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'delta': 0.0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 2,
             'theta': 1.5,
             'c': 2,
@@ -48,7 +48,7 @@ def compute_spread_time(model,alpha):
             'size': NET_SIZE,  # populationSize,
             'initial_states': [infected*active] + [infected*active] + [susceptible] * (NET_SIZE - 2),
             # two initial seeds, next to each other
-            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'delta': 0.0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 2,
             'theta': 1.5,
             'c': 2,
@@ -65,7 +65,7 @@ def compute_spread_time(model,alpha):
             'size': NET_SIZE,  # populationSize,
             'initial_states': [infected*active] + [infected*active] + [susceptible] * (NET_SIZE - 2),
             # two initial seeds, next to each other
-            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'delta': 0.0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 2,
             'fixed_prob_high': 1.0,
             'fixed_prob': 1 / NET_SIZE ** alpha,

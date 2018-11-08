@@ -146,30 +146,35 @@ if model_id == '_model_1':
     fixed_prob_low = 0.05
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
 elif model_id == '_model_2':
     MODEL = '(0.025,0.5)'
     fixed_prob_high = 0.5
     fixed_prob_low = 0.025
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
 elif model_id == '_model_3':
     MODEL = '(0.05,1(0.05,0.5))'
     fixed_prob_high = 1.0
     fixed_prob_low = 0.05
     alpha = 0.05
     gamma = 0.5
+    delta = 0.0
 elif model_id == '_model_4':
     MODEL = '(ORG-0.05,1)'
     fixed_prob_high = 1.0
     fixed_prob_low = 0.05
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
 elif model_id == '_model_5':
     MODEL = 'REL(0.05,1)'
     fixed_prob_high = 1.0
     fixed_prob_low = 0.05
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
     zeta = 0.5  # the relative threshold
 elif model_id == '_model_6':
     MODEL = '(0.001,1)'
@@ -177,6 +182,7 @@ elif model_id == '_model_6':
     fixed_prob_low = 0.001
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
 else:
     print('model_id is not valid')
     exit()

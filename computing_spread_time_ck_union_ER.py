@@ -41,7 +41,7 @@ def compute_spread_time_for_c_k(expected_degree, number_of_cycle_neighbors, netw
         'size': network_size,  # populationSize,
         'initial_states': [infected*active]*number_of_initial_infected_nodes +
                           [susceptible] * (network_size - number_of_initial_infected_nodes),
-        'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+        'delta': 0.0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
         'nearest_neighbors': number_of_cycle_neighbors,
         'fixed_prob_high': 1.0,
         'fixed_prob': 0.0,

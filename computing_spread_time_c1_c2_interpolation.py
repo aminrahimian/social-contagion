@@ -47,7 +47,7 @@ def compute_spread_time_for_q_eta(q, eta):
             'network_model': 'c_1_c_2_interpolation',
             'size': network_size,
             'initial_states': [infected*active] + [infected*active] + [susceptible] * (network_size - 2),  # two initial seeds, next to each other
-            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'delta': 0.0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'fixed_prob_high': 1.0,
             'fixed_prob': q,
             'theta': 2,
@@ -63,7 +63,7 @@ def compute_spread_time_for_q_eta(q, eta):
             'size': network_size,
             'initial_states': [infected * active] + [infected * active] + [susceptible] * (network_size - 2),
             # two initial seeds, next to each other
-            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'delta': 0.0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'fixed_prob_high': 1.0,
             'fixed_prob': q,
             'theta': 2,
