@@ -22,7 +22,7 @@ def draw():
     PL.cla()
     NX.draw(time_networks[time],
             pos=positions,
-            node_color=[time_networks[time].node[i]['state']*2 for i in time_networks[time].nodes()],
+            node_color=[time_networks[time].node[i]['state']*2  for i in time_networks[time].nodes()],
             with_labels=False,
             edge_color='c',
             cmap=PL.cm.YlOrRd,

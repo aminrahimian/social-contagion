@@ -183,6 +183,13 @@ elif model_id == '_model_6':
     alpha = 1.0
     gamma = 0.0
     delta = 0.0
+elif model_id == '_model_7':
+    MODEL = '(0,1)'
+    fixed_prob_high = 1.0
+    fixed_prob_low = 0.0
+    alpha = 1.0
+    gamma = 0.0
+    delta = 0.0
 else:
     print('model_id is not valid')
     exit()
@@ -312,7 +319,7 @@ if simulator_mode:
     import pycxsimulator
     import pylab as PL
 
-    simulate_real_networks = False
+    simulate_real_networks = True
 
     highlight_infecting_edges = True
 
@@ -346,29 +353,29 @@ if simulator_mode:
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             # 'nearest_neighbors': 4,
             # 'fixed_number_edges_added': 2,
-            'fixed_prob_high': 1.0,
-            'fixed_prob': 0.0,
+            'fixed_prob_high': 1,
+            'fixed_prob': 0.05,
             'theta': 2,
             'alpha': 1.0,
             'gamma': 0.0,
         }
     else:
-        simulator_ID = '5000_net_pure_complex'
+        simulator_ID = '1000_test'
 
         initial_seeds = 2
 
-        network_size = 5000
+        network_size = 1000
 
         simulator_params = {
             'size': network_size,  # populationSize,
             'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
             'network_model': 'newman_watts_fixed_number',
             # two initial seeds, next to each other
-            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'delta': 0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 4,
             'fixed_number_edges_added': 2,
-            'fixed_prob_high': 1.0,
-            'fixed_prob': 0.0,
+            'fixed_prob_high': 0.02,
+            'fixed_prob': 0.01,
             'theta': 2,
             'alpha': 1,
             'gamma': 0,
