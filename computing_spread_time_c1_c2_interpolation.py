@@ -78,7 +78,7 @@ def compute_spread_time_for_q_eta(q, eta):
     elif simulation_type is 'c1_c2_interpolation':
         dynamics = DeterministicLinear(params)
 
-    spread_time_avg, spread_time_std, _, _, samples = \
+    spread_time_avg, spread_time_std, _, _, samples, _, _, _, _, _ = \
         dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
 
     print('spread_time_avg: ', spread_time_avg)

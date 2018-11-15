@@ -79,8 +79,8 @@ def compute_spread_time(model,alpha):
     else:
         assert False, "model is not supported for C_1 union random graph simulations"
 
-    spread_time_avg, spread_time_std, _, _, _ = dynamics.avg_speed_of_spread(dataset_size=size_of_dataset,
-                                                                             mode='total')
+    spread_time_avg, spread_time_std, _, _, _, _, _, _, _, _ = \
+        dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
 
     adoption_probabilities = dynamics.get_activation_probabilities()
 

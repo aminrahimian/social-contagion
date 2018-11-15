@@ -36,7 +36,8 @@ def natural_keys(text):
 
 
 # real world networks simulation settings:
-network_group = 'cai_edgelist_'
+network_group = 'fb100_edgelist_'
+# 'cai_edgelist_'
 # 'chami_advice_edgelist_'
 # 'banerjee_combined_edgelist_'
 # 'cai_edgelist_' #'fb100_edgelist_'
@@ -138,7 +139,7 @@ print(network_id_list)
 
 
 #  different models:
-model_id = '_model_1'
+model_id = '_model_7'
 
 if model_id == '_model_1':
     MODEL = '(0.05,1)'
@@ -232,15 +233,15 @@ except OSError as e:
 # commonly used settings:
 
 # for computations:
-# do_computations = True
-# do_multiprocessing = True
-# save_computations = True
-# load_computations = False
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = False
-# simulator_mode = False
+do_computations = True
+do_multiprocessing = False
+save_computations = True
+load_computations = False
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = False
+simulator_mode = False
 #
 # for plotting:
 # do_computations = False
@@ -264,17 +265,17 @@ except OSError as e:
 # data_dump = True
 # simulator_mode = False
 
-# for simulator:
-do_computations = True
-do_multiprocessing = False
-save_computations = False
-load_computations = False
-# simulator uses a different mathplotlib setting for plotting
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = False
-simulator_mode = True
+# # for simulator:
+# do_computations = True
+# do_multiprocessing = False
+# save_computations = False
+# load_computations = False
+# # simulator uses a different mathplotlib setting for plotting
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = False
+# simulator_mode = True
 
 
 #  check that different modes are set consistently
@@ -303,7 +304,9 @@ assert not (simulator_mode and do_plots), "simulator_mode and do_plots use diffe
                                           "(conflicting) matplotlib settings, and " \
                                           "cannot be both true"
 
-layout = 'circular'  # layout could be circular, spring, this the graph visualization layout
+layout = 'spring'
+# 'circular'
+# layout could be circular, spring, this the graph visualization layout
 
 # import the required packages for different modes:
 
@@ -354,7 +357,7 @@ if simulator_mode:
             # 'nearest_neighbors': 4,
             # 'fixed_number_edges_added': 2,
             'fixed_prob_high': 1,
-            'fixed_prob': 0.05,
+            'fixed_prob': 0.0,
             'theta': 2,
             'alpha': 1.0,
             'gamma': 0.0,

@@ -3,8 +3,9 @@
 from models import *
 from multiprocessing import Pool
 
+VERBOSE = True
 
-size_of_dataset = 500
+size_of_dataset = 2
 
 rewiring_percentage_list = [5, 10, 15, 20, 25]
 
@@ -64,24 +65,34 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
         elif model_id == '_model_5':
             params_original['relative_threshold'] = zeta
             dynamics_original = RelativeLinear(params_original)
-        elif model_id in ['_model_1', '_model_2', '_model_3', '_model_6']:
+        elif model_id in ['_model_1', '_model_2', '_model_3', '_model_6', '_model_7']:
             dynamics_original = DeterministicLinear(params_original)
         else:
             print('model_id is not valid')
             exit()
-        speed_original, std_original, _, _, speed_samples_original = \
+        speed_original, std_original, _, _, speed_samples_original, \
+            infection_size_original, infection_size_std_original, _, _, infection_size_samples_original = \
             dynamics_original.avg_speed_of_spread(
                 dataset_size=size_of_dataset,
                 cap=CAP,
                 mode='max')
-        print(speed_original, std_original)
-        print(speed_samples_original)
-        print(type(speed_original))
+        if VERBOSE:
+            print('mean time to spread:', speed_original, std_original)
+            print('mean infection_size:', infection_size_original, infection_size_std_original)
+            print('spread time samples:', speed_samples_original)
+            print('infection size samples:', infection_size_samples_original)
+
         if save_computations:
+
             pickle.dump(speed_samples_original, open(spreading_pickled_samples_directory_address
                                                      + 'speed_samples_original_'
                                                      + network_group + network_id
                                                      + model_id + '.pkl', 'wb'))
+
+            pickle.dump(infection_size_samples_original, open(spreading_pickled_samples_directory_address
+                                                              + 'infection_size_original_'
+                                                              + network_group + network_id
+                                                              + model_id + '.pkl', 'wb'))
     else:  # rewiring
 
         print('network id', network_id, 'rewiring: ', rewiring_percentage)
@@ -109,22 +120,32 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
         elif model_id == '_model_5':
             params_rewired['relative_threshold'] = zeta
             dynamics_rewired = RelativeLinear(params_rewired)
-        elif model_id in ['_model_1', '_model_2', '_model_3', '_model_6']:
+        elif model_id in ['_model_1', '_model_2', '_model_3', '_model_6', '_model_7']:
             dynamics_rewired = DeterministicLinear(params_rewired)
         else:
             print('model_id is not valid')
             exit()
 
-        speed_rewired, std_rewired, _, _, speed_samples_rewired = \
+        speed_rewired, std_rewired, _, _, speed_samples_rewired, \
+            infection_size_rewired, infection_size_std_rewired, _, _, infection_size_samples_rewired = \
             dynamics_rewired.avg_speed_of_spread(dataset_size=size_of_dataset,
                                                  cap=CAP,
                                                  mode='max')
-        print(speed_rewired, std_rewired)
-        print(speed_samples_rewired)
-        print(NX.is_connected(G))
+
+        if VERBOSE:
+            print('mean spreading time in the rewired network:', speed_rewired, std_rewired)
+            print('spreading time samples in the rewired network:', speed_samples_rewired)
+            print('mean infection size in the rewired network:', infection_size_rewired, std_rewired)
+            print('infection size samples in the rewired network:', infection_size_samples_rewired)
+
         if save_computations:
             pickle.dump(speed_samples_rewired,
                         open(spreading_pickled_samples_directory_address + 'speed_samples_'
+                             + str(rewiring_percentage) +
+                             '_percent_rewiring_' + network_group + network_id
+                             + model_id + '.pkl', 'wb'))
+            pickle.dump(infection_size_samples_rewired,
+                        open(spreading_pickled_samples_directory_address + 'infection_size_samples_'
                              + str(rewiring_percentage) +
                              '_percent_rewiring_' + network_group + network_id
                              + model_id + '.pkl', 'wb'))
@@ -173,25 +194,37 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
     elif model_id == '_model_5':
         params_add_triad['relative_threshold'] = zeta
         dynamics_add_triad = RelativeLinear(params_add_triad)
-    elif model_id in ['_model_1', '_model_2', '_model_3','_model_6']:
+    elif model_id in ['_model_1', '_model_2', '_model_3', '_model_6', '_model_7']:
         dynamics_add_triad = DeterministicLinear(params_add_triad)
     else:
         print('model_id is not valid')
         exit()
 
-    speed_add_triad, std_add_triad, _, _, speed_samples_add_triad = \
+    speed_add_triad, std_add_triad, _, _, speed_samples_add_triad, \
+        infection_size_add_triad, infection_size_std_add_triad, _, _, infection_size_samples_add_triad = \
         dynamics_add_triad.avg_speed_of_spread(
             dataset_size=size_of_dataset,
             cap=CAP,
             mode='max')
-    print(speed_add_triad, std_add_triad)
-    print(speed_samples_add_triad)
-    print(NX.is_connected(G))
+
+    if VERBOSE:
+
+        print('mean spread time in triad addition network:', speed_add_triad, std_add_triad)
+        print('spread time samples in triad addition network:', speed_samples_add_triad)
+        print('mean infection size in triad addition network:', infection_size_add_triad, infection_size_std_add_triad)
+        print('infection size samples in triad addition network:', infection_size_samples_add_triad)
+        print(NX.is_connected(G))
+
     if save_computations:
         pickle.dump(speed_samples_add_triad, open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                   + str(percent_more_edges) + '_percent_' + 'add_triad_'
                                                   + network_group + network_id
                                                   + model_id + '.pkl', 'wb'))
+        pickle.dump(infection_size_samples_add_triad, open(spreading_pickled_samples_directory_address
+                                                           + 'infection_size_samples_'
+                                                           + str(percent_more_edges) + '_percent_' + 'add_triad_'
+                                                           + network_group + network_id
+                                                           + model_id + '.pkl', 'wb'))
     return
 
 
@@ -212,6 +245,7 @@ def measure_random_addition_spread_time(network_id, percent_more_edges):
         print('number of edges before self loop removal: ', G.size())
         G.remove_edges_from(G.selfloop_edges())
         print('number of edges before self loop removal: ', G.size())
+
     network_size = NX.number_of_nodes(G)
 
     params_add_random = {
@@ -237,22 +271,33 @@ def measure_random_addition_spread_time(network_id, percent_more_edges):
     elif model_id == '_model_5':
         params_add_random['relative_threshold'] = zeta
         dynamics_add_random = RelativeLinear(params_add_random)
-    elif model_id in ['_model_1', '_model_2', '_model_3','_model_6']:
+    elif model_id in ['_model_1', '_model_2', '_model_3','_model_6', '_model_7']:
         dynamics_add_random = DeterministicLinear(params_add_random)
     else:
         print('model_id is not valid')
         exit()
 
-    speed_add_random, std_add_random, _, _, speed_samples_add_random = \
+    speed_add_random, std_add_random, _, _, speed_samples_add_random, \
+        infection_size_add_random, infection_size_std_add_random, _, _, infection_size_samples_add_random = \
         dynamics_add_random.avg_speed_of_spread(
             dataset_size=size_of_dataset,
             cap=CAP,
             mode='max')
-    print(speed_add_random, std_add_random)
-    print(speed_samples_add_random)
+
+    if VERBOSE:
+        print('mean spread time in add random networks: ', speed_add_random, std_add_random)
+        print('spread time samples in add random networks: ', speed_samples_add_random)
+        print('mean infection size in add random networks: ', infection_size_add_random, std_add_random)
+        print('infection size samples in add random networks: ', infection_size_samples_add_random)
+
     if save_computations:
         pickle.dump(speed_samples_add_random,
                     open(spreading_pickled_samples_directory_address + 'speed_samples_'
+                         + str(percent_more_edges) + '_percent_' + 'add_random_'
+                         + network_group + network_id
+                         + model_id + '.pkl', 'wb'))
+        pickle.dump(infection_size_samples_add_random,
+                    open(spreading_pickled_samples_directory_address + 'infection_size_samples_'
                          + str(percent_more_edges) + '_percent_' + 'add_random_'
                          + network_group + network_id
                          + model_id + '.pkl', 'wb'))

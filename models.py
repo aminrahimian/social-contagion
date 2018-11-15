@@ -268,7 +268,7 @@ def add_edges(G, number_of_edges_to_be_added=10, mode='random', seed=None):
         return fat_network
 
 
-class NetworkModel():
+class NetworkModel:
     """
     implement the initializations and parameter set methods
     """
@@ -710,9 +710,12 @@ class NetworkModel():
                 self.params['thresholds'] = [self.params['theta']] * self.params['size']
 
         self.init_network()
+
         self.init_network_states()
 
         self.missing_params_not_set = False
+
+        self.spread_stopped = False
 
 
 class ContagionModel(NetworkModel):
@@ -727,6 +730,11 @@ class ContagionModel(NetworkModel):
         self.number_of_active_infected_neighbors_is_updated = False
         self.time_since_infection_is_updated = False
         self.time_since_activation_is_updated = False
+        self.list_of_susceptible_agents_is_updated = False
+        self.list_of_active_infected_agents_is_updated = False
+        self.list_of_inactive_infected_agents_is_updated = False
+        self.number_of_active_infected_neighbors_is_updated = False
+        self.list_of_most_recent_activations_is_updated = False
 
     def time_the_total_spread(self, cap=0.99,
                               get_time_series=False,
@@ -758,7 +766,7 @@ class ContagionModel(NetworkModel):
             print('time is', time)
             print('total_number_of_infected is', total_number_of_infected)
             print('total size is', self.params['size'])
-        while total_number_of_infected < cap*self.params['size']:
+        while (total_number_of_infected < cap*self.params['size']) and (not self.spread_stopped):
             self.outer_step()
             dummy_network = self.params['network'].copy()
             time += 1
@@ -780,9 +788,9 @@ class ContagionModel(NetworkModel):
                 break
 
         if get_time_series:
-            return time, network_time_series, fractions_time_series
+            return time, total_number_of_infected, network_time_series, fractions_time_series
         else:
-            return time
+            return time, total_number_of_infected
 
     def generate_network_intervention_dataset(self, dataset_size=200):
         interventioned_networks = []
@@ -797,11 +805,12 @@ class ContagionModel(NetworkModel):
         # avg time to spread over the dataset.
         # The time to spread is measured in one of the modes:
         # integral, max, and total.
+
         if mode == 'integral':
             integrals = []
             sum_of_integrals = 0
             for i in range(dataset_size):
-                _, _, infected_fraction_timeseries = self.time_the_total_spread(cap=cap, get_time_series=True)
+                _, _, _, infected_fraction_timeseries = self.time_the_total_spread(cap=cap, get_time_series=True)
                 integral = sum(infected_fraction_timeseries)
                 sum_of_integrals += integral
                 integrals += [integral]
@@ -810,11 +819,16 @@ class ContagionModel(NetworkModel):
             speed_max = np.max(integrals)
             speed_min = np.min(integrals)
             speed_samples = np.asarray(integrals)
+
         elif mode == 'max':
+
             cap_times = []
             sum_of_cap_times = 0
+            infection_sizes = []
+            sum_of_infection_sizes = 0
+
             for i in range(dataset_size):
-                time = self.time_the_total_spread(cap=cap, get_time_series=False)
+                time, infection_size = self.time_the_total_spread(cap=cap, get_time_series=False)
                 cap_time = time
                 if cap_time == float('Inf'):
                     dataset_size += -1
@@ -822,31 +836,53 @@ class ContagionModel(NetworkModel):
                     continue
                 sum_of_cap_times += cap_time
                 cap_times += [cap_time]
+                sum_of_infection_sizes += infection_size
+                infection_sizes += [infection_size]
+
             if dataset_size == 0:
                 avg_speed = float('Inf')
                 speed_std = float('NaN')
                 speed_max = float('Inf')
                 speed_min = float('Inf')
                 speed_samples = np.asarray([float('Inf')])
+
+                avg_infection_size = float('Inf')
+                infection_size_std = float('NaN')
+                infection_size_max = float('Inf')
+                infection_size_min = float('Inf')
+                infection_size_samples = np.asarray([float('Inf')])
+
             else:
                 avg_speed = sum_of_cap_times/dataset_size
-                speed_std = np.ma.std(cap_times)
+                speed_std = np.ma.std(cap_times)  # masked entries are ignored
                 speed_max = np.max(cap_times)
                 speed_min = np.min(cap_times)
                 speed_samples = np.asarray(cap_times)
+
+                avg_infection_size = sum_of_infection_sizes / dataset_size
+                infection_size_std = np.ma.std(infection_sizes)  # masked entries are ignored
+                infection_size_max = np.max(infection_sizes)
+                infection_size_min = np.min(infection_sizes)
+                infection_size_samples = np.asarray(infection_sizes)
+
         elif mode == 'total':
             total_spread_times = []
             sum_of_total_spread_times = 0
+            infection_sizes = []
+            sum_of_infection_sizes = 0
             count = 1
             while count <= dataset_size:
-                total_spread_time = self.time_the_total_spread(cap=0.9999, get_time_series=False)
+                total_spread_time, infection_size = self.time_the_total_spread(cap=0.99999, get_time_series=False)
                 if total_spread_time == float('Inf'):
                     dataset_size += -1
                     total_spread_times += [float('Inf')]
-                    print('The contagion did not spread totally.')
+                    infection_size += [float('Inf')]
+                    print('The contagion hit the time limit.')
                     continue
                 total_spread_times += [total_spread_time]
                 sum_of_total_spread_times += total_spread_time
+                sum_of_infection_sizes += infection_size
+                infection_sizes += [infection_size]
                 count += 1
 
             if dataset_size == 0:
@@ -856,6 +892,12 @@ class ContagionModel(NetworkModel):
                 speed_min = float('Inf')
                 speed_samples = np.asarray([float('Inf')])
 
+                avg_infection_size = float('Inf')
+                infection_size_std = float('NaN')
+                infection_size_max = float('Inf')
+                infection_size_min = float('Inf')
+                infection_size_samples = np.asarray([float('Inf')])
+
             else:
                 avg_speed = sum_of_total_spread_times/dataset_size
                 speed_std = np.std(total_spread_times)
@@ -863,10 +905,17 @@ class ContagionModel(NetworkModel):
                 speed_min = np.min(total_spread_times)
                 speed_samples = np.asarray(total_spread_times)
 
+                avg_infection_size = sum_of_infection_sizes / dataset_size
+                infection_size_std = np.ma.std(infection_sizes)  # masked entries are ignored
+                infection_size_max = np.max(infection_sizes)
+                infection_size_min = np.min(infection_sizes)
+                infection_size_samples = np.asarray(infection_sizes)
+
         else:
             assert False, 'undefined mode for avg_speed_of_spread'
 
-        return avg_speed, speed_std, speed_max, speed_min, speed_samples
+        return avg_speed, speed_std, speed_max, speed_min, speed_samples, \
+            avg_infection_size, infection_size_std, infection_size_max, infection_size_min, infection_size_samples
 
     def outer_step(self):
         assert hasattr(self, 'classification_label'), 'classification_label not set'
@@ -874,15 +923,21 @@ class ContagionModel(NetworkModel):
         self.number_of_active_infected_neighbors_is_updated = False
         self.time_since_infection_is_updated = False
         self.time_since_activation_is_updated = False
+
         self.step()
-        # print(self.params['network'].edges())
-        # print(self.params['network_model'])
-        assert self.number_of_active_infected_neighbors_is_updated and self.time_since_infection_is_updated \
-               and self.time_since_activation_is_updated, \
-            'error: number_of_infected_neighbors or time_since_infection mishandle'
+
+        assert self.time_since_infection_is_updated \
+            and self.time_since_activation_is_updated \
+            and self.number_of_active_infected_neighbors_is_updated \
+            and self.list_of_inactive_infected_agents_is_updated \
+            and self.list_of_active_infected_agents_is_updated \
+            and self.list_of_susceptible_agents_is_updated \
+            and self.list_of_exposed_agents_is_updated \
+            and self.list_of_most_recent_activations_is_updated, \
+            "error states or list mishandled"
 
     def step(self):
-        # implement this is activation class children
+        # implement this in class children
         pass
 
 
@@ -1901,23 +1956,11 @@ class LinearThreshold(Activation):
         list_of_potential_complex_contagion_infections = []
 
         for recent_activation in self.list_of_most_recent_activations:
-            # print('recent_activation',recent_activation)
-            # print('current_network.neighbors(recent_activation)',
-            #       set(list(current_network.neighbors(recent_activation))))
-            # print('list_of_exposed_agents', set(self.list_of_exposed_agents))
-            # print('intersection', set(list(current_network.neighbors(recent_activation))).intersection(
-            #     set(self.list_of_exposed_agents)))
             list_of_potential_complex_contagion_infections = list(
                 set(list_of_potential_complex_contagion_infections).union(
                     set(list(current_network.neighbors(recent_activation))).intersection(
                         set(self.list_of_exposed_agents))))
-        #
-        # print('list_of_exposed_agents', self.list_of_exposed_agents)
-        # print('list_of_most_recent_activations', self.list_of_most_recent_activations)
-        # print('list_of_susceptible_agents', self.list_of_susceptible_agents)
-        # print('list_of_inactive_infected_agents', self.list_of_inactive_infected_agents)
-        # print('list_of_active_infected_agents', self.list_of_active_infected_agents)
-        # print('list_of_potential_complex_contagion_infections', list_of_potential_complex_contagion_infections)
+
         if not list_of_potential_complex_contagion_infections:
             # the spreading process terminates
             print('no potential complex contagion infections')
@@ -1930,6 +1973,8 @@ class LinearThreshold(Activation):
             self.list_of_susceptible_agents_is_updated = True
             self.list_of_exposed_agents_is_updated = True
             self.list_of_most_recent_activations_is_updated = True
+
+            self.spread_stopped = True
 
         else:
 
@@ -2344,10 +2389,12 @@ class IndependentCascade(ContagionModel):
     Implements an independent cascade model. Each infected neighbor has an independent probability beta of passing on her
     infection, as long as her infection has occurred within the past mem = 1 time steps.
     """
-    def __init__(self, params, mem = 1):
+    def __init__(self, params, mem=1):
         super(IndependentCascade, self).__init__(params)
         self.classification_label = SIMPLE
         self.memory = mem
+
+        assert TRACK_TIME_SINCE_VARIABLES, "we need the time_since_variables for the IndependentCascade model"
 
     def step(self):
 
