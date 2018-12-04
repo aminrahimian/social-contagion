@@ -137,9 +137,16 @@ for file in os.listdir(edgelist_directory_address):
 network_id_list.sort(key=natural_keys)
 print(network_id_list)
 
+# check for SLURM Job Array environmental variable:
+if 'SLURM_ARRAY_TASK_ID' in os.environ:
+    print('SLURM_ARRAY_TASK_ID: ' + str(os.environ['SLURM_ARRAY_TASK_ID']))
+    JOB_NET_ID = int(os.environ['SLURM_ARRAY_TASK_ID']) - 1
+    NET_ID = network_id_list[JOB_NET_ID]
+    network_id_list = [NET_ID]
+    print('SLURM_ARRAY_TASK_ID: ' + NET_ID)
 
 #  different models:
-model_id = '_model_7'
+model_id = '_model_1'
 
 if model_id == '_model_1':
     MODEL = '(0.05,1)'
@@ -234,7 +241,7 @@ except OSError as e:
 
 # for computations:
 do_computations = True
-do_multiprocessing = False
+do_multiprocessing = True
 save_computations = True
 load_computations = False
 do_plots = False
@@ -421,7 +428,10 @@ if do_plots:
 if do_multiprocessing:
     import multiprocessing
     from itertools import product
-    number_CPU = 37
+    if 'SLURM_ARRAY_TASK_ID' in os.environ:
+        number_CPU = 3
+    else:
+        number_CPU = 20
 
 
 def combine(list_of_names,output_name):
