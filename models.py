@@ -6,6 +6,8 @@ import copy
 
 from scipy.stats import norm
 
+import gc
+
 
 def measure_property(network_intervention_dataset, property='avg_clustering', sample_size=None):
 
@@ -272,6 +274,7 @@ class NetworkModel:
     """
     implement the initializations and parameter set methods
     """
+
     def __init__(self):
         pass
 
@@ -535,6 +538,12 @@ class NetworkModel:
             self.list_of_most_recent_activations_is_updated, \
             'error: state lists miss handled in the initializations'
 
+        self.updated_list_of_susceptible_agents = []
+        self.updated_list_of_active_infected_agents = []
+        self.updated_list_of_inactive_infected_agents = []
+        self.updated_list_of_exposed_agents = []
+        self.updated_list_of_most_recent_activations = []
+
     def maslov_sneppen_rewiring(self, num_steps = SENTINEL, return_connected = True):
         """
         Rewire the network graph according to the Maslov and
@@ -682,9 +691,9 @@ class NetworkModel:
             self.params['fixed_prob'] = 0.0
         # SI infection rate
         if 'beta' not in self.fixed_params:  # SIS infection rate parameter
-            self.params['beta'] =  RD.choice([0.2,0.3,0.4,0.5])  # 0.1 * np.random.beta(1, 1, None)#0.2 * np.random.beta(1, 1, None)
+            self.params['beta'] =  RD.choice([0.2, 0.3, 0.4, 0.5])  # 0.1 * np.random.beta(1, 1, None)#0.2 * np.random.beta(1, 1, None)
         if 'sigma' not in self.fixed_params:  # logit and probit parameter
-            self.params['sigma'] = RD.choice([0.1, 0.3, 0.5, 0.7,1])
+            self.params['sigma'] = RD.choice([0.1, 0.3, 0.5, 0.7, 1])
         # complex contagion threshold
         if 'theta' not in self.fixed_params:  # complex contagion threshold parameter
             self.params['theta'] = RD.choice([1, 2, 3, 4])  # np.random.randint(1, 4)
@@ -786,7 +795,7 @@ class ContagionModel(NetworkModel):
                 time = float('Inf')
                 print('It is taking too long (10x size) to spread totally.')
                 break
-
+        del dummy_network
         if get_time_series:
             return time, total_number_of_infected, network_time_series, fractions_time_series
         else:
@@ -794,6 +803,7 @@ class ContagionModel(NetworkModel):
 
     def generate_network_intervention_dataset(self, dataset_size=200):
         interventioned_networks = []
+        del interventioned_networks[:]
         for i in range(dataset_size):
             self.missing_params_not_set = True
             self.setRandomParams()
@@ -814,6 +824,7 @@ class ContagionModel(NetworkModel):
                 integral = sum(infected_fraction_timeseries)
                 sum_of_integrals += integral
                 integrals += [integral]
+
             avg_speed = sum_of_integrals/dataset_size
             speed_std = np.std(integrals)
             speed_max = np.max(integrals)
@@ -828,6 +839,7 @@ class ContagionModel(NetworkModel):
             sum_of_infection_sizes = 0
 
             for i in range(dataset_size):
+                print('dataset_counter_index is:', i)
                 time, infection_size = self.time_the_total_spread(cap=cap, get_time_series=False)
                 cap_time = time
                 if cap_time == float('Inf'):
@@ -838,6 +850,8 @@ class ContagionModel(NetworkModel):
                 cap_times += [cap_time]
                 sum_of_infection_sizes += infection_size
                 infection_sizes += [infection_size]
+
+                gc.collect()
 
             if dataset_size == 0:
                 avg_speed = float('Inf')
@@ -864,6 +878,8 @@ class ContagionModel(NetworkModel):
                 infection_size_max = np.max(infection_sizes)
                 infection_size_min = np.min(infection_sizes)
                 infection_size_samples = np.asarray(infection_sizes)
+
+                gc.collect()
 
         elif mode == 'total':
             total_spread_times = []
@@ -926,6 +942,8 @@ class ContagionModel(NetworkModel):
 
         self.step()
 
+        gc.collect()
+
         assert self.time_since_infection_is_updated \
             and self.time_since_activation_is_updated \
             and self.number_of_active_infected_neighbors_is_updated \
@@ -969,8 +987,6 @@ class Activation(ContagionModel):
         self.activation_functions = []
         self.activation_functions_is_set = False
 
-        # print(self.params)
-
         if 'size' not in self.params:
             if 'network' in self.params:
                 self.params['size'] = NX.number_of_nodes(self.params['network'])
@@ -983,6 +999,8 @@ class Activation(ContagionModel):
 
         self.isActivationModel = True
 
+        self.activation_functions = []
+
     def set_activation_functions(self):
         """
         This will be called prior to generating each timeseries if self.isActivationModel
@@ -991,6 +1009,9 @@ class Activation(ContagionModel):
         self.activation_functions[index of the node](number of infected neighbors)
         This function is overwritten by each of the subclasses of Activation() such as probit, logit, etc
         """
+        del self.activation_functions[:]
+        # this is necessary to prevent the list growing bigger with the dataset_size
+
         if self.externally_set_activation_function != SENTINEL:
             assert self.externally_set_classification_label != SENTINEL, 'classification_label not provided'
             for node_counter in range(self.params['size']):
@@ -1010,11 +1031,11 @@ class Activation(ContagionModel):
         """
         assert self.activation_functions_is_set, 'activation_fucntions are not set'
 
-        current_network = copy.deepcopy(self.params['network'])
-        for i in current_network.nodes():
+        for i in self.params['network'].nodes():
             self.activation_probabilities[self.node_list.index(i)] = \
                 self.activation_functions[self.node_list.index(i)](
-                    current_network.node[i]['number_of_active_infected_neighbors'])
+                    self.params['network'].node[i]['number_of_active_infected_neighbors'])
+
         self.activation_probabilities_is_set = True
 
     def step(self):
@@ -1023,11 +1044,16 @@ class Activation(ContagionModel):
 
         current_network = copy.deepcopy(self.params['network'])
 
-        updated_list_of_susceptible_agents = copy.deepcopy(self.list_of_susceptible_agents)
-        updated_list_of_active_infected_agents = copy.deepcopy(self.list_of_active_infected_agents)
-        updated_list_of_inactive_infected_agents = copy.deepcopy(self.list_of_inactive_infected_agents)
-        updated_list_of_exposed_agents = copy.deepcopy(self.list_of_exposed_agents)
-        updated_list_of_most_recent_activations = []
+        assert not self.updated_list_of_susceptible_agents, "updated_list_of_susceptible_agents mis-handled"
+        assert not self.updated_list_of_active_infected_agents, "updated_list_of_active_infected_agents mis-handled"
+        assert not self.updated_list_of_inactive_infected_agents, "updated_list_of_inactive_infected_agents mis-handled"
+        assert not self.updated_list_of_exposed_agents, "updated_list_of_exposed_agents mis-handled"
+        assert not self.updated_list_of_most_recent_activations, "updated_list_of_most_recent_activations mis-handled"
+
+        self.updated_list_of_susceptible_agents += self.list_of_susceptible_agents
+        self.updated_list_of_active_infected_agents += self.list_of_active_infected_agents
+        self.updated_list_of_inactive_infected_agents += self.list_of_inactive_infected_agents
+        self.updated_list_of_exposed_agents += self.list_of_exposed_agents
 
         self.list_of_susceptible_agents_is_updated = False
         self.list_of_active_infected_agents_is_updated = False
@@ -1035,32 +1061,10 @@ class Activation(ContagionModel):
         self.number_of_active_infected_neighbors_is_updated = False
         self.list_of_most_recent_activations_is_updated = False
 
-        # self.slow_loop()
-
-        updated_list_of_susceptible_agents,\
-            updated_list_of_active_infected_agents, \
-            updated_list_of_inactive_infected_agents, \
-            updated_list_of_exposed_agents, \
-            updated_list_of_most_recent_activations = \
-            self.loop_over_exposed_nodes(current_network,
-                                         updated_list_of_susceptible_agents,
-                                         updated_list_of_active_infected_agents,
-                                         updated_list_of_inactive_infected_agents,
-                                         updated_list_of_exposed_agents,
-                                         updated_list_of_most_recent_activations)
+        self.loop_over_exposed_nodes(current_network)
 
         if self.params['delta'] > 0 or self.params['gamma'] > 0:
-            updated_list_of_susceptible_agents, \
-                updated_list_of_active_infected_agents, \
-                updated_list_of_inactive_infected_agents, \
-                updated_list_of_exposed_agents, \
-                updated_list_of_most_recent_activations = \
-                self.loop_over_active_infected_nodes(current_network,
-                                                     updated_list_of_susceptible_agents,
-                                                     updated_list_of_active_infected_agents,
-                                                     updated_list_of_inactive_infected_agents,
-                                                     updated_list_of_exposed_agents,
-                                                     updated_list_of_most_recent_activations)
+            self.loop_over_active_infected_nodes(current_network)
         elif TRACK_TIME_SINCE_VARIABLES:
 
             for i in self.list_of_active_infected_agents:
@@ -1083,17 +1087,7 @@ class Activation(ContagionModel):
 
         if self.params['delta'] > 0 or self.params['alpha'] > 0:
 
-            updated_list_of_susceptible_agents, \
-                updated_list_of_active_infected_agents, \
-                updated_list_of_inactive_infected_agents, \
-                updated_list_of_exposed_agents, \
-                updated_list_of_most_recent_activations = \
-                self.loop_over_inactive_infected_nodes(current_network,
-                                                       updated_list_of_susceptible_agents,
-                                                       updated_list_of_active_infected_agents,
-                                                       updated_list_of_inactive_infected_agents,
-                                                       updated_list_of_exposed_agents,
-                                                       updated_list_of_most_recent_activations)
+            self.loop_over_inactive_infected_nodes(current_network)
 
         elif TRACK_TIME_SINCE_VARIABLES:
 
@@ -1119,23 +1113,34 @@ class Activation(ContagionModel):
                 self.params['network'].node[i]['time_since_infection'] += 1
                 self.params['network'].node[i]['time_since_activation'] = 0
 
-        self.list_of_susceptible_agents = copy.deepcopy(updated_list_of_susceptible_agents)
+        del self.list_of_susceptible_agents[:]
+        del self.list_of_active_infected_agents[:]
+        del self.list_of_inactive_infected_agents[:]
+        del self.list_of_exposed_agents[:]
+        del self.list_of_most_recent_activations[:]
+
+        self.list_of_susceptible_agents += self.updated_list_of_susceptible_agents
         self.list_of_susceptible_agents_is_updated = True
-        self.list_of_active_infected_agents = copy.deepcopy(updated_list_of_active_infected_agents)
+        self.list_of_active_infected_agents += self.updated_list_of_active_infected_agents
         self.list_of_active_infected_agents_is_updated = True
-        self.list_of_inactive_infected_agents = copy.deepcopy(updated_list_of_inactive_infected_agents)
+        self.list_of_inactive_infected_agents += self.updated_list_of_inactive_infected_agents
         self.list_of_inactive_infected_agents_is_updated = True
-        self.list_of_exposed_agents = copy.deepcopy(updated_list_of_exposed_agents)
+        self.list_of_exposed_agents += self.updated_list_of_exposed_agents
         self.list_of_exposed_agents_is_updated = True
-        self.list_of_most_recent_activations = copy.deepcopy(updated_list_of_most_recent_activations)
+        self.list_of_most_recent_activations += self.updated_list_of_most_recent_activations
         self.list_of_most_recent_activations_is_updated = True
 
-    def loop_over_exposed_nodes(self, current_network,
-                                updated_list_of_susceptible_agents,
-                                updated_list_of_active_infected_agents,
-                                updated_list_of_inactive_infected_agents,
-                                updated_list_of_exposed_agents,
-                                updated_list_of_most_recent_activations):
+        del self.updated_list_of_susceptible_agents[:]
+        del self.updated_list_of_active_infected_agents[:]
+        del self.updated_list_of_inactive_infected_agents[:]
+        del self.updated_list_of_exposed_agents[:]
+        del self.updated_list_of_most_recent_activations[:]
+
+        del current_network
+
+        gc.collect()
+
+    def loop_over_exposed_nodes(self, current_network):
 
         assert self.activation_probabilities_is_set, 'activation_probabilities are not set'
 
@@ -1181,28 +1186,28 @@ class Activation(ContagionModel):
                 self.params['network'].node[i]['state'] = infected*active
                 for k in self.params['network'].neighbors(i):
                     self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
-                    if k not in updated_list_of_exposed_agents \
+                    if k not in self.updated_list_of_exposed_agents \
                             and self.params['network'].node[k]['state'] == susceptible:
-                        updated_list_of_exposed_agents.append(k)
+                        self.updated_list_of_exposed_agents.append(k)
                 self.params['network'].node[i]['time_since_infection'] = 0
                 self.params['network'].node[i]['time_since_activation'] = 0
                 self.number_of_active_infected_neighbors_is_updated = True
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
-                assert i in updated_list_of_exposed_agents,\
+                assert i in self.updated_list_of_exposed_agents,\
                     "updated_list_of_exposed_agents is mishandled"
-                updated_list_of_exposed_agents.remove(i)
-                assert i in updated_list_of_susceptible_agents, \
+                self.updated_list_of_exposed_agents.remove(i)
+                assert i in self.updated_list_of_susceptible_agents, \
                     "updated_list_of_susceptible_agents is mishandled"
-                updated_list_of_susceptible_agents.remove(i)
-                assert i not in updated_list_of_active_infected_agents, \
+                self.updated_list_of_susceptible_agents.remove(i)
+                assert i not in self.updated_list_of_active_infected_agents, \
                     "updated_list_of_active_infected_agents is mishandled"
-                updated_list_of_active_infected_agents.append(i)
-                assert i not in updated_list_of_most_recent_activations, \
+                self.updated_list_of_active_infected_agents.append(i)
+                assert i not in self.updated_list_of_most_recent_activations, \
                     "updated_list_of_most_recent_activations is mishandled"
-                updated_list_of_most_recent_activations.append(i)
-                assert i not in updated_list_of_inactive_infected_agents, \
+                self.updated_list_of_most_recent_activations.append(i)
+                assert i not in self.updated_list_of_inactive_infected_agents, \
                     "updated_list_of_inactive_infected_agents is mishandled"
 
                 self.list_of_inactive_infected_agents_is_updated = True
@@ -1232,28 +1237,14 @@ class Activation(ContagionModel):
             and self.list_of_most_recent_activations_is_updated, \
             "error states or list mishandled"
 
-        return updated_list_of_susceptible_agents, \
-            updated_list_of_active_infected_agents,\
-            updated_list_of_inactive_infected_agents,\
-            updated_list_of_exposed_agents, \
-            updated_list_of_most_recent_activations
+        return
 
-    def loop_over_active_infected_nodes(self, current_network,
-                                        updated_list_of_susceptible_agents,
-                                        updated_list_of_active_infected_agents,
-                                        updated_list_of_inactive_infected_agents,
-                                        updated_list_of_exposed_agents,
-                                        updated_list_of_most_recent_activations):
+    def loop_over_active_infected_nodes(self, current_network):
 
         # this loop is necessary only if delta > 0 for transitions back to susceptible or gamma > 0
 
         assert (self.params['delta'] > 0 or self.params['gamma'] > 0), \
             "error:  this loop is not necessary!"
-
-        # print('list_of_exposed_agents inside loop_over_active_infected_nodes',
-        #       self.list_of_exposed_agents)
-        # print('list_of_active_infected_agents inside loop_over_active_infected_nodes',
-        #       self.list_of_active_infected_agents)
 
         for i in self.list_of_active_infected_agents:
 
@@ -1304,18 +1295,18 @@ class Activation(ContagionModel):
 
                 # update the lists:
 
-                assert i not in updated_list_of_most_recent_activations, \
+                assert i not in self.updated_list_of_most_recent_activations, \
                     " updated_list_of_most_recent_activations is mishandled."
-                assert i in updated_list_of_active_infected_agents, \
+                assert i in self.updated_list_of_active_infected_agents, \
                     "updated_list_of_active_infected_agents mishandled"
-                updated_list_of_active_infected_agents.remove(i)
-                assert i not in updated_list_of_susceptible_agents, \
+                self.updated_list_of_active_infected_agents.remove(i)
+                assert i not in self.updated_list_of_susceptible_agents, \
                     "updated_list_of_susceptible_agents mishandled"
-                updated_list_of_susceptible_agents.append(i)
-                assert i not in updated_list_of_exposed_agents, \
+                self.updated_list_of_susceptible_agents.append(i)
+                assert i not in self.updated_list_of_exposed_agents, \
                     "updated_list_of_exposed_agents mishandled"
-                updated_list_of_exposed_agents.append(i)
-                assert i not in updated_list_of_inactive_infected_agents, \
+                self.updated_list_of_exposed_agents.append(i)
+                assert i not in self.updated_list_of_inactive_infected_agents, \
                     " updated_list_of_inactive_infected_agents is mishandled."
                 # an active agent who transitions into susceptible is always considered exposed
 
@@ -1343,17 +1334,17 @@ class Activation(ContagionModel):
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
-                assert i in updated_list_of_active_infected_agents, \
+                assert i in self.updated_list_of_active_infected_agents, \
                     "updated_list_of_active_infected_agents mishandled"
-                updated_list_of_active_infected_agents.remove(i)
-                assert i not in updated_list_of_inactive_infected_agents, \
+                self.updated_list_of_active_infected_agents.remove(i)
+                assert i not in self.updated_list_of_inactive_infected_agents, \
                     "updated_list_of_inactive_infected_agents mishandled"
-                updated_list_of_inactive_infected_agents.append(i)
-                assert i not in updated_list_of_susceptible_agents, \
+                self.updated_list_of_inactive_infected_agents.append(i)
+                assert i not in self.updated_list_of_susceptible_agents, \
                     "updated_list_of_susceptible_agents mishandled"
-                assert i not in updated_list_of_exposed_agents, \
+                assert i not in self.updated_list_of_exposed_agents, \
                     "updated_list_of_exposed_agents mishandled"
-                assert i not in updated_list_of_most_recent_activations, \
+                assert i not in self.updated_list_of_most_recent_activations, \
                     "updated_list_of_most_recent_activations mishandled"
 
                 self.list_of_inactive_infected_agents_is_updated = True
@@ -1385,18 +1376,9 @@ class Activation(ContagionModel):
             and self.list_of_most_recent_activations_is_updated, \
             "error states or list mishandled"
 
-        return updated_list_of_susceptible_agents, \
-            updated_list_of_active_infected_agents,\
-            updated_list_of_inactive_infected_agents, \
-            updated_list_of_exposed_agents, \
-            updated_list_of_most_recent_activations
+        return
 
-    def loop_over_inactive_infected_nodes(self, current_network,
-                                          updated_list_of_susceptible_agents,
-                                          updated_list_of_active_infected_agents,
-                                          updated_list_of_inactive_infected_agents,
-                                          updated_list_of_exposed_agents,
-                                          updated_list_of_most_recent_activations):
+    def loop_over_inactive_infected_nodes(self, current_network):
 
         # this loop is necessary only if delta > 0 for transitions back to susceptible or alpha > 0
 
@@ -1451,19 +1433,19 @@ class Activation(ContagionModel):
 
                 # update the lists:
 
-                assert i in updated_list_of_inactive_infected_agents, \
+                assert i in self.updated_list_of_inactive_infected_agents, \
                     "updated_list_of_active_infected_agents mishandled"
-                updated_list_of_inactive_infected_agents.remove(i)
-                assert i not in updated_list_of_susceptible_agents, \
+                self.updated_list_of_inactive_infected_agents.remove(i)
+                assert i not in self.updated_list_of_susceptible_agents, \
                     "updated_list_of_susceptible_agents mishandled"
-                updated_list_of_susceptible_agents.append(i)
-                assert i not in updated_list_of_active_infected_agents, \
+                self.updated_list_of_susceptible_agents.append(i)
+                assert i not in self.updated_list_of_active_infected_agents, \
                     "updated_list_of_active_infected_agents mishandled"
-                assert i not in updated_list_of_most_recent_activations, \
+                assert i not in self.updated_list_of_most_recent_activations, \
                     "updated_list_of_most_recent_activations mishandled"
-                assert i not in updated_list_of_exposed_agents, \
+                assert i not in self.updated_list_of_exposed_agents, \
                     "updated_list_of_exposed_agents mishandled"
-                updated_list_of_exposed_agents.append(i)
+                self.updated_list_of_exposed_agents.append(i)
                 # an inactive agent who transitions into susceptible is always considered exposed
 
                 self.list_of_inactive_infected_agents_is_updated = True
@@ -1490,18 +1472,18 @@ class Activation(ContagionModel):
 
                 # update the lists:
 
-                assert i in updated_list_of_inactive_infected_agents, \
+                assert i in self.updated_list_of_inactive_infected_agents, \
                     "updated_list_of_inactive_infected_agents mishandled"
-                updated_list_of_inactive_infected_agents.remove(i)
-                assert i not in updated_list_of_susceptible_agents, \
+                self.updated_list_of_inactive_infected_agents.remove(i)
+                assert i not in self.updated_list_of_susceptible_agents, \
                     "updated_list_of_susceptible_agents mishandled"
-                assert i not in updated_list_of_active_infected_agents, \
+                assert i not in self.updated_list_of_active_infected_agents, \
                     "updated_list_of_active_infected_agents mishandled"
-                updated_list_of_active_infected_agents.append(i)
-                assert i not in updated_list_of_most_recent_activations, \
+                self.updated_list_of_active_infected_agents.append(i)
+                assert i not in self.updated_list_of_most_recent_activations, \
                     "updated_list_of_most_recent_activations mishandled"
-                updated_list_of_most_recent_activations.append(i)
-                assert i not in updated_list_of_exposed_agents, \
+                self.updated_list_of_most_recent_activations.append(i)
+                assert i not in self.updated_list_of_exposed_agents, \
                     "updated_list_of_exposed_agents mishandled"
 
                 self.list_of_inactive_infected_agents_is_updated = True
@@ -1534,100 +1516,7 @@ class Activation(ContagionModel):
             and self.list_of_most_recent_activations_is_updated, \
             "error states or list mishandled"
 
-        return updated_list_of_susceptible_agents, \
-            updated_list_of_active_infected_agents, \
-            updated_list_of_inactive_infected_agents, \
-            updated_list_of_exposed_agents, \
-            updated_list_of_most_recent_activations
-
-    # def slow_loop(self):
-    #     # this step implementation is slow computationally since it performs a comprehensive loop over all nodes
-    #     # it is from an old implementation of these codes
-    #
-    #     self.set_activation_probabilities()
-    #
-    #     assert self.activation_probabilities_is_set, 'activation_probabilities not set'
-    #
-    #     current_network = copy.deepcopy(self.params['network'])
-    #     count_node = 0
-    #
-    #     for i in current_network.nodes():
-    #         # current_network.node[i]['state'] can either be susceptible (0)
-    #         # or active infected (0.5) or inactive infected (-0.5)
-    #
-    #         # transition from susceptible to active infected:
-    #
-    #         if current_network.node[i]['state'] == susceptible:
-    #             assert self.params['network'].node[i]['time_since_infection'] == 0 and \
-    #                    self.params['network'].node[i]['time_since_activation'] == 0, 'error: time_since_infection or ' \
-    #                                                                                  'time_since_activation mishandled!'
-    #             self.time_since_infection_is_updated = True
-    #             self.time_since_activation_is_updated = True
-    #
-    #             if RD.random() < self.activation_probabilities[count_node]:
-    #                 self.params['network'].node[i]['state'] = infected * active
-    #                 for k in self.params['network'].neighbors(i):
-    #                     self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
-    #             self.number_of_active_infected_neighbors_is_updated = True
-    #
-    #         # in all the below cases the node is in infected active or infected inactive state.
-    #
-    #         # transition from active or inactive infected to susceptible:
-    #
-    #         elif RD.random() < self.params['delta']:
-    #             assert 2 * abs(current_network.node[i]['state']) == infected, \
-    #                 "error: node states are mishandled"
-    #             #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
-    #             self.params['network'].node[i]['state'] = susceptible
-    #             if current_network.node[i]['state'] == infected * active:
-    #                 for k in self.params['network'].neighbors(i):
-    #                     assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
-    #                         'error: number_of_active_infected_neighbors is mishandled'
-    #                     # here number_of_active_infected_neighbors for neighbor k should be at least one
-    #                     self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
-    #             self.number_of_active_infected_neighbors_is_updated = True
-    #             self.params['network'].node[i]['time_since_infection'] = 0
-    #             self.params['network'].node[i]['time_since_activation'] = 0
-    #             self.time_since_infection_is_updated = True
-    #             self.time_since_activation_is_updated = True
-    #         # transition from active infected to inactive infected:
-    #         elif current_network.node[i]['state'] == infected * active and RD.random() < self.params['gamma']:
-    #             self.params['network'].node[i]['state'] = infected * inactive
-    #             for k in self.params['network'].neighbors(i):
-    #                 assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
-    #                     'error: number_of_active_infected_neighbors is mishandled'
-    #                 # here number_of_active_infected_neighbors for neighbor k should be at least one
-    #                 self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
-    #             self.number_of_active_infected_neighbors_is_updated = True
-    #             self.params['network'].node[i]['time_since_infection'] += 1
-    #             self.params['network'].node[i]['time_since_activation'] = 0
-    #             self.time_since_infection_is_updated = True
-    #             self.time_since_activation_is_updated = True
-    #
-    #         # transition from inactive infected to active infected:
-    #
-    #         elif current_network.node[i]['state'] == infected * inactive and RD.random() < self.params['alpha']:
-    #             self.params['network'].node[i]['state'] = infected * active
-    #             for k in self.params['network'].neighbors(i):
-    #                 self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
-    #             self.number_of_active_infected_neighbors_is_updated = True
-    #             self.params['network'].node[i]['time_since_infection'] += 1
-    #             self.params['network'].node[i]['time_since_activation'] = 0
-    #             self.time_since_infection_is_updated = True
-    #             self.time_since_activation_is_updated = True
-    #
-    #         # else the node state is either active or inactive infected and
-    #         # there are no state transitions, but we still need to update the time_since variables:
-    #
-    #         else:
-    #             self.params['network'].node[i]['time_since_infection'] += 1
-    #             if current_network.node[i]['state'] == infected * active:
-    #                 self.params['network'].node[i]['time_since_activation'] += 1
-    #             self.time_since_infection_is_updated = True
-    #             self.time_since_activation_is_updated = True
-    #             self.number_of_active_infected_neighbors_is_updated = True
-    #
-    #         count_node += 1
+        return
 
     def get_activation_probabilities(self,degree_range=range(10),node = SENTINEL):
         if self.missing_params_not_set:
@@ -1654,9 +1543,11 @@ class SIS(Activation):
         """
         sets the SIS activation functions for each of the nodes
         """
+        del self.activation_functions[:]
+
         self.activation_functions = \
             [lambda number_of_infected_neighbors:1 - (1 - self.params['beta'])**number_of_infected_neighbors]\
-            *self.params['size']
+            * self.params['size']
         self.activation_functions_is_set = True
 
 
@@ -1675,24 +1566,28 @@ class SIS_threshold(Activation):
         """
         sets the SIS_threshold activation functions for each of the nodes
         """
-        current_network = copy.deepcopy(self.params['network'])
+
+        del self.activation_functions[:]
 
         if self.params['zero_at_zero']:
-            for i in current_network.nodes():
+            for i in self.params['network'].nodes():
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-                                                 ((1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0 * (
-                                                     current_network.node[i]['threshold'] < number_of_infected_neighbors)) +
+                                                 ((1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0
+                                                  * (self.params['network'].node[i]['threshold']
+                                                     < number_of_infected_neighbors)) +
                                                  (self.params['fixed_prob']* 1.0 *
-                                                 ((current_network.node[i]['threshold'] >= number_of_infected_neighbors)
+                                                 ((self.params['network'].node[i]['threshold']
+                                                   >= number_of_infected_neighbors)
                                                   and (not (number_of_infected_neighbors < 1)))) +
                                                  0.0 * (number_of_infected_neighbors < 0))
         else:  # not zero at zero
-            for i in current_network.nodes():
+            for i in self.params['network'].nodes():
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-                                                 ((1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0 * (
-                                                     current_network.node[i]['threshold'] < number_of_infected_neighbors)) +
+                                                 ((1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0
+                                                  * (self.params['network'].node[i]['threshold']
+                                                     < number_of_infected_neighbors)) +
                                                  (self.params['fixed_prob'] * 1.0 *
-                                                  (current_network.node[i]['threshold'] >=
+                                                  (self.params['network'].node[i]['threshold'] >=
                                                    number_of_infected_neighbors)))
 
         self.activation_functions_is_set = True
@@ -1711,15 +1606,17 @@ class SIS_threshold_soft(Activation):
         """
         sets the SIS_threshold_soft activation functions for each of the nodes
         """
-        current_network = copy.deepcopy(self.params['network'])
 
-        for i in current_network.nodes():
+        del self.activation_functions[:]
+
+        for i in self.params['network'].nodes():
             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-                                             (1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0 * (
-                                                 current_network.node[i]['threshold'] < number_of_infected_neighbors) +
+                                             (1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0 *
+                                             (self.params['network'].node[i]['threshold']
+                                              < number_of_infected_neighbors) +
                                              (1 - ((1 - (self.params['beta']/self.params['multiplier']))
                                                    ** number_of_infected_neighbors))
-                                             * 1.0 * (current_network.node[i]['threshold'] >=
+                                             * 1.0 * (self.params['network'].node[i]['threshold'] >=
                                                       number_of_infected_neighbors))
             # this is always zero at zero.
         self.activation_functions_is_set = True
@@ -1738,9 +1635,10 @@ class Probit(Activation):
         """
         sets the probit activation functions for each of the nodes
         """
-        current_network = copy.deepcopy(self.params['network'])
 
-        thresholds = NX.get_node_attributes(current_network, 'threshold')
+        del self.activation_functions[:]
+
+        thresholds = NX.get_node_attributes(self.params['network'], 'threshold')
         if len(set(thresholds.values())) == 1:  # all nodes have the same threshold
             probit_function = norm(self.params['theta'], self.params['sigma'])
             if self.params['zero_at_zero']:
@@ -1756,8 +1654,8 @@ class Probit(Activation):
         else:  # heterogeneous thresholds
             if self.params['zero_at_zero']:
 
-                for i in current_network.nodes():
-                    probit_function = norm(current_network.node[i]['threshold'], self.params['sigma'])
+                for i in self.params['network'].nodes():
+                    probit_function = norm(self.params['network'].node[i]['threshold'], self.params['sigma'])
                     if self.params['zero_at_zero']:
                         self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                          (1.0 * (number_of_infected_neighbors > 0)
@@ -1782,9 +1680,10 @@ class Logit(Activation):
         """
         sets the logit activation functions for each of the nodes
         """
-        current_network = copy.deepcopy(self.params['network'])
 
-        thresholds = NX.get_node_attributes(current_network, 'threshold')
+        del self.activation_functions[:]
+
+        thresholds = NX.get_node_attributes(self.params['network'], 'threshold')
         if len(set(thresholds.values())) == 1:  # all nodes have the same threshold
             if self.params['zero_at_zero']:
                 self.activation_functions = \
@@ -1799,18 +1698,18 @@ class Logit(Activation):
                             self.params['theta'] - number_of_infected_neighbors))))* 1.0] * self.params['size']
         else:  # heterogeneous thresholds
             if self.params['zero_at_zero']:
-                for i in current_network.nodes():
+                for i in self.params['network'].nodes():
                     self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                      ((1/(1 + np.exp((1 / self.params['sigma']) *
-                                                            (current_network.node[node_index]['threshold'] -
+                                                            (self.params['network'].node[node_index]['threshold'] -
                                                              number_of_infected_neighbors)))) *
                                                       1.0 * (number_of_infected_neighbors > 0)) +
                                                      0.0 * 1.0 * (number_of_infected_neighbors == 0))
             else:  # not zero at zero
-                for i in current_network.nodes():
+                for i in self.params['network'].nodes():
                     self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                      (1/(1 + np.exp((1 / self.params['sigma']) *
-                                                            (current_network.node[node_index]['threshold'] -
+                                                            (self.params['network'].node[node_index]['threshold'] -
                                                              number_of_infected_neighbors)))) * 1.0)
         self.activation_functions_is_set = True
 
@@ -1831,25 +1730,24 @@ class LinearThreshold(Activation):
         """
         sets the linear threshold activation functions for each of the nodes
         """
-        current_network = copy.deepcopy(self.params['network'])
 
-        for i in current_network.nodes():
+        del self.activation_functions[:]
+
+        for i in self.params['network'].nodes():
             if self.params['zero_at_zero']:
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                  self.params['fixed_prob_high'] * 1.0 * (
-                                                     current_network.node[i][
-                                                         'threshold'] <= number_of_infected_neighbors) +
-                                                 self.params['fixed_prob'] * 1.0 * (
-                                                         (current_network.node[i][
+                                                         self.params['network'].node[i]['threshold']
+                                                         <= number_of_infected_neighbors) +
+                                                 self.params['fixed_prob'] * 1.0 * ((self.params['network'].node[i][
                                                               'threshold'] > number_of_infected_neighbors)
                                                          and (not (number_of_infected_neighbors < 1))) +
                                                  0.0 * 1.0 * (number_of_infected_neighbors < 1))
             else:  # not zero at zero
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-                                                 self.params['fixed_prob_high'] * 1.0 * (
-                                                         current_network.node[i][
+                                                 self.params['fixed_prob_high'] * 1.0 * (self.params['network'].node[i][
                                                              'threshold'] <= number_of_infected_neighbors) +
-                                                 self.params['fixed_prob'] * 1.0 * ((current_network.node[i][
+                                                 self.params['fixed_prob'] * 1.0 * ((self.params['network'].node[i][
                                                               'threshold'] > number_of_infected_neighbors)))
 
         self.activation_functions_is_set = True
@@ -1860,87 +1758,57 @@ class LinearThreshold(Activation):
 
         current_network = copy.deepcopy(self.params['network'])
 
-        updated_list_of_susceptible_agents = copy.deepcopy(self.list_of_susceptible_agents)
-        updated_list_of_active_infected_agents = copy.deepcopy(self.list_of_active_infected_agents)
-        updated_list_of_inactive_infected_agents = copy.deepcopy(self.list_of_inactive_infected_agents)
-        updated_list_of_exposed_agents = copy.deepcopy(self.list_of_exposed_agents)
-        updated_list_of_most_recent_activations = []
+        assert not self.updated_list_of_susceptible_agents, "updated_list_of_susceptible_agents mis-handled"
+        assert not self.updated_list_of_active_infected_agents, "updated_list_of_active_infected_agents mis-handled"
+        assert not self.updated_list_of_inactive_infected_agents, "updated_list_of_inactive_infected_agents mis-handled"
+        assert not self.updated_list_of_exposed_agents, "updated_list_of_exposed_agents mis-handled"
+        assert not self.updated_list_of_most_recent_activations, "updated_list_of_most_recent_activations mis-handled"
+
+        self.updated_list_of_susceptible_agents += self.list_of_susceptible_agents
+        self.updated_list_of_active_infected_agents += self.list_of_active_infected_agents
+        self.updated_list_of_inactive_infected_agents += self.list_of_inactive_infected_agents
+        self.updated_list_of_exposed_agents += self.list_of_exposed_agents
 
         if self.params['fixed_prob'] == 0.0 and self.params['fixed_prob_high'] == 1.0:
             # using the fast update for pure (0,1) complex contagion based on the most recent state switches
-            updated_list_of_susceptible_agents, \
-                updated_list_of_active_infected_agents, \
-                updated_list_of_inactive_infected_agents, \
-                updated_list_of_exposed_agents, \
-                updated_list_of_most_recent_activations =  \
-                self.fast_loop_over_exposed_nodes_for_zero_one_complex_contagion(
-                    current_network,
-                    updated_list_of_susceptible_agents,
-                    updated_list_of_active_infected_agents,
-                    updated_list_of_inactive_infected_agents,
-                    updated_list_of_exposed_agents,
-                    updated_list_of_most_recent_activations)
-            # print('updated_list_of_exposed_agents after fast_loop_over_exposed_nodes_for_zero_one_complex_contagion',
-            #       updated_list_of_exposed_agents)
+            self.fast_loop_over_exposed_nodes_for_zero_one_complex_contagion(current_network)
         else:
-            updated_list_of_susceptible_agents, \
-                updated_list_of_active_infected_agents, \
-                updated_list_of_inactive_infected_agents, \
-                updated_list_of_exposed_agents, \
-                updated_list_of_most_recent_activations = \
-                self.loop_over_exposed_nodes(current_network,
-                                             updated_list_of_susceptible_agents,
-                                             updated_list_of_active_infected_agents,
-                                             updated_list_of_inactive_infected_agents,
-                                             updated_list_of_exposed_agents,
-                                             updated_list_of_most_recent_activations)
-
-        # print('updated_list_of_exposed_agents after fast_loop_over_exposed_nodes_for_zero_one_complex_contagion',
-        #       updated_list_of_exposed_agents)
+            self.loop_over_exposed_nodes(current_network)
 
         if self.params['delta'] > 0 or self.params['gamma'] > 0:
-            updated_list_of_susceptible_agents, \
-                updated_list_of_active_infected_agents, \
-                updated_list_of_inactive_infected_agents, \
-                updated_list_of_exposed_agents, \
-                updated_list_of_most_recent_activations = \
-                self.loop_over_active_infected_nodes(current_network,
-                                                     updated_list_of_susceptible_agents,
-                                                     updated_list_of_active_infected_agents,
-                                                     updated_list_of_inactive_infected_agents,
-                                                     updated_list_of_exposed_agents,
-                                                     updated_list_of_most_recent_activations)
+            self.loop_over_active_infected_nodes(current_network)
 
         if self.params['delta'] > 0 or self.params['alpha'] > 0:
-            updated_list_of_susceptible_agents, \
-                updated_list_of_active_infected_agents, \
-                updated_list_of_inactive_infected_agents, \
-                updated_list_of_exposed_agents, \
-                updated_list_of_most_recent_activations = \
-                self.loop_over_inactive_infected_nodes(current_network,
-                                                       updated_list_of_susceptible_agents,
-                                                       updated_list_of_active_infected_agents,
-                                                       updated_list_of_inactive_infected_agents,
-                                                       updated_list_of_exposed_agents,
-                                                       updated_list_of_most_recent_activations)
+            self.loop_over_inactive_infected_nodes(current_network)
 
-        self.list_of_susceptible_agents = copy.deepcopy(updated_list_of_susceptible_agents)
+        del self.list_of_susceptible_agents[:]
+        del self.list_of_active_infected_agents[:]
+        del self.list_of_inactive_infected_agents[:]
+        del self.list_of_exposed_agents[:]
+        del self.list_of_most_recent_activations[:]
+
+        self.list_of_susceptible_agents += self.updated_list_of_susceptible_agents
         self.list_of_susceptible_agents_is_updated = True
-        self.list_of_active_infected_agents = copy.deepcopy(updated_list_of_active_infected_agents)
+        self.list_of_active_infected_agents += self.updated_list_of_active_infected_agents
         self.list_of_active_infected_agents_is_updated = True
-        self.list_of_inactive_infected_agents = copy.deepcopy(updated_list_of_inactive_infected_agents)
+        self.list_of_inactive_infected_agents += self.updated_list_of_inactive_infected_agents
         self.list_of_inactive_infected_agents_is_updated = True
-        self.list_of_exposed_agents = copy.deepcopy(updated_list_of_exposed_agents)
+        self.list_of_exposed_agents += self.updated_list_of_exposed_agents
         self.list_of_exposed_agents_is_updated = True
-        self.list_of_most_recent_activations = copy.deepcopy(updated_list_of_most_recent_activations)
+        self.list_of_most_recent_activations += self.updated_list_of_most_recent_activations
         self.list_of_most_recent_activations_is_updated = True
 
-    def fast_loop_over_exposed_nodes_for_zero_one_complex_contagion(self, current_network,
-                                                                    updated_list_of_susceptible_agents,
-                                                                    updated_list_of_active_infected_agents,
-                                                                    updated_list_of_inactive_infected_agents,
-                                                                    updated_list_of_exposed_agents,
-                                                                    updated_list_of_most_recent_activations):
+        del self.updated_list_of_susceptible_agents[:]
+        del self.updated_list_of_active_infected_agents[:]
+        del self.updated_list_of_inactive_infected_agents[:]
+        del self.updated_list_of_exposed_agents[:]
+        del self.updated_list_of_most_recent_activations[:]
+
+        del current_network
+
+        gc.collect()
+
+    def fast_loop_over_exposed_nodes_for_zero_one_complex_contagion(self, current_network):
 
         assert self.activation_probabilities_is_set, 'activation_probabilities not set'
 
@@ -1993,19 +1861,12 @@ class LinearThreshold(Activation):
                     "list_of_exposed_agents is mishandled"
                 assert i in self.list_of_susceptible_agents, \
                     "list_of_susceptible_agents is mishandled"
-                # print('list_of_exposed_agents inside fast loop', self.list_of_exposed_agents)
-                # print('list_of_most_recent_activations inside fast loop', self.list_of_most_recent_activations)
-                # print('list_of_inactive_infected_agents inside fast_loop', self.list_of_inactive_infected_agents)
                 assert i not in self.list_of_inactive_infected_agents, \
                     "list_of_inactive_infected_agents is mishandled " + str(i)
                 assert i not in self.list_of_active_infected_agents, \
                     "list_of_active_infected_agents is mishandled"
                 assert i not in self.list_of_most_recent_activations, \
                     "list_of_most_recent_activations is mishandled"
-
-                # perform state transitions:
-
-                # lists and states should be updated after the transitions:
 
                 self.list_of_susceptible_agents_is_updated = False
                 self.list_of_active_infected_agents_is_updated = False
@@ -2027,9 +1888,9 @@ class LinearThreshold(Activation):
                     self.params['network'].node[i]['state'] = infected * active
                     for k in self.params['network'].neighbors(i):
                         self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
-                        if k not in updated_list_of_exposed_agents \
+                        if k not in self.updated_list_of_exposed_agents \
                                 and self.params['network'].node[k]['state'] == susceptible:
-                            updated_list_of_exposed_agents.append(k)
+                            self.updated_list_of_exposed_agents.append(k)
                     self.params['network'].node[i]['time_since_infection'] = 0
                     self.params['network'].node[i]['time_since_activation'] = 0
                     self.number_of_active_infected_neighbors_is_updated = True
@@ -2038,19 +1899,19 @@ class LinearThreshold(Activation):
 
                     # print("node " + str(i) + " is activated!")
 
-                    assert i in updated_list_of_exposed_agents, \
+                    assert i in self.updated_list_of_exposed_agents, \
                         "updated_list_of_exposed_agents is mishandled"
-                    updated_list_of_exposed_agents.remove(i)
-                    assert i in updated_list_of_susceptible_agents, \
+                    self.updated_list_of_exposed_agents.remove(i)
+                    assert i in self.updated_list_of_susceptible_agents, \
                         "updated_list_of_susceptible_agents is mishandled"
-                    updated_list_of_susceptible_agents.remove(i)
-                    assert i not in updated_list_of_active_infected_agents, \
+                    self.updated_list_of_susceptible_agents.remove(i)
+                    assert i not in self.updated_list_of_active_infected_agents, \
                         "updated_list_of_active_infected_agents is mishandled"
-                    updated_list_of_active_infected_agents.append(i)
-                    assert i not in updated_list_of_most_recent_activations, \
+                    self.updated_list_of_active_infected_agents.append(i)
+                    assert i not in self.updated_list_of_most_recent_activations, \
                         "updated_list_of_most_recent_activations is mishandled"
-                    updated_list_of_most_recent_activations.append(i)
-                    assert i not in updated_list_of_inactive_infected_agents, \
+                    self.updated_list_of_most_recent_activations.append(i)
+                    assert i not in self.updated_list_of_inactive_infected_agents, \
                         "updated_list_of_inactive_infected_agents is mishandled"
 
                     self.list_of_inactive_infected_agents_is_updated = True
@@ -2071,15 +1932,6 @@ class LinearThreshold(Activation):
                     self.list_of_susceptible_agents_is_updated = True
                     self.list_of_exposed_agents_is_updated = True
                     self.list_of_most_recent_activations_is_updated = True
-        #
-        # print('time_since_infection_is_updated', self.time_since_infection_is_updated)
-        # print('time_since_activation_is_updated',self.time_since_activation_is_updated)
-        # print('number_of_active_infected_neighbors_is_updated', self.number_of_active_infected_neighbors_is_updated)
-        # print('list_of_inactive_infected_agents_is_updated',self.list_of_inactive_infected_agents_is_updated)
-        # print('list_of_active_infected_agents_is_updated', self.list_of_active_infected_agents_is_updated)
-        # print('list_of_susceptible_agents_is_updated', self.list_of_susceptible_agents_is_updated)
-        # print('list_of_exposed_agents_is_updated', self.list_of_exposed_agents_is_updated)
-        # print('list_of_most_recent_activations_is_updated', self.list_of_most_recent_activations_is_updated)
 
         assert self.time_since_infection_is_updated \
             and self.time_since_activation_is_updated \
@@ -2091,14 +1943,7 @@ class LinearThreshold(Activation):
             and self.list_of_most_recent_activations_is_updated, \
             "error states or list mishandled"
 
-        # print('updated_list_of_exposed_agents at the end of fast loop', updated_list_of_exposed_agents)
-        # print('self.list_of_exposed_agents at the end of fast loop', self.list_of_exposed_agents)
-
-        return updated_list_of_susceptible_agents, \
-            updated_list_of_active_infected_agents, \
-            updated_list_of_inactive_infected_agents, \
-            updated_list_of_exposed_agents, \
-            updated_list_of_most_recent_activations
+        return
 
 
 class RandomLinear(LinearThreshold):
@@ -2268,6 +2113,8 @@ class SimpleOnlyAlongC1(ContagionModel):
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
 
+        del current_network
+
 
 class SimpleOnlyAlongOriginalEdges(ContagionModel):
     """
@@ -2383,6 +2230,8 @@ class SimpleOnlyAlongOriginalEdges(ContagionModel):
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
 
+        del current_network
+
 
 class IndependentCascade(ContagionModel):
     """
@@ -2496,6 +2345,8 @@ class IndependentCascade(ContagionModel):
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
 
+        del current_network
+
 
 class NewModel(ContagionModel):
     def __init__(self,params):
@@ -2507,22 +2358,27 @@ class NewModel(ContagionModel):
         """
         sets the linear threshold activation functions with deterministic thresholds for each of the nodes
         """
-        current_network = copy.deepcopy(self.params['network'])
+        del self.activation_functions[:]
 
-        for i in current_network.nodes():
+        for i in self.params['network'].nodes():
             if self.params['zero_at_zero']:
                 pass
             else:  # not zero at zero
                 pass
         self.activation_functions_is_set = True
 
-    # note: do not implement step if you implemented set_activation_functions()
+    # note: do not implement step if you implemented set_activation_functions() set_activation function is for
+    # classes that inherit Activation
 
     def step(self):
+
         current_network = copy.deepcopy(self.params['network'])
+
         for i in current_network.nodes():
             # set node states according to the model
             pass
         # makes sure time_since_infection and number_of_infected_neighbors are properly updated
         self.time_since_infection_is_updated = True
         self.number_of_infected_neighbors_is_updated = True
+
+        del current_network
