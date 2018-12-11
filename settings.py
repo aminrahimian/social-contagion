@@ -316,9 +316,9 @@ if simulator_mode:
 
     if simulate_real_networks:
 
-        simulator_ID = 'cai_edgelist_1'
+        simulator_ID = 'fb100_edgelist_American75'  # 'cai_edgelist_1'
 
-        root_data_address = './data/cai-data/'
+        root_data_address = './data/fb100-data/'
 
         edgelist_directory_address = root_data_address + 'edgelists/'
 
@@ -341,17 +341,17 @@ if simulator_mode:
             # 'nearest_neighbors': 4,
             # 'fixed_number_edges_added': 2,
             'fixed_prob_high': 1.0,
-            'fixed_prob': 0.05,
+            'fixed_prob': 0.0,
             'theta': 2,
-            'alpha': 0.05,
-            'gamma': 0.5,
+            'alpha': 1.0,
+            'gamma': 0.0,
         }
     else:
-        simulator_ID = '10000_net'
+        simulator_ID = '5000_net_pure_complex'
 
         initial_seeds = 2
 
-        network_size = 10000
+        network_size = 5000
 
         simulator_params = {
             'size': network_size,  # populationSize,
@@ -362,7 +362,7 @@ if simulator_mode:
             'nearest_neighbors': 4,
             'fixed_number_edges_added': 2,
             'fixed_prob_high': 1.0,
-            'fixed_prob': 0,
+            'fixed_prob': 0.0,
             'theta': 2,
             'alpha': 1,
             'gamma': 0,

@@ -43,9 +43,9 @@ def draw():
                                                                     (e[0] in previously_infected_nodes)
                                                                     and ((e[1] in newly_infected_nodes)))]
         # edges_between_infected_nodes = G.subgraph(infected_nodes).edges()
-        print(infected_nodes)
+        # print(infected_nodes)
         # print(edges_between_infected_nodes)
-        print(infecting_edges)
+        # print(infecting_edges)
         # NX.draw_networkx_nodes(G, positions, nodelist=infected_nodes, node_color='r')
         NX.draw_networkx_edges(G, positions, edgelist=infecting_edges, edge_color='r', width=1)
 
@@ -55,7 +55,7 @@ def draw():
         PL.title('t = ' + str(time))
 
     if save_snapshots:
-        PL.savefig(visualizing_spread_output_address + str(time) + '.png',bbox_inches='tight')
+        PL.savefig(visualizing_spread_output_address + str(time) + '.png', bbox_inches='tight')
 
 
 def step_viz():

@@ -299,7 +299,8 @@ class network_model():
             elif self.params['network_model'] == 'grid':
                 if 'number_grid_rows' not in self.fixed_params:
                     if 'number_grid_columns' not in self.fixed_params:
-                        (self.params['number_grid_columns'],self.params['number_grid_rows']) = random_factor_pair(self.params['size'])
+                        (self.params['number_grid_columns'],self.params['number_grid_rows']) = \
+                            random_factor_pair(self.params['size'])
                     else:
                         self.params['number_grid_rows'] = self.params['size'] // self.params['number_grid_columns']
                         self.params['number_grid_columns'] = self.params['size'] // self.params['number_grid_rows']
@@ -320,8 +321,9 @@ class network_model():
                     self.params['fixed_number_edges_added'] = 2
                 if 'nearest_neighbors' not in self.fixed_params:
                     self.params['nearest_neighbors'] = 2
-                self.params['network'] = newman_watts_add_fixed_number_graph(self.params['size'], self.params['nearest_neighbors']
-                                                                             , self.params['fixed_number_edges_added'])
+                self.params['network'] = newman_watts_add_fixed_number_graph(self.params['size'],
+                                                                             self.params['nearest_neighbors'],
+                                                                             self.params['fixed_number_edges_added'])
             elif self.params['network_model'] == 'cycle_union_Erdos_Renyi':
                 if 'c' not in self.fixed_params:
                     self.params['c'] = 2
@@ -418,7 +420,9 @@ class network_model():
         self.number_of_active_infected_neighbors_is_updated = False
         self.time_since_infection_is_updated = False
         self.time_since_activation_is_updated = False
-        self.list_of_most_recent_switches = []
+        self.list_of_most_recent_switches = [] # list of most recent switches is useful for speeding up pure (0,1)
+        # complex contagion computations by shoteninig the loops. It won't be updated unless we have a pure (0,1)
+        # complex contagion in the LinearThreshold model.
         self.list_of_most_recent_switches_is_updated = False
 
         if 'initial_states' in self.fixed_params:
@@ -822,8 +826,8 @@ class contagion_model(network_model):
         self.time_since_infection_is_updated = False
         self.time_since_activation_is_updated = False
         self.step()
-        print(self.params['network'].edges())
-        print(self.params['network_model'])
+        # print(self.params['network'].edges())
+        # print(self.params['network_model'])
         assert self.number_of_active_infected_neighbors_is_updated and self.time_since_infection_is_updated \
                and self.time_since_activation_is_updated, \
             'error: number_of_infected_neighbors or time_since_infection mishandle'
@@ -849,8 +853,8 @@ class activation(contagion_model):
         super(activation, self).__init__(params)
 
         assert not (
-        (externally_set_activation_functions == SENTINEL and externally_set_classification_label != SENTINEL) or
-        (externally_set_activation_functions != SENTINEL and externally_set_classification_label == SENTINEL)), \
+                (externally_set_activation_functions == SENTINEL and externally_set_classification_label != SENTINEL) or
+                (externally_set_activation_functions != SENTINEL and externally_set_classification_label == SENTINEL)),\
             'externally_set_activation_function and classification_label should be provided together'
 
         self.externally_set_activation_functions = externally_set_activation_functions
@@ -908,33 +912,137 @@ class activation(contagion_model):
         self.activation_probabilities_is_set = True
 
     def step(self):
+        self.slow_step()
 
-        assert self.list_of_most_recent_switches_is_updated, \
-            "list_of_most_recent_switches is mishandled"
+    # def new_step(self):
+    #
+    #     assert self.list_of_most_recent_switches_is_updated, \
+    #         "list_of_most_recent_switches is mishandled"
+    #
+    #     self.set_activation_probabilities()
+    #
+    #     assert self.activation_probabilities_is_set, 'activation_probabilities not set'
+    #
+    #     current_network = copy.deepcopy(self.params['network'])
+    #
+    #
+    #     list_of_potential_complex_contagion_switches = []
+    #
+    #     for recent_switch in self.list_of_most_recent_switches:
+    #         list_of_potential_complex_contagion_switches = list(set(list_of_potential_complex_contagion_switches)
+    #                                                              .union(set(list(current_network.
+    #                                                                              neighbors(recent_switch)))))
+    #
+    #     self.list_of_most_recent_switches = []
+    #
+    #     if not list_of_potential_complex_contagion_switches: # the spreading process terminates
+    #         print('warning the spreading stopped')
+    #         self.time_since_infection_is_updated = True
+    #         self.time_since_activation_is_updated = True
+    #         self.number_of_active_infected_neighbors_is_updated = True
+    #
+    #     for i in list_of_potential_complex_contagion_switches:
+    #         node_i_index = self.node_list.index(i)
+    #         self.list_of_most_recent_switches_is_updated = False
+    #         # current_network.node[i]['state'] can either be susceptible (0)
+    #         # or active infected (0.5) or inactive infected (-0.5)
+    #
+    #         # transition from susceptible to active infected:
+    #
+    #         if current_network.node[i]['state'] == susceptible:
+    #             assert self.params['network'].node[i]['time_since_infection'] == 0 and \
+    #                    self.params['network'].node[i]['time_since_activation'] == 0, 'error: time_since_infection or ' \
+    #                                                                                  'time_since_activation mishandled!'
+    #             self.time_since_infection_is_updated = True
+    #             self.time_since_activation_is_updated = True
+    #
+    #             if RD.random() < self.activation_probabilities[node_i_index]:
+    #                 self.params['network'].node[i]['state'] = infected*active
+    #                 self.list_of_most_recent_switches.append(i)
+    #                 for k in self.params['network'].neighbors(i):
+    #                     self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
+    #             self.number_of_active_infected_neighbors_is_updated = True
+    #             self.list_of_most_recent_switches_is_updated = True
+    #
+    #         # in all the below cases the node is in infected active or infected inactive state.
+    #
+    #         # transition from active or inactive infected to susceptible:
+    #
+    #         elif RD.random() < self.params['delta']:
+    #             assert 2*abs(current_network.node[i]['state']) == infected, \
+    #                 "error: node states are mishandled"
+    #             #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
+    #             self.params['network'].node[i]['state'] = susceptible
+    #
+    #             self.list_of_most_recent_switches.append(i)
+    #             self.list_of_most_recent_switches_is_updated = True
+    #
+    #             if current_network.node[i]['state'] == infected*active:
+    #                 for k in self.params['network'].neighbors(i):
+    #                     assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
+    #                         'error: number_of_active_infected_neighbors is mishandled'
+    #                     # here number_of_active_infected_neighbors for neighbor k should be at least one
+    #                     self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
+    #             self.number_of_active_infected_neighbors_is_updated = True
+    #             self.params['network'].node[i]['time_since_infection'] = 0
+    #             self.params['network'].node[i]['time_since_activation'] = 0
+    #             self.time_since_infection_is_updated = True
+    #             self.time_since_activation_is_updated = True
+    #
+    #         # transition from active infected to inactive infected:
+    #
+    #         elif current_network.node[i]['state'] == infected*active and RD.random() < self.params['gamma']:
+    #             self.params['network'].node[i]['state'] = infected*inactive
+    #             self.list_of_most_recent_switches.append(i)
+    #             self.list_of_most_recent_switches_is_updated = True
+    #             for k in self.params['network'].neighbors(i):
+    #                 assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
+    #                     'error: number_of_active_infected_neighbors is mishandled'
+    #                 # here number_of_active_infected_neighbors for neighbor k should be at least one
+    #                 self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
+    #             self.number_of_active_infected_neighbors_is_updated = True
+    #             self.params['network'].node[i]['time_since_infection'] += 1
+    #             self.params['network'].node[i]['time_since_activation'] = 0
+    #             self.time_since_infection_is_updated = True
+    #             self.time_since_activation_is_updated = True
+    #
+    #         # transition from inactive infected to active infected:
+    #
+    #         elif current_network.node[i]['state'] == infected*inactive and RD.random() < self.params['alpha']:
+    #             self.params['network'].node[i]['state'] = infected*active
+    #             self.list_of_most_recent_switches.append(i)
+    #             self.list_of_most_recent_switches_is_updated = True
+    #             for k in self.params['network'].neighbors(i):
+    #                 self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
+    #             self.number_of_active_infected_neighbors_is_updated = True
+    #             self.params['network'].node[i]['time_since_infection'] += 1
+    #             self.params['network'].node[i]['time_since_activation'] = 0
+    #             self.time_since_infection_is_updated = True
+    #             self.time_since_activation_is_updated = True
+    #
+    #         # else the node state is either active or inactive infected and
+    #         # there are no state transitions, but we still need to update the time_since variables:
+    #
+    #         else:
+    #             self.params['network'].node[i]['time_since_infection'] += 1
+    #             if current_network.node[i]['state'] == infected*active:
+    #                 self.params['network'].node[i]['time_since_activation'] += 1
+    #             self.time_since_infection_is_updated = True
+    #             self.time_since_activation_is_updated = True
+    #             self.number_of_active_infected_neighbors_is_updated = True
+    #             self.list_of_most_recent_switches_is_updated = True
+
+    def slow_step(self):
+        # this step implementation is slow computationally since it performs a comprehensive loop over all nodes
 
         self.set_activation_probabilities()
 
         assert self.activation_probabilities_is_set, 'activation_probabilities not set'
 
         current_network = copy.deepcopy(self.params['network'])
+        count_node = 0
 
-        list_of_potential_switches = []
-
-        for recent_switch in self.list_of_most_recent_switches:
-            list_of_potential_switches = list(set(list_of_potential_switches)
-                                              .union(set(list(current_network.neighbors(recent_switch)))))
-
-        self.list_of_most_recent_switches = []
-
-        if not list_of_potential_switches: # the spreading process terminates
-            print('warning the spreading stopped')
-            self.time_since_infection_is_updated = True
-            self.time_since_activation_is_updated = True
-            self.number_of_active_infected_neighbors_is_updated = True
-
-        for i in list_of_potential_switches:
-            node_i_index = self.node_list.index(i)
-            self.list_of_most_recent_switches_is_updated = False
+        for i in current_network.nodes():
             # current_network.node[i]['state'] can either be susceptible (0)
             # or active infected (0.5) or inactive infected (-0.5)
 
@@ -947,28 +1055,22 @@ class activation(contagion_model):
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
-                if RD.random() < self.activation_probabilities[node_i_index]:
-                    self.params['network'].node[i]['state'] = infected*active
-                    self.list_of_most_recent_switches.append(i)
+                if RD.random() < self.activation_probabilities[count_node]:
+                    self.params['network'].node[i]['state'] = infected * active
                     for k in self.params['network'].neighbors(i):
                         self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.list_of_most_recent_switches_is_updated = True
 
             # in all the below cases the node is in infected active or infected inactive state.
 
             # transition from active or inactive infected to susceptible:
 
             elif RD.random() < self.params['delta']:
-                assert 2*abs(current_network.node[i]['state']) == infected, \
+                assert 2 * abs(current_network.node[i]['state']) == infected, \
                     "error: node states are mishandled"
                 #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
                 self.params['network'].node[i]['state'] = susceptible
-
-                self.list_of_most_recent_switches.append(i)
-                self.list_of_most_recent_switches_is_updated = True
-
-                if current_network.node[i]['state'] == infected*active:
+                if current_network.node[i]['state'] == infected * active:
                     for k in self.params['network'].neighbors(i):
                         assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                             'error: number_of_active_infected_neighbors is mishandled'
@@ -982,10 +1084,8 @@ class activation(contagion_model):
 
             # transition from active infected to inactive infected:
 
-            elif current_network.node[i]['state'] == infected*active and RD.random() < self.params['gamma']:
-                self.params['network'].node[i]['state'] = infected*inactive
-                self.list_of_most_recent_switches.append(i)
-                self.list_of_most_recent_switches_is_updated = True
+            elif current_network.node[i]['state'] == infected * active and RD.random() < self.params['gamma']:
+                self.params['network'].node[i]['state'] = infected * inactive
                 for k in self.params['network'].neighbors(i):
                     assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                         'error: number_of_active_infected_neighbors is mishandled'
@@ -999,10 +1099,8 @@ class activation(contagion_model):
 
             # transition from inactive infected to active infected:
 
-            elif current_network.node[i]['state'] == infected*inactive and RD.random() < self.params['alpha']:
-                self.params['network'].node[i]['state'] = infected*active
-                self.list_of_most_recent_switches.append(i)
-                self.list_of_most_recent_switches_is_updated = True
+            elif current_network.node[i]['state'] == infected * inactive and RD.random() < self.params['alpha']:
+                self.params['network'].node[i]['state'] = infected * active
                 for k in self.params['network'].neighbors(i):
                     self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                 self.number_of_active_infected_neighbors_is_updated = True
@@ -1016,12 +1114,13 @@ class activation(contagion_model):
 
             else:
                 self.params['network'].node[i]['time_since_infection'] += 1
-                if current_network.node[i]['state'] == infected*active:
+                if current_network.node[i]['state'] == infected * active:
                     self.params['network'].node[i]['time_since_activation'] += 1
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.list_of_most_recent_switches_is_updated = True
+
+            count_node += 1
 
     def get_activation_probabilities(self,degree_range=range(10),node = SENTINEL):
         if self.missing_params_not_set:
@@ -1247,6 +1346,264 @@ class LinearThreshold(activation):
                                                               'threshold'] > number_of_infected_neighbors)))
 
         self.activation_functions_is_set = True
+
+    def step(self):
+
+        self.set_activation_probabilities()
+
+        assert self.activation_probabilities_is_set, 'activation_probabilities not set'
+
+        if self.params['fixed_prob'] == 0.0 and self.params['fixed_prob_high'] == 1.0:
+            # using the fast update for pure (0,1) complex contagion based on the most recent state switches
+            self.fast_update_infected_nodes()
+        else:
+            self.slow_step()
+
+    def fast_update_infected_nodes(self):
+        assert self.list_of_most_recent_switches_is_updated, \
+            "list_of_most_recent_switches is mishandled"
+
+        current_network = copy.deepcopy(self.params['network'])
+
+        # current_inactive_infected_nodes = [x for x, y in current_network.nodes(data=True)
+        #                                    if y['state'] == infected*inactive]
+        #
+        # current_active_infected_nodes = [x for x, y in current_network.nodes(data=True)
+        #                                  if y['state'] == infected*active]
+        # current_susceptible_nodes = [x for x, y in current_network.nodes(data=True)
+        #                                  if y['state'] == susceptible]
+
+        list_of_potential_complex_contagion_switches = []
+
+        for recent_switch in self.list_of_most_recent_switches:
+            list_of_potential_complex_contagion_switches = list(set(list_of_potential_complex_contagion_switches)
+                                                                .union(set(list(current_network.
+                                                                                neighbors(recent_switch)))))
+        self.list_of_most_recent_switches = []
+
+        if not list_of_potential_complex_contagion_switches:
+            # the spreading process terminates
+            print('warning the spreading stopped')
+            self.time_since_infection_is_updated = True
+            self.time_since_activation_is_updated = True
+            self.number_of_active_infected_neighbors_is_updated = True
+
+        for i in list_of_potential_complex_contagion_switches:
+            node_i_index = self.node_list.index(i)
+            self.list_of_most_recent_switches_is_updated = False
+            # current_network.node[i]['state'] can either be susceptible (0)
+            # or active infected (0.5) or inactive infected (-0.5)
+
+            # transition from susceptible to active infected:
+
+            if current_network.node[i]['state'] == susceptible:
+                assert self.params['network'].node[i]['time_since_infection'] == 0 and \
+                       self.params['network'].node[i]['time_since_activation'] == 0, 'error: time_since_infection or ' \
+                                                                                     'time_since_activation mishandled!'
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+
+                if RD.random() < self.activation_probabilities[node_i_index]:
+                    self.params['network'].node[i]['state'] = infected * active
+                    self.list_of_most_recent_switches.append(i)
+                    for k in self.params['network'].neighbors(i):
+                        self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
+                self.number_of_active_infected_neighbors_is_updated = True
+                self.list_of_most_recent_switches_is_updated = True
+
+            # in all the below cases the node is in infected active or infected inactive state.
+
+            # transition from active or inactive infected to susceptible:
+
+            elif RD.random() < self.params['delta']:
+                assert 2 * abs(current_network.node[i]['state']) == infected, \
+                    "error: node states are mishandled"
+                #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
+                self.params['network'].node[i]['state'] = susceptible
+
+                self.list_of_most_recent_switches.append(i)
+                self.list_of_most_recent_switches_is_updated = True
+
+                if current_network.node[i]['state'] == infected * active:
+                    for k in self.params['network'].neighbors(i):
+                        assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
+                            'error: number_of_active_infected_neighbors is mishandled'
+                        # here number_of_active_infected_neighbors for neighbor k should be at least one
+                        self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
+                self.number_of_active_infected_neighbors_is_updated = True
+                self.params['network'].node[i]['time_since_infection'] = 0
+                self.params['network'].node[i]['time_since_activation'] = 0
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+
+            # transition from active infected to inactive infected:
+
+            elif current_network.node[i]['state'] == infected * active and RD.random() < self.params['gamma']:
+                self.params['network'].node[i]['state'] = infected * inactive
+                self.list_of_most_recent_switches.append(i)
+                self.list_of_most_recent_switches_is_updated = True
+                for k in self.params['network'].neighbors(i):
+                    assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
+                        'error: number_of_active_infected_neighbors is mishandled'
+                    # here number_of_active_infected_neighbors for neighbor k should be at least one
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
+                self.number_of_active_infected_neighbors_is_updated = True
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+
+            # transition from inactive infected to active infected:
+
+            elif current_network.node[i]['state'] == infected * inactive and RD.random() < self.params['alpha']:
+                self.params['network'].node[i]['state'] = infected * active
+                self.list_of_most_recent_switches.append(i)
+                self.list_of_most_recent_switches_is_updated = True
+                for k in self.params['network'].neighbors(i):
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
+                self.number_of_active_infected_neighbors_is_updated = True
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+
+            # else the node state is either active or inactive infected and
+            # there are no state transitions, but we still need to update the time_since variables:
+
+            else:
+                self.params['network'].node[i]['time_since_infection'] += 1
+                if current_network.node[i]['state'] == infected * active:
+                    self.params['network'].node[i]['time_since_activation'] += 1
+                self.time_since_infection_is_updated = True
+                self.time_since_activation_is_updated = True
+                self.number_of_active_infected_neighbors_is_updated = True
+                self.list_of_most_recent_switches_is_updated = True
+
+    # def step(self):
+    #
+    #     self.set_activation_probabilities()
+    #
+    #     assert self.activation_probabilities_is_set, 'activation_probabilities not set'
+    #
+    #     current_network = copy.deepcopy(self.params['network'])
+    #
+    #     print('we are here')
+    #
+    #     if self.params['fixed_prob'] == 0.0 and self.params['fixed_prob_high'] == 1.0:
+    #     # if the model is pure (0,1) complex contagion then we can loop only over the neighbors of
+    #     # list_of_most_recent_switches  - the so-called list_of_potential_complex_contagion_switches
+    #     # to speed up computations
+    #         print('we are here')
+    #
+    #         assert self.list_of_most_recent_switches_is_updated, \
+    #             "list_of_most_recent_switches is mishandled"
+    #
+    #
+    #         list_of_potential_complex_contagion_switches = []
+    #
+    #         for recent_switch in self.list_of_most_recent_switches:
+    #             list_of_potential_complex_contagion_switches = list(set(list_of_potential_complex_contagion_switches)
+    #                                                                  .union(set(list(current_network.
+    #                                                                                  neighbors(recent_switch)))))
+    #
+    #         self.list_of_most_recent_switches = []
+    #
+    #         if not list_of_potential_complex_contagion_switches: # the spreading process terminates
+    #             print('warning the spreading stopped')
+    #             self.time_since_infection_is_updated = True
+    #             self.time_since_activation_is_updated = True
+    #             self.number_of_active_infected_neighbors_is_updated = True
+    #
+    #         for i in list_of_potential_complex_contagion_switches:
+    #             node_i_index = self.node_list.index(i)
+    #             self.list_of_most_recent_switches_is_updated = False
+    #             # current_network.node[i]['state'] can either be susceptible (0)
+    #             # or active infected (0.5) or inactive infected (-0.5)
+    #
+    #             # transition from susceptible to active infected:
+    #
+    #             if current_network.node[i]['state'] == susceptible:
+    #                 assert self.params['network'].node[i]['time_since_infection'] == 0 and \
+    #                        self.params['network'].node[i]['time_since_activation'] == 0, 'error: time_since_infection or ' \
+    #                                                                                      'time_since_activation mishandled!'
+    #                 self.time_since_infection_is_updated = True
+    #                 self.time_since_activation_is_updated = True
+    #
+    #                 if RD.random() < self.activation_probabilities[node_i_index]:
+    #                     self.params['network'].node[i]['state'] = infected*active
+    #                     self.list_of_most_recent_switches.append(i)
+    #                     for k in self.params['network'].neighbors(i):
+    #                         self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
+    #                 self.number_of_active_infected_neighbors_is_updated = True
+    #                 self.list_of_most_recent_switches_is_updated = True
+    #
+    #             # in all the below cases the node is in infected active or infected inactive state.
+    #
+    #             # transition from active or inactive infected to susceptible:
+    #
+    #             elif RD.random() < self.params['delta']:
+    #                 assert 2*abs(current_network.node[i]['state']) == infected, \
+    #                     "error: node states are mishandled"
+    #                 #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
+    #                 self.params['network'].node[i]['state'] = susceptible
+    #
+    #                 self.list_of_most_recent_switches.append(i)
+    #                 self.list_of_most_recent_switches_is_updated = True
+    #
+    #                 if current_network.node[i]['state'] == infected*active:
+    #                     for k in self.params['network'].neighbors(i):
+    #                         assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
+    #                             'error: number_of_active_infected_neighbors is mishandled'
+    #                         # here number_of_active_infected_neighbors for neighbor k should be at least one
+    #                         self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
+    #                 self.number_of_active_infected_neighbors_is_updated = True
+    #                 self.params['network'].node[i]['time_since_infection'] = 0
+    #                 self.params['network'].node[i]['time_since_activation'] = 0
+    #                 self.time_since_infection_is_updated = True
+    #                 self.time_since_activation_is_updated = True
+    #
+    #             # transition from active infected to inactive infected:
+    #
+    #             elif current_network.node[i]['state'] == infected*active and RD.random() < self.params['gamma']:
+    #                 self.params['network'].node[i]['state'] = infected*inactive
+    #                 self.list_of_most_recent_switches.append(i)
+    #                 self.list_of_most_recent_switches_is_updated = True
+    #                 for k in self.params['network'].neighbors(i):
+    #                     assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
+    #                         'error: number_of_active_infected_neighbors is mishandled'
+    #                     # here number_of_active_infected_neighbors for neighbor k should be at least one
+    #                     self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
+    #                 self.number_of_active_infected_neighbors_is_updated = True
+    #                 self.params['network'].node[i]['time_since_infection'] += 1
+    #                 self.params['network'].node[i]['time_since_activation'] = 0
+    #                 self.time_since_infection_is_updated = True
+    #                 self.time_since_activation_is_updated = True
+    #
+    #             # transition from inactive infected to active infected:
+    #
+    #             elif current_network.node[i]['state'] == infected*inactive and RD.random() < self.params['alpha']:
+    #                 self.params['network'].node[i]['state'] = infected*active
+    #                 self.list_of_most_recent_switches.append(i)
+    #                 self.list_of_most_recent_switches_is_updated = True
+    #                 for k in self.params['network'].neighbors(i):
+    #                     self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
+    #                 self.number_of_active_infected_neighbors_is_updated = True
+    #                 self.params['network'].node[i]['time_since_infection'] += 1
+    #                 self.params['network'].node[i]['time_since_activation'] = 0
+    #                 self.time_since_infection_is_updated = True
+    #                 self.time_since_activation_is_updated = True
+    #
+    #             # else the node state is either active or inactive infected and
+    #             # there are no state transitions, but we still need to update the time_since variables:
+    #
+    #             else:
+    #                 self.params['network'].node[i]['time_since_infection'] += 1
+    #                 if current_network.node[i]['state'] == infected*active:
+    #                     self.params['network'].node[i]['time_since_activation'] += 1
+    #                 self.time_since_infection_is_updated = True
+    #                 self.time_since_activation_is_updated = True
+    #                 self.number_of_active_infected_neighbors_is_updated = True
+    #                 self.list_of_most_recent_switches_is_updated = True
 
 
 class RandomLinear(LinearThreshold):
