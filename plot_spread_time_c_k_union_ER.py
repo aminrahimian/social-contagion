@@ -62,13 +62,53 @@ if __name__ == '__main__':
                          label='$k = ' + str(number_of_cycle_neighbors // 2) + '$')
 
         plt.plot(np.log(np.asarray(network_sizes)),
-                 (1/2)*np.log(np.asarray(network_sizes))-1,
+                 (1/2)*np.log(np.asarray(network_sizes))+0.1,
                  linewidth=1.5,
-                 label='$0.5\log(n)$')
+                 label='$(1/2)\log(n)$',  linestyle=':')
+
+        plt.plot(np.log(np.asarray(network_sizes)),
+                 (2 / 3) * np.log(np.asarray(network_sizes))-1.45,
+                 linewidth=1.5,
+                 label='$(2/3)\log(n)$', linestyle=':')
+        #
+        # plt.plot(np.log(np.asarray(network_sizes)),
+        #          (1 / 3) * np.log(np.asarray(network_sizes)),
+        #          linewidth=1.5,
+        #          label='$(1/3)\log(n)$', linestyle=':')
+
+        # plt.plot(np.log(np.asarray(network_sizes)),
+        #          (5 / 12) * np.log(np.asarray(network_sizes))-0.75,
+        #          linewidth=1.5,
+        #          label='$(5/12)\log(n)$', linestyle=':')
 
         plt.ylabel('log time to spread', fontsize=15)
 
         plt.xlabel('log network size ($\log(n)$)', fontsize=15)
+        # plt.title('\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
+        #           '\\vspace{-10pt}  \\begin{center}  with $p_n = (13 - 2k)/n$ \\end{center}', fontsize=18)
+        plt.legend(fontsize=10)
+
+        if show_plots:
+            plt.show()
+        if save_plots:
+            plt.savefig(theory_simulation_output_address + simulation_type + '_log_log_' + '.png')
+
+        plt.figure(2)
+
+        for number_of_cycle_neighbors in number_of_cycle_neighbors_list:
+            number_of_cycle_neighbors_index = number_of_cycle_neighbors_list.index(number_of_cycle_neighbors)
+            plt.errorbar(network_sizes,
+                         (np.asarray(spread_time_avgs[number_of_cycle_neighbors_index]) /
+                          (np.asarray(network_sizes) ** (2 / 3))),
+                         yerr=(np.asarray([1.96 * s / np.sqrt(size_of_dataset) for s in
+                                           spread_time_stds[number_of_cycle_neighbors_index]]) /
+                               (np.asarray(network_sizes) ** (2 / 3))),
+                         linewidth=1.5,
+                         label='$k = ' + str(number_of_cycle_neighbors // 2) + '$')
+
+        plt.ylabel('time to spread (normalized by $\\times n^{-2/3}$)', fontsize=15)
+
+        plt.xlabel('network size ($n$)', fontsize=15)
         # plt.title('\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
         #           '\\vspace{-10pt}  \\begin{center}  with $p_n = (13 - 2k)/n$ \\end{center}', fontsize=18)
         plt.legend()
@@ -76,7 +116,57 @@ if __name__ == '__main__':
         if show_plots:
             plt.show()
         if save_plots:
-            plt.savefig(theory_simulation_output_address + simulation_type + '_log_log_' + '.png')
+            plt.savefig(theory_simulation_output_address + simulation_type + '_two_third_normalization' + '.png')
+
+        plt.figure(4)
+
+        for number_of_cycle_neighbors in number_of_cycle_neighbors_list:
+            number_of_cycle_neighbors_index = number_of_cycle_neighbors_list.index(number_of_cycle_neighbors)
+            plt.errorbar(network_sizes,
+                         (np.asarray(spread_time_avgs[number_of_cycle_neighbors_index]) /
+                          (np.asarray(network_sizes) ** (5 / 12))),
+                         yerr=(np.asarray([1.96 * s / np.sqrt(size_of_dataset) for s in
+                                           spread_time_stds[number_of_cycle_neighbors_index]]) /
+                               (np.asarray(network_sizes) ** (5 / 12))),
+                         linewidth=1.5,
+                         label='$k = ' + str(number_of_cycle_neighbors // 2) + '$')
+
+        plt.ylabel('time to spread (normalized by $\\times n^{-5/12}$)', fontsize=15)
+
+        plt.xlabel('network size ($n$)', fontsize=15)
+        # plt.title('\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
+        #           '\\vspace{-10pt}  \\begin{center}  with $p_n = (13 - 2k)/n$ \\end{center}', fontsize=18)
+        plt.legend()
+
+        if show_plots:
+            plt.show()
+        if save_plots:
+            plt.savefig(theory_simulation_output_address + simulation_type + '_five_twelfth_normalization' + '.png')
+
+        plt.figure(3)
+
+        for number_of_cycle_neighbors in number_of_cycle_neighbors_list:
+            number_of_cycle_neighbors_index = number_of_cycle_neighbors_list.index(number_of_cycle_neighbors)
+            plt.errorbar(network_sizes,
+                         (np.asarray(spread_time_avgs[number_of_cycle_neighbors_index]) /
+                          (np.asarray(network_sizes) ** (1 / 3))),
+                         yerr=(np.asarray([1.96 * s / np.sqrt(size_of_dataset) for s in
+                                           spread_time_stds[number_of_cycle_neighbors_index]]) /
+                               (np.asarray(network_sizes) ** (1 / 3))),
+                         linewidth=1.5,
+                         label='$k = ' + str(number_of_cycle_neighbors // 2) + '$')
+
+        plt.ylabel('time to spread (normalized by $\\times n^{-1/3}$)', fontsize=15)
+
+        plt.xlabel('network size ($n$)', fontsize=15)
+        # plt.title('\centering Complex Contagions  over $\mathcal{C}_{k} \\cup \mathcal{G}_{n,p_n}$'
+        #           '\\vspace{-10pt}  \\begin{center}  with $p_n = (13 - 2k)/n$ \\end{center}', fontsize=18)
+        plt.legend()
+
+        if show_plots:
+            plt.show()
+        if save_plots:
+            plt.savefig(theory_simulation_output_address + simulation_type + '_one_third_normalization' + '.png')
 
     elif simulation_type == 'ck_union_ER_vs_k':
 
