@@ -1,12 +1,52 @@
 from settings import *
 
+from pympler import muppy, summary, refbrowser, asizeof, classtracker
+
 TRACK_TIME_SINCE_VARIABLES = False
 
 import copy
 
 from scipy.stats import norm
 
+import sys
+
+from itertools import count
+
 import gc
+
+import types
+
+import psutil
+
+
+import linecache
+import os
+import tracemalloc
+
+def display_top(snapshot, key_type='lineno', limit=10):
+    snapshot = snapshot.filter_traces((
+        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
+        tracemalloc.Filter(False, "<unknown>"),
+    ))
+    top_stats = snapshot.statistics(key_type)
+
+    print("Top %s lines" % limit)
+    for index, stat in enumerate(top_stats[:limit], 1):
+        frame = stat.traceback[0]
+        # replace "/path/to/module/file.py" with "module/file.py"
+        filename = os.sep.join(frame.filename.split(os.sep)[-2:])
+        print("#%s: %s:%s: %.1f KiB"
+              % (index, filename, frame.lineno, stat.size / 1024))
+        line = linecache.getline(frame.filename, frame.lineno).strip()
+        if line:
+            print('    %s' % line)
+
+    other = top_stats[limit:]
+    if other:
+        size = sum(stat.size for stat in other)
+        print("%s other: %.1f KiB" % (len(other), size / 1024))
+    total = sum(stat.size for stat in top_stats)
+    print("Total allocated size: %.1f KiB" % (total / 1024))
 
 
 def measure_property(network_intervention_dataset, property='avg_clustering', sample_size=None):
@@ -274,8 +314,10 @@ class NetworkModel:
     """
     implement the initializations and parameter set methods
     """
+    _ids = count(0)
 
     def __init__(self):
+        self.id = next(self._ids)
         pass
 
     def init_network(self):
@@ -761,6 +803,9 @@ class ContagionModel(NetworkModel):
         # record the values at time zero:
         dummy_network = self.params['network'].copy()
 
+
+        print('size of self network inside time_the_total_spread:', sys.getsizeof(self))
+
         all_nodes_states = list(
             map(lambda node_pointer: 1.0 * self.params['network'].node[node_pointer]['state'],
                 self.params['network'].nodes()))
@@ -799,11 +844,13 @@ class ContagionModel(NetworkModel):
         if get_time_series:
             return time, total_number_of_infected, network_time_series, fractions_time_series
         else:
+            print(network_time_series)
+            print(fractions_time_series)
             return time, total_number_of_infected
 
     def generate_network_intervention_dataset(self, dataset_size=200):
+        exit()
         interventioned_networks = []
-        del interventioned_networks[:]
         for i in range(dataset_size):
             self.missing_params_not_set = True
             self.setRandomParams()
@@ -815,6 +862,9 @@ class ContagionModel(NetworkModel):
         # avg time to spread over the dataset.
         # The time to spread is measured in one of the modes:
         # integral, max, and total.
+
+        # tr = classtracker.ClassTracker()
+        # tr.track_class(DeterministicLinear)
 
         if mode == 'integral':
             integrals = []
@@ -850,8 +900,42 @@ class ContagionModel(NetworkModel):
                 cap_times += [cap_time]
                 sum_of_infection_sizes += infection_size
                 infection_sizes += [infection_size]
+                print('sys.getsizeof(cap_times):', sys.getsizeof(cap_times))
+                print('sys.getsizeof(infection_sizes):', sys.getsizeof(infection_sizes))
+
+                # memory investigation:
+
+                # all_objects = muppy.get_objects()
+                #
+                # print('length of all_objects', len(all_objects))
+                #
+                # my_types = muppy.filter(all_objects, Type=list)
+
+                # print('total number of lists len(my_types):', len(my_types))
+                #
+                # for t in my_types:
+                #
+                #     # print(len(t))
+                #     if len(t) > 6370 and len(t) < 4*6370:
+                #         print('length',t)
+                #         # print(asizeof.asizeof(t))
+                #
+                # sum1 = summary.summarize(all_objects)
+                #
+                # # tr.create_snapshot()
+                # # tr.stats.print_summary()
+                #
+                # summary.print_(sum1)
 
                 gc.collect()
+
+                # print(dir())
+
+                process = psutil.Process(os.getpid())
+                print(process.memory_info().rss)
+
+                snapshot = tracemalloc.take_snapshot()
+                display_top(snapshot)
 
             if dataset_size == 0:
                 avg_speed = float('Inf')
@@ -987,6 +1071,8 @@ class Activation(ContagionModel):
         self.activation_functions = []
         self.activation_functions_is_set = False
 
+        # print(self.params)
+
         if 'size' not in self.params:
             if 'network' in self.params:
                 self.params['size'] = NX.number_of_nodes(self.params['network'])
@@ -1010,7 +1096,6 @@ class Activation(ContagionModel):
         This function is overwritten by each of the subclasses of Activation() such as probit, logit, etc
         """
         del self.activation_functions[:]
-        # this is necessary to prevent the list growing bigger with the dataset_size
 
         if self.externally_set_activation_function != SENTINEL:
             assert self.externally_set_classification_label != SENTINEL, 'classification_label not provided'
@@ -1023,6 +1108,9 @@ class Activation(ContagionModel):
             assert self.externally_set_classification_label == SENTINEL, \
                 'classification_label provided without externally_set_activation_functions'
             self.activation_functions_is_set = False
+
+        print(self.activation_functions)
+        print('asizeof.asizeof(self.activation_functions)', asizeof.asizeof(self.activation_functions))
 
     def set_activation_probabilities(self):
         """
@@ -1039,6 +1127,8 @@ class Activation(ContagionModel):
         self.activation_probabilities_is_set = True
 
     def step(self):
+
+        exit()
 
         self.set_activation_probabilities()
 
@@ -1060,6 +1150,8 @@ class Activation(ContagionModel):
         self.list_of_inactive_infected_agents_is_updated = False
         self.number_of_active_infected_neighbors_is_updated = False
         self.list_of_most_recent_activations_is_updated = False
+
+        # self.slow_loop()
 
         self.loop_over_exposed_nodes(current_network)
 
@@ -1129,12 +1221,12 @@ class Activation(ContagionModel):
         self.list_of_exposed_agents_is_updated = True
         self.list_of_most_recent_activations += self.updated_list_of_most_recent_activations
         self.list_of_most_recent_activations_is_updated = True
-
-        del self.updated_list_of_susceptible_agents[:]
-        del self.updated_list_of_active_infected_agents[:]
-        del self.updated_list_of_inactive_infected_agents[:]
-        del self.updated_list_of_exposed_agents[:]
-        del self.updated_list_of_most_recent_activations[:]
+        #
+        # del updated_list_of_susceptible_agents[:]
+        # del updated_list_of_active_infected_agents[:]
+        # del updated_list_of_inactive_infected_agents[:]
+        # del updated_list_of_exposed_agents[:]
+        # del updated_list_of_most_recent_activations[:]
 
         del current_network
 
@@ -1245,6 +1337,11 @@ class Activation(ContagionModel):
 
         assert (self.params['delta'] > 0 or self.params['gamma'] > 0), \
             "error:  this loop is not necessary!"
+
+        # print('list_of_exposed_agents inside loop_over_active_infected_nodes',
+        #       self.list_of_exposed_agents)
+        # print('list_of_active_infected_agents inside loop_over_active_infected_nodes',
+        #       self.list_of_active_infected_agents)
 
         for i in self.list_of_active_infected_agents:
 
@@ -1547,7 +1644,7 @@ class SIS(Activation):
 
         self.activation_functions = \
             [lambda number_of_infected_neighbors:1 - (1 - self.params['beta'])**number_of_infected_neighbors]\
-            * self.params['size']
+            *self.params['size']
         self.activation_functions_is_set = True
 
 
@@ -1752,11 +1849,16 @@ class LinearThreshold(Activation):
 
         self.activation_functions_is_set = True
 
+        print('length:', len(self.activation_functions))
+        print('asizeof.asizeof(self.activation_functions)', asizeof.asizeof(self.activation_functions))
+
     def step(self):
 
         self.set_activation_probabilities()
 
         current_network = copy.deepcopy(self.params['network'])
+
+        print('we are where we should be')
 
         assert not self.updated_list_of_susceptible_agents, "updated_list_of_susceptible_agents mis-handled"
         assert not self.updated_list_of_active_infected_agents, "updated_list_of_active_infected_agents mis-handled"
@@ -2232,7 +2334,6 @@ class SimpleOnlyAlongOriginalEdges(ContagionModel):
 
         del current_network
 
-
 class IndependentCascade(ContagionModel):
     """
     Implements an independent cascade model. Each infected neighbor has an independent probability beta of passing on her
@@ -2346,7 +2447,6 @@ class IndependentCascade(ContagionModel):
                 self.number_of_active_infected_neighbors_is_updated = True
 
         del current_network
-
 
 class NewModel(ContagionModel):
     def __init__(self,params):

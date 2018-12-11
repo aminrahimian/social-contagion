@@ -15,7 +15,7 @@ if simulation_type == 'ck_union_ER_vs_size':
 
     expected_degree = 13
 
-    network_sizes = [3000, 4000, 5000, 6000, 7000]
+    network_sizes = [2000, 3000, 4000, 5000, 6000, 7000]
 
     number_of_cycle_neighbors_list = [12, 10, 8]
 
@@ -41,17 +41,18 @@ def compute_spread_time_for_c_k(expected_degree, number_of_cycle_neighbors, netw
         'size': network_size,  # populationSize,
         'initial_states': [infected*active]*number_of_initial_infected_nodes +
                           [susceptible] * (network_size - number_of_initial_infected_nodes),
-        'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+        'delta': 0.0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
         'nearest_neighbors': number_of_cycle_neighbors,
         'fixed_prob_high': 1.0,
         'fixed_prob': 0.0,
         'theta': 2,
         'c': expected_degree - number_of_cycle_neighbors,
+        'rewire': False,
     }
 
     dynamics = DeterministicLinear(params)
 
-    spread_time_avg, spread_time_std, _, _, _ = \
+    spread_time_avg, spread_time_std, _, _, _, _, _, _, _, _ = \
         dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
 
     print('network_size ', network_size, 'expected_degree ', expected_degree,

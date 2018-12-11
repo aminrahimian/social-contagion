@@ -36,7 +36,8 @@ def natural_keys(text):
 
 
 # real world networks simulation settings:
-network_group = 'cai_edgelist_'
+network_group = 'fb100_edgelist_'
+# 'cai_edgelist_'
 # 'chami_advice_edgelist_'
 # 'banerjee_combined_edgelist_'
 # 'cai_edgelist_' #'fb100_edgelist_'
@@ -136,6 +137,13 @@ for file in os.listdir(edgelist_directory_address):
 network_id_list.sort(key=natural_keys)
 print(network_id_list)
 
+# check for SLURM Job Array environmental variable:
+if 'SLURM_ARRAY_TASK_ID' in os.environ:
+    print('SLURM_ARRAY_TASK_ID: ' + str(os.environ['SLURM_ARRAY_TASK_ID']))
+    JOB_NET_ID = int(os.environ['SLURM_ARRAY_TASK_ID']) - 1
+    NET_ID = network_id_list[JOB_NET_ID]
+    network_id_list = [NET_ID]
+    print('SLURM_ARRAY_TASK_ID: ' + NET_ID)
 
 #  different models:
 model_id = '_model_1'
@@ -146,30 +154,35 @@ if model_id == '_model_1':
     fixed_prob_low = 0.05
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
 elif model_id == '_model_2':
     MODEL = '(0.025,0.5)'
     fixed_prob_high = 0.5
     fixed_prob_low = 0.025
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
 elif model_id == '_model_3':
     MODEL = '(0.05,1(0.05,0.5))'
     fixed_prob_high = 1.0
     fixed_prob_low = 0.05
     alpha = 0.05
     gamma = 0.5
+    delta = 0.0
 elif model_id == '_model_4':
     MODEL = '(ORG-0.05,1)'
     fixed_prob_high = 1.0
     fixed_prob_low = 0.05
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
 elif model_id == '_model_5':
     MODEL = 'REL(0.05,1)'
     fixed_prob_high = 1.0
     fixed_prob_low = 0.05
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
     zeta = 0.5  # the relative threshold
 elif model_id == '_model_6':
     MODEL = '(0.001,1)'
@@ -177,6 +190,14 @@ elif model_id == '_model_6':
     fixed_prob_low = 0.001
     alpha = 1.0
     gamma = 0.0
+    delta = 0.0
+elif model_id == '_model_7':
+    MODEL = '(0,1)'
+    fixed_prob_high = 1.0
+    fixed_prob_low = 0.0
+    alpha = 1.0
+    gamma = 0.0
+    delta = 0.0
 else:
     print('model_id is not valid')
     exit()
@@ -219,15 +240,15 @@ except OSError as e:
 # commonly used settings:
 
 # for computations:
-# do_computations = True
-# do_multiprocessing = True
-# save_computations = True
-# load_computations = False
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = False
-# simulator_mode = False
+do_computations = True
+do_multiprocessing = True
+save_computations = True
+load_computations = False
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = False
+simulator_mode = False
 #
 # for plotting:
 # do_computations = False
@@ -251,17 +272,17 @@ except OSError as e:
 # data_dump = True
 # simulator_mode = False
 
-# for simulator:
-do_computations = True
-do_multiprocessing = False
-save_computations = False
-load_computations = False
-# simulator uses a different mathplotlib setting for plotting
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = False
-simulator_mode = True
+# # for simulator:
+# do_computations = True
+# do_multiprocessing = False
+# save_computations = False
+# load_computations = False
+# # simulator uses a different mathplotlib setting for plotting
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = False
+# simulator_mode = True
 
 
 #  check that different modes are set consistently
@@ -290,7 +311,9 @@ assert not (simulator_mode and do_plots), "simulator_mode and do_plots use diffe
                                           "(conflicting) matplotlib settings, and " \
                                           "cannot be both true"
 
-layout = 'circular'  # layout could be circular, spring, this the graph visualization layout
+layout = 'spring'
+# 'circular'
+# layout could be circular, spring, this the graph visualization layout
 
 # import the required packages for different modes:
 
@@ -306,7 +329,7 @@ if simulator_mode:
     import pycxsimulator
     import pylab as PL
 
-    simulate_real_networks = False
+    simulate_real_networks = True
 
     highlight_infecting_edges = True
 
@@ -340,29 +363,29 @@ if simulator_mode:
             'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             # 'nearest_neighbors': 4,
             # 'fixed_number_edges_added': 2,
-            'fixed_prob_high': 1.0,
+            'fixed_prob_high': 1,
             'fixed_prob': 0.0,
             'theta': 2,
             'alpha': 1.0,
             'gamma': 0.0,
         }
     else:
-        simulator_ID = '5000_net_pure_complex'
+        simulator_ID = '1000_test'
 
         initial_seeds = 2
 
-        network_size = 5000
+        network_size = 1000
 
         simulator_params = {
             'size': network_size,  # populationSize,
             'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
             'network_model': 'newman_watts_fixed_number',
             # two initial seeds, next to each other
-            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'delta': 0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 4,
             'fixed_number_edges_added': 2,
-            'fixed_prob_high': 1.0,
-            'fixed_prob': 0.0,
+            'fixed_prob_high': 0.02,
+            'fixed_prob': 0.01,
             'theta': 2,
             'alpha': 1,
             'gamma': 0,
@@ -405,7 +428,10 @@ if do_plots:
 if do_multiprocessing:
     import multiprocessing
     from itertools import product
-    number_CPU = 37
+    if 'SLURM_ARRAY_TASK_ID' in os.environ:
+        number_CPU = 3
+    else:
+        number_CPU = 20
 
 
 def combine(list_of_names,output_name):

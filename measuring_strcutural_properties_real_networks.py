@@ -67,7 +67,7 @@ def generate_network_intervention_datasets(network_id, intervention_size):
         # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
         'initialization_mode': 'fixed_number_initial_infection',
         # 'initial_infection_number': number_initial_seeds,
-        'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+        'delta': delta,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
         'fixed_prob_high': 1.0,
         'fixed_prob': 0.05,
         'theta': 2,
@@ -85,7 +85,7 @@ def generate_network_intervention_datasets(network_id, intervention_size):
         # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
         'initialization_mode': 'fixed_number_initial_infection',
         # 'initial_infection_number': number_initial_seeds,
-        'delta': 0.0000000000000001,
+        'delta': delta,
         'fixed_prob_high': 1.0,
         'fixed_prob': 0.05,
         'theta': 2,
@@ -102,7 +102,7 @@ def generate_network_intervention_datasets(network_id, intervention_size):
         # 'initial_states': [1] * initial_seeds + [0] * (network_size - initial_seeds),
         'initialization_mode': 'fixed_number_initial_infection',
         # 'initial_infection_number': number_initial_seeds,
-        'delta': 0.0000000000000001,
+        'delta': delta,
         'fixed_prob_high': 1.0,
         'fixed_prob': 0.05,
         'theta': 2,
