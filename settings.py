@@ -11,7 +11,6 @@ import errno
 import networkx as NX
 import re
 
-
 susceptible = 0.0
 infected = 1.0
 
@@ -23,6 +22,7 @@ COMPLEX = 1
 
 SENTINEL = object()
 
+
 def atoi(text):
     return int(text) if text.isdigit() else text
 
@@ -32,11 +32,12 @@ def natural_keys(text):
     http://nedbatchelder.com/blog/200712/human_sorting.html
     (See Toothy's implementation in the comments)
     '''
-    return [atoi(c) for c in re.split('(\d+)', text) ]
+    return [atoi(c) for c in re.split('(\d+)', text)]
 
 
 # real world networks simulation settings:
-network_group = 'fb100_edgelist_'
+network_group = 'chami_union_edgelist_'
+# 'fb100_edgelist_'
 # 'cai_edgelist_'
 # 'chami_advice_edgelist_'
 # 'banerjee_combined_edgelist_'
@@ -52,17 +53,27 @@ if network_group == 'cai_edgelist_':
 
     DELIMITER = ' '
 
-
 elif network_group == 'chami_friendship_edgelist_':
 
     root_data_address = './data/chami-friendship-data/'
 
     DELIMITER = ','
 
-
 elif network_group == 'chami_advice_edgelist_':
 
     root_data_address = './data/chami-advice-data/'
+
+    DELIMITER = ','
+
+elif network_group == 'chami_union_edgelist_':
+
+    root_data_address = './data/chami-union-data/'
+
+    DELIMITER = ','
+
+elif network_group == 'chami_union_edgelist_':
+
+    root_data_address = './data/chami-union-data/'
 
     DELIMITER = ','
 
@@ -134,7 +145,9 @@ for file in os.listdir(edgelist_directory_address):
     net_id = filename.replace(network_group,'')
     print(net_id)
     network_id_list += [net_id]
+
 network_id_list.sort(key=natural_keys)
+
 print(network_id_list)
 
 # check for SLURM Job Array environmental variable:
@@ -146,7 +159,7 @@ if 'SLURM_ARRAY_TASK_ID' in os.environ:
     print('SLURM_ARRAY_TASK_ID: ' + NET_ID)
 
 #  different models:
-model_id = '_model_1'
+model_id = '_model_7'
 
 if model_id == '_model_1':
     MODEL = '(0.05,1)'
@@ -238,10 +251,10 @@ except OSError as e:
         raise
 
 # commonly used settings:
-
+#
 # for computations:
 do_computations = True
-do_multiprocessing = True
+do_multiprocessing = False
 save_computations = True
 load_computations = False
 do_plots = False
@@ -260,8 +273,8 @@ simulator_mode = False
 # show_plots = False
 # data_dump = False
 # simulator_mode = False
-
-# for data_dump:
+#
+# # for data_dump:
 # do_computations = False
 # do_multiprocessing = False
 # save_computations = False
@@ -272,7 +285,7 @@ simulator_mode = False
 # data_dump = True
 # simulator_mode = False
 
-# # for simulator:
+# for simulator:
 # do_computations = True
 # do_multiprocessing = False
 # save_computations = False
@@ -431,7 +444,7 @@ if do_multiprocessing:
     if 'SLURM_ARRAY_TASK_ID' in os.environ:
         number_CPU = 3
     else:
-        number_CPU = 20
+        number_CPU = 2
 
 
 def combine(list_of_names,output_name):

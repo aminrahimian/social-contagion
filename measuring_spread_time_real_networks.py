@@ -5,11 +5,11 @@ from multiprocessing import Pool
 
 VERBOSE = True
 
-size_of_dataset = 2
+size_of_dataset = 500
 
-rewiring_percentage_list = [5, 10, 15, 20, 25]
+rewiring_percentage_list = [10]
 
-percent_more_edges_list = [5, 10, 15, 20, 25]
+percent_more_edges_list = [10]
 
 do_computations_for_original_network = True
 
