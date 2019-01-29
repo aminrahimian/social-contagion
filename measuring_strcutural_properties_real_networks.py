@@ -234,5 +234,5 @@ if __name__ == '__main__':
             for network_id in network_id_list:
                 measure_properties_of_network_inetrvention_datasets(network_id, intervention_size)
 
-    pool.close()
-    pool.join()
+    # pool.close()
+    # pool.join()
