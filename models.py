@@ -115,9 +115,8 @@ def random_factor_pair(value):
 
 
 def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
-    """Returns a Newman–Watts–Strogatz small-world graph. With a fixed - p - (not random) number of edges
-    added to each node. Modified newman_watts_strogatzr_graph() in NetworkX.
-    """
+    """ Returns a Newman-Watts-Strogatz small-world graph. With a fixed - p - (not random)
+    number of edges added to each node. Modified newman_watts_strogatzr_graph() in NetworkX. """
     if seed is not None:
         RD.seed(seed)
     if k >= n:
@@ -270,7 +269,7 @@ def add_edges(G, number_of_edges_to_be_added=10, mode='random', seed=None):
         return fat_network
 
 
-class NetworkModel:
+class NetworkModel(object):
     """
     implement the initializations and parameter set methods
     """
