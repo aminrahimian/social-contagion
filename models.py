@@ -249,7 +249,7 @@ def add_edges(G, number_of_edges_to_be_added=10, mode='random', seed=None):
     if mode is 'triadic_closures':
         weights = []
         for non_edge in unformed_edges:
-            weights += [len(list(NX.common_neighbors(G, non_edge[0], non_edge[1])))]
+            weights += [1.0*len(list(NX.common_neighbors(G, non_edge[0], non_edge[1])))]
 
         total_sum = sum(weights)
 
