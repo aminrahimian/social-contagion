@@ -23,12 +23,12 @@ centola_data$ratio_k<- centola_data$hazard_ratio
 centola_data_processed <- centola_data[c("k","ratio_k")]
 
 
-initial_row<-data.frame(1.0,1.0)
-names(initial_row)<-c("k","ratio_k")
+#initial_row<-data.frame(1.0,1.0)
+#names(initial_row)<-c("k","ratio_k")
 
-centola_data_processed <- rbind(initial_row , centola_data_processed)
+#centola_data_processed <- rbind(initial_row , centola_data_processed)
 
-centola_data_processed$group <- rep("centola_online",length(centola_data_processed$k))
+centola_data_processed$group <- rep("Centola (2010)",length(centola_data_processed$k))
 
 # load data
 bakshy_role_data <- read.csv(
@@ -70,7 +70,11 @@ bakshy_role_data_feed_0_processed <- bakshy_role_data_feed_0[c("k","ratio_k")]
 
 bakshy_role_data_feed_0_processed$group <- rep("bakshy_role_no_feed",length(bakshy_role_data_feed_0_processed$k))
 
-#bakshy_role_data_feed_1
+# remove the first row
+
+bakshy_role_data_feed_0_processed <- bakshy_role_data_feed_0_processed[-c(1),]
+
+################bakshy_role_data_feed_1
 
 bakshy_role_data_feed_1 <- bakshy_role_data %>% filter(feed == "1")
 
@@ -104,7 +108,12 @@ bakshy_role_data_feed_1_processed <-
   bakshy_role_data_feed_1[c("k","ratio_k")]
 
 bakshy_role_data_feed_1_processed$group <- 
-  rep("bakshy_role_feed",length(bakshy_role_data_feed_1_processed$k))
+  rep("Bakshy et. al. (2012)",length(bakshy_role_data_feed_1_processed$k))
+
+
+# remove the first row
+
+bakshy_role_data_feed_1_processed <- bakshy_role_data_feed_1_processed[-c(1),]
 
 # combine all processed data frames
 
@@ -122,14 +131,14 @@ theme_update(
   panel.grid.minor = element_blank()
 )
 group_colors <- c(
-  "centola_online" = "black",
+  "Centola (2010)" = "black",
   "bakshy_role_no_feed" = brewer.pal(8, "Set1")[1],
-  "bakshy_role_feed" = brewer.pal(8, "Set1")[2]
+  "Bakshy et. al. (2012)" = brewer.pal(8, "Set1")[2]
 )
 intervention_shapes <- c(
-  "centola_online" = 16,
+  "Centola (2010)" = 16,
   "bakshy_role_no_feed" = 16,
-  "bakshy_role_feed" = 17
+  "Bakshy et. al. (2012)" = 17
 )
 
 # plot ECDF averaging over networks
@@ -137,7 +146,7 @@ empirical_adoption_rates_plot <- ggplot(
   aes(x = k, y=ratio_k,
       color = group
   ),
-  data = empirical_adoptions_rates #%>% filter()
+  data = empirical_adoptions_rates%>%filter(group != "bakshy_role_no_feed")
 ) +
   geom_line()+
   scale_color_manual(values = group_colors) +
@@ -146,11 +155,11 @@ empirical_adoption_rates_plot <- ggplot(
   #facet_wrap( ~ factor(intervention_size)) +
   ylab("p(k)/p(k-1)") +
   xlab("k") +
-  theme(legend.position = c(0.8, 0.3)) +
-  annotation_logticks(
-    sides = "b", size = .3,
-    short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
-  )
+  theme(legend.position = c(0.8, 0.3))
+  #annotation_logticks(
+   # sides = "b", size = .3,
+  #  short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
+  #)
 empirical_adoption_rates_plot
 
 ggsave('figures/empirical_adoption_rates/empirical_adoption_rates.pdf',
