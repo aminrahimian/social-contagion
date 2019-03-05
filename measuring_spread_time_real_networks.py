@@ -2,14 +2,18 @@
 
 from models import *
 from multiprocessing import Pool
+from pathlib import Path
+
 
 VERBOSE = True
 
-size_of_dataset = 2
+CHECK_FOR_EXISTING_PKL_SAMPLES = True
 
-rewiring_percentage_list = [5, 10, 15, 20, 25]
+size_of_dataset = 50
 
-percent_more_edges_list = [5, 10, 15, 20, 25]
+rewiring_percentage_list = [50]
+
+percent_more_edges_list = [50]
 
 do_computations_for_original_network = True
 
@@ -43,6 +47,17 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
 
     if rewiring_percentage is 0:
         print('network id', network_id, 'original')
+
+        if CHECK_FOR_EXISTING_PKL_SAMPLES:
+            path = Path(spreading_pickled_samples_directory_address + 'infection_size_original_'
+                        + network_group + network_id
+                        + model_id + '.pkl')
+            if path.is_file():
+                print('infection_size_original_'
+                      + network_group + network_id
+                      + model_id + ' already exists')
+                return
+
         params_original = {
             'network': G,
             'original_network': G,
@@ -96,6 +111,17 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
     else:  # rewiring
 
         print('network id', network_id, 'rewiring: ', rewiring_percentage)
+
+        if CHECK_FOR_EXISTING_PKL_SAMPLES:
+            path = Path(spreading_pickled_samples_directory_address + 'infection_size_samples_'
+                        + str(rewiring_percentage) + '_percent_rewiring_'
+                        + network_group + network_id
+                        + model_id + '.pkl')
+            if path.is_file():
+                print('infection_size_samples_' + str(rewiring_percentage) + '_percent_rewiring_'
+                      + network_group + network_id
+                      + model_id + ' already exists')
+                return
 
         params_rewired = {
             'network': G,
@@ -154,6 +180,18 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
 
 def measure_triad_addition_spread_time(network_id, percent_more_edges):
     print('network id', network_id, 'triad edge addition: ', percent_more_edges)
+
+    if CHECK_FOR_EXISTING_PKL_SAMPLES:
+        path = Path(spreading_pickled_samples_directory_address + 'infection_size_samples_'
+                    + str(percent_more_edges) + '_percent_' + 'add_triad_'
+                    + network_group + network_id
+                    + model_id + '.pkl')
+        if path.is_file():
+            print('infection_size_samples_' + str(percent_more_edges) + '_percent_' + 'add_triad_'
+                  + network_group + network_id
+                  + model_id + ' already exists')
+            return
+
     #  load in the network and extract preliminary data
     fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
     G = NX.read_edgelist(fh, delimiter=DELIMITER)
@@ -230,6 +268,19 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
 
 def measure_random_addition_spread_time(network_id, percent_more_edges):
     print('network id', network_id, 'traid edge addition: ', percent_more_edges)
+
+    if CHECK_FOR_EXISTING_PKL_SAMPLES:
+        path = Path(spreading_pickled_samples_directory_address + 'infection_size_samples_'
+                    + str(percent_more_edges) + '_percent_' + 'add_random_'
+                    + network_group + network_id
+                    + model_id + '.pkl')
+        if path.is_file():
+            print('infection_size_samples_' + str(percent_more_edges)
+                  + '_percent_' + 'add_random_'
+                  + network_group + network_id
+                  + model_id + ' already exists')
+            return
+
     #  load in the network and extract preliminary data
     fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
     G = NX.read_edgelist(fh, delimiter=DELIMITER)
