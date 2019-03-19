@@ -9,11 +9,11 @@ VERBOSE = True
 
 CHECK_FOR_EXISTING_PKL_SAMPLES = True
 
-size_of_dataset = 50
+size_of_dataset = 100
 
-rewiring_percentage_list = [50]
+rewiring_percentage_list = [10]
 
-percent_more_edges_list = [50]
+percent_more_edges_list = [10]
 
 do_computations_for_original_network = True
 
@@ -267,7 +267,7 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
 
 
 def measure_random_addition_spread_time(network_id, percent_more_edges):
-    print('network id', network_id, 'traid edge addition: ', percent_more_edges)
+    print('network id', network_id, 'random edge addition: ', percent_more_edges)
 
     if CHECK_FOR_EXISTING_PKL_SAMPLES:
         path = Path(spreading_pickled_samples_directory_address + 'infection_size_samples_'
