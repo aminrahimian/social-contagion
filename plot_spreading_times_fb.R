@@ -185,8 +185,8 @@ st_1_ecdf_diff <- st_1_ecdf %>%
   filter(model != MODEL_4) %>%
   group_by(model, network_group, network_id) %>%
   mutate(
-    cdf_diff_none = cdf - cdf[intervention_type == "none"]#,
-    #cdf_diff_triad_addition = cdf - cdf[intervention_type == "triad_addition"]
+    cdf_diff_none = cdf - cdf[intervention_type == "none"],
+    cdf_diff_triad_addition = cdf - cdf[intervention_type == "triad_addition"]
     )
 
 many_diff_in_ecdf_plot = ggplot(
@@ -289,8 +289,8 @@ many_with_insets <- many_ecdf_plot +
   ) +
   annotation_custom(
     ggplotGrob(
-      many_diff_in_ecdf_plot +
-      #many_diff_in_ecdf_plot_random_vs_triad +
+      #many_diff_in_ecdf_plot +
+      many_diff_in_ecdf_plot_random_vs_triad +
         theme(legend.position = "none") +
         xlab(NULL) +
         scale_y_continuous(breaks = c(0, .5)) +
