@@ -23,8 +23,15 @@ COMPLEX = 1
 SENTINEL = object()
 
 
+def get_n_smallest_key_values(dictionary, n):
+    smallest_entries = sorted(
+        dictionary.keys(), key=lambda t: dictionary[t], reverse=False)[:n]
+    return smallest_entries
+
+
 def atoi(text):
     return int(text) if text.isdigit() else text
+
 
 def natural_keys(text):
     '''
@@ -90,7 +97,12 @@ elif network_group == 'fb100_edgelist_':
 
     DELIMITER = ' '
 
-    GENERATE_NET_LIST_FROM_AVAILABLE_SAMPLES = True
+    GENERATE_NET_LIST_FROM_AVAILABLE_SAMPLES = False
+
+    TAKE_SMALLEST_N = True
+
+    if TAKE_SMALLEST_N:
+        SMALLEST_N = 40
 
 edgelist_directory_address = root_data_address + 'edgelists/'
 
@@ -200,6 +212,21 @@ else:
     print('model_id is not valid')
     exit()
 
+
+network_id_list = []
+
+for file in os.listdir(edgelist_directory_address):
+    filename = os.path.splitext(file)[0]
+    net_id = filename.replace(network_group, '')
+    print(net_id)
+    network_id_list += [net_id]
+
+network_id_list.sort(key=natural_keys)
+
+print('without checking the availability of samples or taking smaller ones:')
+
+print(network_id_list)
+
 try:
     if GENERATE_NET_LIST_FROM_AVAILABLE_SAMPLES == True:
         network_id_list = []
@@ -207,7 +234,8 @@ try:
             filename = os.path.splitext(file)[0]
             net_id = filename.replace(network_group, '')
             print(net_id)
-            available_sample_file = 'infection_size_samples_' + '10' + '_percent_' + 'add_triad_'\
+            available_sample_file = 'infection_size_samples_' + '10' + '_percent_' \
+                                    + 'add_triad_'\
                                     + network_group + net_id + model_id + '.pkl'
             print(available_sample_file)
             print(spreading_pickled_samples_directory_address)
@@ -218,19 +246,50 @@ try:
 
         network_id_list.sort(key=natural_keys)
 
+        print('before taking smallest N:')
+
+        print(network_id_list)
+
+    if TAKE_SMALLEST_N:
+
+        assert SMALLEST_N <= len(network_id_list), "not enough nets in the net_id list"
+
+        net_id_dic = dict.fromkeys(network_id_list)
+
+        for network_id in net_id_dic.keys():
+
+            print('loading' + network_group + network_id)
+
+            #  load in the network and extract preliminary data
+
+            fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
+
+            G = NX.read_edgelist(fh, delimiter=DELIMITER)
+
+            print('original size ', len(G.nodes()))
+
+            #  get the largest connected component:
+            if not NX.is_connected(G):
+                G = max(NX.connected_component_subgraphs(G), key=len)
+                print('largest connected component extracted with size ', len(G.nodes()))
+
+            network_size = NX.number_of_nodes(G)
+
+            net_id_dic[network_id] = network_size
+
+        print(net_id_dic)
+
+        network_id_list = get_n_smallest_key_values(net_id_dic,SMALLEST_N)
+
+        network_id_list.sort(key=natural_keys)
+
+        print('after taking smallest N')
+
         print(network_id_list)
 
 except NameError:
-    network_id_list = []
-    for file in os.listdir(edgelist_directory_address):
-        filename = os.path.splitext(file)[0]
-        net_id = filename.replace(network_group, '')
-        print(net_id)
-        network_id_list += [net_id]
 
-    network_id_list.sort(key=natural_keys)
-
-    print(network_id_list)
+    print('could not check for availability of samples or take smaller ones')
 
 # check for SLURM Job Array environmental variable:
 if 'SLURM_ARRAY_TASK_ID' in os.environ:
@@ -468,7 +527,7 @@ if do_multiprocessing:
     if 'SLURM_ARRAY_TASK_ID' in os.environ:
         number_CPU = 3
     else:
-        number_CPU = 2
+        number_CPU = 40
 
 
 def combine(list_of_names,output_name):
