@@ -3,12 +3,11 @@ library(dplyr)
 library(ggplot2)
 library(RColorBrewer)
 
-# network_type = "advice"
-network_type = "friendship"
+network_type = "union"
 
 MODEL_1 = "(0.05,1)"
 
-default_intervention_size = 25
+default_intervention_size = 10
 
 # load data
 st <- read.csv(
@@ -111,7 +110,7 @@ overall_ecdf_plot <- ggplot(
   )
 overall_ecdf_plot
 
-ggsave('figures/chami/chami_time_to_spread_ecdf_overall_model_1.pdf',
+ggsave('figures/chami_union/chami_union_time_to_spread_ecdf_overall_model_1.pdf',
        overall_ecdf_plot, width = 4.5, height = 3.5)
 
 overall_ecdf_plot_facet_by_size = ggplot(
@@ -142,7 +141,7 @@ overall_ecdf_plot_facet_by_size = ggplot(
   )
 overall_ecdf_plot_facet_by_size
 
-ggsave('figures/chami/chami_time_to_spread_ecdf_overall_by_intervention_size.pdf',
+ggsave('figures/chami_union/chami_union_time_to_spread_ecdf_overall_by_intervention_size.pdf',
        overall_ecdf_plot_facet_by_size, width = 12, height = 4)
 
 
@@ -169,7 +168,7 @@ many_ecdf_plot = ggplot(
 guides(colour = guide_legend(override.aes = list(alpha = .7)))
 many_ecdf_plot
 
-ggsave('figures/chami/chami_time_to_spread_many_ecdfs_model_1.pdf',
+ggsave('figures/chami_union/chami_union_time_to_spread_many_ecdfs_model_1.pdf',
        many_ecdf_plot, width = 5, height = 4)
 
 many_ecdf_plot_facet_by_size = ggplot(
@@ -202,7 +201,7 @@ many_ecdf_plot_facet_by_size = ggplot(
 guides(colour = guide_legend(override.aes = list(alpha = .7)))
 many_ecdf_plot_facet_by_size
 
-ggsave('figures/chami/chami_time_to_spread_many_ecdfs_by_intervention_size.pdf',
+ggsave('figures/chami_union/chami_union_time_to_spread_many_ecdfs_by_intervention_size.pdf',
        many_ecdf_plot_facet_by_size, width = 12, height = 4)
 
 ###
@@ -254,7 +253,7 @@ many_diff_in_ecdf_plot = ggplot(
   )
 many_diff_in_ecdf_plot
 
-ggsave('figures/chami/chami_time_to_spread_many_diff_in_ecdfs_rewired_vs_none.pdf',
+ggsave('figures/chami_union/chami_union_time_to_spread_many_diff_in_ecdfs_rewired_vs_none.pdf',
        many_diff_in_ecdf_plot, width = 5, height = 4)
 
 many_diff_in_ecdf_plot_random_vs_triad = ggplot(
@@ -281,7 +280,7 @@ many_diff_in_ecdf_plot_random_vs_triad = ggplot(
   )
 many_diff_in_ecdf_plot_random_vs_triad
 
-ggsave('figures/chami/chami_time_to_spread_many_diff_in_ecdfs_random_vs_triadic.pdf',
+ggsave('figures/chami_union/chami_union_time_to_spread_many_diff_in_ecdfs_random_vs_triadic.pdf',
        many_diff_in_ecdf_plot_random_vs_triad, width = 5, height = 4)
 
 many_diff_in_ecdf_plot = ggplot(
@@ -308,7 +307,7 @@ many_diff_in_ecdf_plot = ggplot(
   )
 many_diff_in_ecdf_plot
 
-ggsave('figures/chami/chami_time_to_spread_many_diff_in_ecdfs_random_vs_none.pdf',
+ggsave('figures/chami_union/chami_union_time_to_spread_many_diff_in_ecdfs_random_vs_none.pdf',
        many_diff_in_ecdf_plot, width = 5, height = 4)
 
 
@@ -343,7 +342,7 @@ many_with_insets <- many_ecdf_plot +
   )
 many_with_insets
 
-ggsave('figures/chami/chami_time_to_spread_many_ecdfs_with_insets.pdf',
+ggsave('figures/chami_union/chami_union_time_to_spread_many_ecdfs_with_insets.pdf',
        many_with_insets, width = 5, height = 4)
 
 
@@ -378,6 +377,6 @@ sample_ecdf_plot = ggplot(
   xlab("time to spread")
 sample_ecdf_plot
 
-ggsave('figures/chami/time_to_spread_sample_networks_ecdfs.pdf',
+ggsave('figures/chami_union/time_to_spread_sample_networks_ecdfs.pdf',
        sample_ecdf_plot, width = 12, height = 10)
 
