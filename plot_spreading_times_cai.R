@@ -6,6 +6,9 @@ library(RColorBrewer)
 MODEL_1 = "(0.05,1)"
 MODEL_2 = "(0.025,0.5)"
 MODEL_3 = "(0.05,1(0.05,0.5))"
+MODEL_4 = "(ORG-0.05,1)"
+MODEL_5 = "REL(0.05,1)"
+MODEL_6 = "(0.001,1)"
 
 default_intervention_size = 10
 
@@ -16,6 +19,7 @@ st <- read.csv(
 )
 
 table(table(st$network_id))
+table(st$model)
 
 nd <- read.csv(
   "data/cai-data/output/cai_edgelist_properties_data_dump.csv",
@@ -65,9 +69,6 @@ combined_summary_null <- st %>%
       )
   )
 
-st_1 <- st %>%
-  inner_join(combined_summary_null)
-
 
 # plotting settings
 theme_set(theme_bw())
@@ -75,24 +76,36 @@ theme_update(
   panel.grid.major = element_blank(),
   panel.grid.minor = element_blank()
 )
+intervention_name_map <- c(
+  "none" = "original",
+  "random_addition" = "random addition",
+  "triad_addition" = "triadic addition",
+  "rewired" = "rewired"
+)
 intervention_colors <- c(
-  "none" = "black",
-  "random_addition" = brewer.pal(8, "Set1")[1],
-  "triad_addition" = brewer.pal(8, "Set1")[2],
+  "original" = "black",
+  "random addition" = brewer.pal(8, "Set1")[1],
+  "triadic addition" = brewer.pal(8, "Set1")[2],
   "rewired" = brewer.pal(8, "Set1")[5]
 )
 intervention_shapes <- c(
-  "none" = 16,
-  "random_addition" = 16,
-  "triad_addition" = 17,
+  "original" = 16,
+  "random addition" = 16,
+  "triadic addition" = 17,
   "rewired" = 17
 )
+
+st_1 <- st %>%
+  inner_join(combined_summary_null) %>%
+  mutate(
+    intervention = intervention_name_map[intervention_type]
+    )
 
 
 # plot ECDF averaging over networks
 overall_ecdf_plot <- ggplot(
   aes(x = time_to_spread,
-      color = intervention_type
+      color = intervention
   ),
   data = st_1 %>% filter(
     model == MODEL_1,
@@ -115,57 +128,53 @@ overall_ecdf_plot
 ggsave('figures/cai/cai_time_to_spread_ecdf_overall_model_1.pdf',
        overall_ecdf_plot, width = 4.5, height = 3.5)
 
-overall_ecdf_plot_2 <- ggplot(
-  aes(x = time_to_spread,
-      color = intervention_type
-  ),
-  data = st_1 %>% filter(
+overall_ecdf_plot %+% (
+  st_1 %>% filter(
     model == MODEL_2,
     intervention_size %in% c(0, default_intervention_size)
-  )
-) +
-  scale_color_manual(values = intervention_colors) +
-  scale_x_log10() +
-  stat_ecdf() +
-  ylab("ECDF") +
-  xlab("time to spread") +
-  theme(legend.position = c(0.8, 0.3)) +
-  annotation_logticks(
-    sides = "b", size = .3,
-    short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
-  )
-overall_ecdf_plot_2
-
+  ))
 ggsave('figures/cai/cai_time_to_spread_ecdf_overall_model_2.pdf',
-       overall_ecdf_plot_2, width = 4.5, height = 3.5)
+       width = 4.5, height = 3.5)
 
-overall_ecdf_plot_3 <- ggplot(
-  aes(x = time_to_spread,
-      color = intervention_type
-  ),
-  data = st_1 %>% filter(
+overall_ecdf_plot %+% (
+  st_1 %>% filter(
     model == MODEL_3,
     intervention_size %in% c(0, default_intervention_size)
-  )
-) +
-  scale_color_manual(values = intervention_colors) +
-  scale_x_log10() +
-  stat_ecdf() +
-  ylab("ECDF") +
-  xlab("time to spread") +
-  theme(legend.position = c(0.8, 0.3)) +
-  annotation_logticks(
-    sides = "b", size = .3,
-    short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
-  )
-overall_ecdf_plot_3
-
+  )) +
+  theme(legend.position = c(0.22, 0.75))
 ggsave('figures/cai/cai_time_to_spread_ecdf_overall_model_3.pdf',
-       overall_ecdf_plot_3, width = 4.5, height = 3.5)
+       width = 4.5, height = 3.5)
 
-overall_ecdf_plot_facet_by_size = ggplot(
+overall_ecdf_plot %+% (
+  st_1 %>% filter(
+    model == MODEL_4,
+    intervention_size %in% c(0, default_intervention_size)
+  ))
+ggsave('figures/cai/cai_time_to_spread_ecdf_overall_model_4.pdf',
+       width = 4.5, height = 3.5)
+
+overall_ecdf_plot %+% (
+  st_1 %>% filter(
+    model == MODEL_5,
+    intervention_size %in% c(0, default_intervention_size)
+  ))
+ggsave('figures/cai/cai_time_to_spread_ecdf_overall_model_5.pdf',
+       width = 4.5, height = 3.5)
+
+overall_ecdf_plot %+% (
+  st_1 %>% filter(
+    model == MODEL_6,
+    intervention_size %in% c(0, default_intervention_size)
+  )) +
+  theme(legend.position = c(0.22, 0.75))
+
+ggsave('figures/cai/cai_time_to_spread_ecdf_overall_model_6.pdf',
+       width = 4.5, height = 3.5)
+
+
+overall_ecdf_plot_facet = ggplot(
   aes(x = time_to_spread,
-      color = intervention_type 
+      color = intervention 
   ),
   data = st_1 %>% filter(
     intervention_type != "none"
@@ -181,7 +190,7 @@ overall_ecdf_plot_facet_by_size = ggplot(
       select(-intervention_size)
   ) +
   stat_ecdf() +
-  facet_grid(model ~ intervention_size) +
+  facet_grid(intervention_size ~ model, scales = "free_x") +
   ylab("ECDF") +
   xlab("time to spread") +
   theme(legend.position = "bottom") +
@@ -189,24 +198,29 @@ overall_ecdf_plot_facet_by_size = ggplot(
     sides = "b", size = .3,
     short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
   )
-overall_ecdf_plot_facet_by_size
+#overall_ecdf_plot_facet
 
 ggsave('figures/cai/cai_time_to_spread_ecdf_overall_by_model_and_intervention_size.pdf',
-       overall_ecdf_plot_facet_by_size, width = 12, height = 12)
+       overall_ecdf_plot_facet, width = 12, height = 12)
 
 
 # overlay ECDF for each network
+tmp <- st_1 %>% filter(
+  intervention_size %in% c(0, default_intervention_size),
+  model == MODEL_1
+) %>%
+  mutate(
+    intervention = factor(intervention)
+    )
 many_ecdf_plot = ggplot(
   aes(x = time_to_spread / time_to_spread_null_mean,
-      color = intervention_type,
+      color = intervention,
       group = paste(intervention_type, intervention_size, network_id)
   ),
-  data = st_1 %>% filter(
-    intervention_size %in% c(0, default_intervention_size),
-    model == MODEL_1)
+  data = tmp
 ) +
-  scale_x_log10(breaks = c(.25, .5, 1, 2, 4, 10)) +
-  scale_color_manual(values = intervention_colors) +
+  scale_x_log10(breaks = c(.25, .5, 1, 2, 4, 10), limits = c(.1, 11)) +
+  scale_color_manual(values = intervention_colors, drop = FALSE) +
   stat_ecdf(alpha = .25, lwd = .2) +
   ylab("ECDF") +
   xlab("relative time to spread") +
@@ -215,16 +229,33 @@ many_ecdf_plot = ggplot(
     sides = "b", size = .3,
     short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
   ) +
-guides(colour = guide_legend(override.aes = list(alpha = .7)))
+guides(colour = guide_legend(override.aes = list(alpha = .8, lwd = .4)))
 many_ecdf_plot
 
 ggsave('figures/cai/cai_time_to_spread_many_ecdfs_model_1.pdf',
        many_ecdf_plot, width = 5, height = 4)
 
+# make version for revealing in talk
+many_ecdf_plot %+%
+  (tmp %>% filter(intervention_type %in% "none"))
+ggsave('figures/cai/cai_time_to_spread_many_ecdfs_reveal_1.pdf',
+       width = 5, height = 4)
+many_ecdf_plot %+%
+  (tmp %>% filter(intervention_type %in% c("none", "rewired")))
+ggsave('figures/cai/cai_time_to_spread_many_ecdfs_reveal_2.pdf',
+       width = 5, height = 4)
+many_ecdf_plot %+%
+  (tmp %>% filter(intervention_type %in% c("none", "rewired", "triad_addition")))
+ggsave('figures/cai/cai_time_to_spread_many_ecdfs_reveal_3.pdf',
+       width = 5, height = 4)
+many_ecdf_plot %+%
+  (tmp)
+ggsave('figures/cai/cai_time_to_spread_many_ecdfs_reveal_4.pdf',
+       width = 5, height = 4)
 
 many_ecdf_plot_2 = ggplot(
   aes(x = time_to_spread / time_to_spread_null_mean,
-      color = intervention_type,
+      color = intervention,
       group = paste(intervention_type, intervention_size, network_id)
   ),
   data = st_1 %>% filter(
@@ -249,7 +280,7 @@ ggsave('figures/cai/cai_time_to_spread_many_ecdfs_model_2.pdf',
 
 many_ecdf_plot_3 = ggplot(
   aes(x = time_to_spread / time_to_spread_null_mean,
-      color = intervention_type,
+      color = intervention,
       group = paste(intervention_type, intervention_size, network_id)
   ),
   data = st_1 %>% filter(
@@ -275,7 +306,7 @@ ggsave('figures/cai/cai_time_to_spread_many_ecdfs_model_3.pdf',
 
 many_ecdf_plot_facet_by_size = ggplot(
   aes(x = time_to_spread / time_to_spread_null_mean,
-      color = intervention_type,
+      color = intervention,
       group = paste(intervention_type, network_id)      
   ),
   data = st_1 %>% filter(
@@ -309,14 +340,13 @@ ggsave('figures/cai/cai_time_to_spread_many_ecdfs_by_model_and_intervention_size
 ###
 # difference in ECDFs
 
-time_seq = 1:max(st_1$time_to_spread)
 st_1_ecdf <- st_1 %>%
   filter(intervention_size %in% c(0, default_intervention_size)) %>%
-  group_by(model, network_group, network_id, intervention_type) %>%
+  group_by(model, network_group, network_id, intervention, intervention_type) %>%
   do({
     data.frame(
-      time_to_spread = time_seq,
-      cdf = ecdf(.$time_to_spread)(time_seq)
+      time_to_spread = 1:.$time_to_spread_max,
+      cdf = ecdf(.$time_to_spread)(1:.$time_to_spread_max)
     )
   })
 
@@ -325,6 +355,7 @@ st_1_ecdf <- st_1_ecdf %>%
   filter(time_to_spread <= time_to_spread_max)
 
 st_1_ecdf_diff <- st_1_ecdf %>%
+  filter(model != MODEL_4) %>%
   group_by(model, network_group, network_id) %>%
   mutate(
     cdf_diff_none = cdf - cdf[intervention_type == "none"],
@@ -334,7 +365,7 @@ st_1_ecdf_diff <- st_1_ecdf %>%
 many_diff_in_ecdf_plot = ggplot(
   aes(x = time_to_spread,
       y = cdf_diff_none,
-      color = intervention_type,
+      color = intervention,
       group = paste(intervention_type, network_id)
       ),
   data = st_1_ecdf_diff %>%
@@ -361,7 +392,7 @@ ggsave('figures/cai/cai_time_to_spread_many_diff_in_ecdfs_rewired_vs_none.pdf',
 many_diff_in_ecdf_plot_random_vs_triad = ggplot(
   aes(x = time_to_spread,
       y = cdf_diff_triad_addition,
-      color = intervention_type,
+      color = intervention,
       group = paste(intervention_type, network_id)
       ),
   data = st_1_ecdf_diff %>%
@@ -388,7 +419,7 @@ ggsave('figures/cai/cai_time_to_spread_many_diff_in_ecdfs_random_vs_triadic.pdf'
 many_diff_in_ecdf_plot = ggplot(
   aes(x = time_to_spread,
       y = cdf_diff_none,
-      color = intervention_type,
+      color = intervention,
       group = paste(intervention_type, network_id)
       ),
   data = st_1_ecdf_diff %>%
@@ -422,7 +453,7 @@ many_with_insets <- many_ecdf_plot +
       overall_ecdf_plot +
         theme(legend.position = "none") +
         scale_y_continuous(breaks = c(0, .5, 1)) +
-        scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), max(st_1$time_to_spread))) +
+        scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), 230)) +
         theme(text = element_text(size=7),
               rect = element_rect(fill = "transparent"),
               plot.background = element_rect(color = NA))
@@ -435,7 +466,7 @@ many_with_insets <- many_ecdf_plot +
         theme(legend.position = "none") +
         xlab(NULL) +
         scale_y_continuous(breaks = c(0, .5)) +
-        scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), max(st_1$time_to_spread))) +
+        scale_x_log10(breaks = c(1, 3, 10, 30, 100), limits = c(min(st_1$time_to_spread), 230)) +
         theme(text = element_text(size=7),
               rect = element_rect(fill = "transparent"),
               plot.background = element_rect(color = NA))
@@ -456,7 +487,7 @@ sample_network_ids <- sample(unique(st_1$network_id), 16)
 
 sample_ecdf_plot = ggplot(
   aes(x = time_to_spread,
-      color = intervention_type,
+      color = intervention,
       group = paste(intervention_type, network_id)
       ),
   data = st_1 %>% filter(network_id %in% sample_network_ids)
@@ -482,3 +513,76 @@ sample_ecdf_plot
 ggsave('figures/cai/time_to_spread_sample_networks_ecdfs.pdf',
        sample_ecdf_plot, width = 12, height = 10)
 
+
+
+
+sts <- st_1 %>%
+  filter(network_size > 10) %>%
+  group_by(model, network_group, network_id,
+           intervention_type, intervention, intervention_size) %>%
+  summarise(
+    time_to_spread_median = median(time_to_spread),
+    time_to_spread_mean = mean(time_to_spread),
+    time_to_spread_max = max(time_to_spread)
+  ) %>%
+  inner_join(nd) %>%
+  mutate(
+    density = number_edges / network_size^2
+    )
+
+lm.1 <- felm(
+  time_to_spread_mean ~ transitivity + avg_clustering + average_shortest_path_length + I(number_edges/network_size^2)
+  | network_id,
+  data = sts %>% filter(model == MODEL_1)
+)
+summary(lm.1)
+
+tmp <- sts %>%
+    filter(
+      model == MODEL_1,
+      network_id %in% 1:15,
+      intervention_type %in% c("none", "random_addition", "triad_addition")
+    ) %>%
+  mutate(
+    x = ifelse(intervention_type == "triad_addition", -1, 1) * intervention_size
+    ) %>%
+  arrange(
+    network_id, x
+    )
+
+ggplot(
+  aes(x = transitivity, y = time_to_spread_mean,
+      group = network_id, #paste(network_id, intervention),
+      color = intervention_size,
+      shape = intervention
+      ),
+  data = tmp
+) +
+  scale_y_log10() +
+  geom_path(alpha = .5) +
+  geom_point(alpha = .5)
+
+
+
+tmp <- sts %>%
+    filter(
+      model == MODEL_1,
+      #network_id %in% 50:80,
+      intervention_type %in% c("none", "rewired")
+    ) %>%
+  arrange(
+    network_id, intervention_size
+    )
+
+ggplot(
+  aes(x = transitivity / avg_degree,
+      y = time_to_spread_mean,
+      group = network_id, #paste(network_id, intervention),
+      color = intervention_size,
+      shape = intervention
+      ),
+  data = tmp
+) +
+  #scale_y_log10() +
+  geom_path(alpha = .5) +
+  geom_point(alpha = .5)
