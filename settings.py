@@ -36,7 +36,8 @@ def natural_keys(text):
 
 
 # real world networks simulation settings:
-network_group = 'chami_union_edgelist_'
+network_group = 'fb100_edgelist_'
+# 'chami_union_edgelist_'
 # 'fb100_edgelist_'
 # 'cai_edgelist_'
 # 'chami_advice_edgelist_'
@@ -89,6 +90,8 @@ elif network_group == 'fb100_edgelist_':
 
     DELIMITER = ' '
 
+    GENERATE_NET_LIST_FROM_AVAILABLE_SAMPLES = True
+
 edgelist_directory_address = root_data_address + 'edgelists/'
 
 output_directory_address = root_data_address + 'output/'
@@ -139,27 +142,9 @@ except OSError as e:
     if e.errno != errno.EEXIST:
         raise
 
-network_id_list = []
-for file in os.listdir(edgelist_directory_address):
-    filename = os.path.splitext(file)[0]
-    net_id = filename.replace(network_group,'')
-    print(net_id)
-    network_id_list += [net_id]
+#  different spreading models:
 
-network_id_list.sort(key=natural_keys)
-
-print(network_id_list)
-
-# check for SLURM Job Array environmental variable:
-if 'SLURM_ARRAY_TASK_ID' in os.environ:
-    print('SLURM_ARRAY_TASK_ID: ' + str(os.environ['SLURM_ARRAY_TASK_ID']))
-    JOB_NET_ID = int(os.environ['SLURM_ARRAY_TASK_ID']) - 1
-    NET_ID = network_id_list[JOB_NET_ID]
-    network_id_list = [NET_ID]
-    print('SLURM_ARRAY_TASK_ID: ' + NET_ID)
-
-#  different models:
-model_id = '_model_7'
+model_id = '_model_1'
 
 if model_id == '_model_1':
     MODEL = '(0.05,1)'
@@ -215,6 +200,45 @@ else:
     print('model_id is not valid')
     exit()
 
+try:
+    if GENERATE_NET_LIST_FROM_AVAILABLE_SAMPLES == True:
+        network_id_list = []
+        for file in os.listdir(edgelist_directory_address):
+            filename = os.path.splitext(file)[0]
+            net_id = filename.replace(network_group, '')
+            print(net_id)
+            available_sample_file = 'infection_size_samples_' + '10' + '_percent_' + 'add_triad_'\
+                                    + network_group + net_id + model_id + '.pkl'
+            print(available_sample_file)
+            print(spreading_pickled_samples_directory_address)
+            if available_sample_file in os.listdir(spreading_pickled_samples_directory_address):
+                network_id_list += [net_id]
+            else:
+                print(net_id + ' has no samples available!')
+
+        network_id_list.sort(key=natural_keys)
+
+        print(network_id_list)
+
+except NameError:
+    network_id_list = []
+    for file in os.listdir(edgelist_directory_address):
+        filename = os.path.splitext(file)[0]
+        net_id = filename.replace(network_group, '')
+        print(net_id)
+        network_id_list += [net_id]
+
+    network_id_list.sort(key=natural_keys)
+
+    print(network_id_list)
+
+# check for SLURM Job Array environmental variable:
+if 'SLURM_ARRAY_TASK_ID' in os.environ:
+    print('SLURM_ARRAY_TASK_ID: ' + str(os.environ['SLURM_ARRAY_TASK_ID']))
+    JOB_NET_ID = int(os.environ['SLURM_ARRAY_TASK_ID']) - 1
+    NET_ID = network_id_list[JOB_NET_ID]
+    network_id_list = [NET_ID]
+    print('SLURM_ARRAY_TASK_ID: ' + NET_ID)
 
 # theory simulations settings:
 
@@ -253,15 +277,15 @@ except OSError as e:
 # commonly used settings:
 #
 # for computations:
-do_computations = True
-do_multiprocessing = False
-save_computations = True
-load_computations = False
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = False
-simulator_mode = False
+# do_computations = True
+# do_multiprocessing = False
+# save_computations = True
+# load_computations = False
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = False
+# simulator_mode = False
 #
 # for plotting:
 # do_computations = False
@@ -275,15 +299,15 @@ simulator_mode = False
 # simulator_mode = False
 #
 # # for data_dump:
-# do_computations = False
-# do_multiprocessing = False
-# save_computations = False
-# load_computations = True
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = True
-# simulator_mode = False
+do_computations = False
+do_multiprocessing = False
+save_computations = False
+load_computations = True
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = True
+simulator_mode = False
 
 # for simulator:
 # do_computations = True

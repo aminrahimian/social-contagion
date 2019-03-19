@@ -7,10 +7,10 @@ rewiring_percentage_list = [10]  # [5, 10, 15, 20, 25]
 
 percent_more_edges_list = [10]  # [5, 10, 15, 20, 25]
 
-include_original_networks = False
-include_rewiring_networks = False
-include_addition_networks = False
-include_add_rand_networks = True
+include_original_networks = True
+include_rewiring_networks = True
+include_addition_networks = True
+include_add_rand_networks = False
 
 assert not (include_add_rand_networks and include_addition_networks), \
     "include_add_rand_networks and include_addition_networks cannot be both True"
@@ -42,7 +42,7 @@ else:
 
 assert include_spread_size, "data dump without spread size is not supported!"
 
-update_existing_dump = True
+update_existing_dump = False
 
 
 if __name__ == "__main__":
