@@ -7,17 +7,18 @@ from pathlib import Path
 
 VERBOSE = True
 
-CHECK_FOR_EXISTING_PKL_SAMPLES = True
+CHECK_FOR_EXISTING_PKL_SAMPLES = False
 
-size_of_dataset = 100
+size_of_dataset = 500
 
 rewiring_percentage_list = [10]
 
 percent_more_edges_list = [10]
 
-do_computations_for_original_network = True
+do_computations_for_original_network = False
 
-intervention_type = 'all'  # 'rewiring' #'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
+intervention_type = 'triad-addition'
+#'all'  # 'rewiring' #'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
 
 all_interventions = ['triad-addition', 'random-addition', 'rewiring']
 
