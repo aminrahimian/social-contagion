@@ -11,7 +11,6 @@ library(RColorBrewer)
 # each dataset will have a column called k for the number of reinforcing signals
 # and another column called ratio_k for the ratio of adoptions at k to adoptions at k-1
 # any additional column is dropped
-# each processed dataset will start with the (k=1,ratio_k=1) point
 
 centola_data <- read.csv(
   "data/empirical_adoption_rates/centola_data_from_fig3.csv",
@@ -216,13 +215,35 @@ ugander_structural_data_type_recruitment_processed <- head(ugander_structural_da
 
 # ugander_structural_data_type_recruitment_processed <- ugander_structural_data_type_recruitment_processed[-nrow(ugander_structural_data_type_recruitment_processed),]
 
+
+##########################################Aral_data
+
+# load data
+
+# each dataset will have a column called k for the number of reinforcing signals
+# and another column called ratio_k for the ratio of adoptions at k to adoptions at k-1
+# any additional column is dropped
+
+aral_data <- read.csv(
+  "data/empirical_adoption_rates/aral_data_from_fig3b.csv",
+  stringsAsFactors = FALSE
+)
+
+# remove the first row
+
+aral_data_processed <- aral_data[-c(1),]
+
+aral_data_processed$group <- rep("Aral et. al. (2009)",length(aral_data_processed$k))
+
+
 # combine all processed data frames
 
 empirical_adoptions_rates = rbind(centola_data_processed, 
                                   bakshy_role_data_feed_0_processed, 
                                   bakshy_role_data_feed_1_processed,
                                   mønsted_complex_data_type_unique_processed,
-                                  ugander_structural_data_type_recruitment_processed)
+                                  ugander_structural_data_type_recruitment_processed,
+                                  aral_data_processed)
 
 write.csv(empirical_adoptions_rates, file = "data/empirical_adoption_rates/empirical_adoptions_rates.csv")
 
@@ -236,18 +257,20 @@ theme_update(
   panel.grid.minor = element_blank()
 )
 group_colors <- c(
+  "Aral et. al. (2009)" = "black",
   "Centola (2010)" = "black",
   "bakshy_role_no_feed" = brewer.pal(8, "Set1")[1],
-  "Bakshy et. al. (2012)" = brewer.pal(8, "Set1")[2],
   "Mønsted et. al. (2017)" = brewer.pal(8, "Set1")[3],
+  "Bakshy et. al. (2012)" = brewer.pal(8, "Set1")[2],
   "Ugander et. al. (2012)" = brewer.pal(8, "Set1")[4]
 )
 intervention_shapes <- c(
-  "Centola (2010)" = 16,
-  "bakshy_role_no_feed" = 16,
-  "Bakshy et. al. (2012)" = 17,
-  "Mønsted et. al. (2017)" = 18,
-  "Ugander et. al. (2012)" = 19
+  "Aral et. al. (2009)" = 16,
+  "Centola (2010)" = 17,
+  "bakshy_role_no_feed" = 17,
+  "Bakshy et. al. (2012)" = 18,
+  "Mønsted et. al. (2017)" = 19,
+  "Ugander et. al. (2012)" = 20
 )
 
 # plot ECDF averaging over networks
@@ -268,7 +291,7 @@ empirical_adoption_rates_plot <- ggplot(
   #xlab(unname(TeX(c("k")))) +
   ylab("p(k)/p(k-1)") +
   xlab("k") +
-  theme(legend.position = c(0.7, 0.7))
+  theme(legend.position = c(0.75, 0.7))
   #annotation_logticks(
    # sides = "b", size = .3,
   #  short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
