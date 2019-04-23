@@ -4,6 +4,7 @@ library(dplyr)
 library(ggplot2)
 library(RColorBrewer)
 
+
 # load spreading data
 
 # each dataset will have a column called k for the number of reinforcing signals
@@ -36,7 +37,6 @@ network_group_name_map <- c(
 )
 
 
-
 # load and summarize each set data set:
 
 # cai:
@@ -55,7 +55,9 @@ cai_filtered_data <- cai_data %>%
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread)
+  ) %>% select(network_group,intervention,time_to_spread) %>% 
+  mutate(intervention = as.factor(intervention))%>%
+  mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
 
 cai_summary_data <- cai_filtered_data %>%
   group_by(network_group,intervention) %>%
@@ -63,7 +65,6 @@ cai_summary_data <- cai_filtered_data %>%
     time_to_spread_mean = mean(time_to_spread),
     time_to_spread_sd = sd(time_to_spread)
   )
-
 
 # chami advice:
 
@@ -81,7 +82,9 @@ chami_advice_filtered_data <- chami_advice_data %>%
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread)
+  ) %>% select(network_group,intervention,time_to_spread) %>% 
+  mutate(intervention = as.factor(intervention))%>%
+  mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
 
 
 chami_advice_summary_data <- chami_advice_filtered_data %>%
@@ -107,7 +110,9 @@ chami_friendship_filtered_data <- chami_friendship_data %>%
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread)
+  ) %>% select(network_group,intervention,time_to_spread)%>% 
+  mutate(intervention = as.factor(intervention))%>%
+  mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
 
 chami_friendship_summary_data <- chami_friendship_filtered_data %>%
   group_by(network_group,intervention) %>%
@@ -123,7 +128,6 @@ banerjee_combined_data <- read.csv(
   stringsAsFactors = FALSE
 )
 
-
 banerjee_combined_filtered_data <- banerjee_combined_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
@@ -133,7 +137,9 @@ banerjee_combined_filtered_data <- banerjee_combined_data %>%
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread)
+  ) %>% select(network_group,intervention,time_to_spread)%>% 
+  mutate(intervention = as.factor(intervention))%>%
+  mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
 
 banerjee_combined_summary_data <- banerjee_combined_filtered_data %>%
   group_by(network_group,intervention) %>%
@@ -141,7 +147,6 @@ banerjee_combined_summary_data <- banerjee_combined_filtered_data %>%
     time_to_spread_mean = mean(time_to_spread),
     time_to_spread_sd = sd(time_to_spread)
   )
-
 
 # fb40:
 
@@ -176,7 +181,9 @@ fb_filtered_data <- fb_data %>%
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread)
+  ) %>% select(network_group,intervention,time_to_spread)%>% 
+  mutate(intervention = as.factor(intervention))%>%
+  mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
 
 fb_summary_data <- fb_filtered_data %>%
   group_by(network_group,intervention) %>%
@@ -243,22 +250,22 @@ ggsave('figures/spreading_time_summaries/all_summaries_plot.pdf',
 #xlim1 = boxplot.stats(all_filtered_data$time_to_spread)$stats[c(1, 5)]
 
 all_summaries_box_plot <- 
-  ggplot(data = all_filtered_data, aes(x=network_group, y=time_to_spread),
+  ggplot(data = all_filtered_data, aes(x=network_group, y=time_to_spread,color=intervention),
          xlab='',ylim = c(1,40))+#+ 
   #coord_cartesian(ylim = c(1,40))+
   ylab("time to spread")+
   scale_color_manual(values = intervention_colors) + 
-  geom_boxplot(aes(color=intervention),outlier.shape=NA,coef=0) +
+  #geom_boxplot(aes(color=intervention),outlier.shape=NA,coef=0) +
   stat_summary(fun.y=mean, 
                aes(color=intervention), 
                geom="point", 
                position=position_dodge(width=0.75), 
-               shape=18, 
+               shape=13, 
                size=5,
-               show_guide = FALSE)+ coord_cartesian(xlim = c(1,40)) + 
+               show_guide = TRUE)+ coord_cartesian(xlim = c(1,30)) + 
   theme(legend.justification=c(1,1), legend.position=c(0.95,0.95))+ 
   scale_y_log10(breaks = c(3,4,6,10,18,34)) + 
-  coord_flip(ylim = c(3,35))
+  coord_flip(ylim = c(3,21))
   
 
 all_summaries_box_plot
