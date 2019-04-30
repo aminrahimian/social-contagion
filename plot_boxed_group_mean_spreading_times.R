@@ -21,6 +21,10 @@ MODEL_6 = "(0.001,1)"
 
 default_intervention_size = 10
 
+
+cwd <- dirname(rstudioapi::getSourceEditorContext()$path)
+
+
 intervention_name_map <- c(
   "none" = "original",
   "random_addition" = "random addition",
@@ -42,7 +46,7 @@ network_group_name_map <- c(
 # cai:
 
 cai_data <- read.csv(
-  "data/cai-data/output/cai_edgelist_spreading_data_dump.csv",
+  paste(cwd,"/data/cai-data/output/cai_edgelist_spreading_data_dump.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
@@ -69,7 +73,7 @@ cai_summary_data <- cai_filtered_data %>%
 # chami advice:
 
 chami_advice_data <- read.csv(
-  "data/chami-advice-data/output/chami_advice_edgelist_spreading_data_dump.csv",
+  paste(cwd,"/data/chami-advice-data/output/chami_advice_edgelist_spreading_data_dump.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
@@ -97,7 +101,7 @@ chami_advice_summary_data <- chami_advice_filtered_data %>%
 # chami friendship:
 
 chami_friendship_data <- read.csv(
-  "data/chami-friendship-data/output/chami_friendship_edgelist_spreading_data_dump.csv",
+  paste(cwd,"/data/chami-friendship-data/output/chami_friendship_edgelist_spreading_data_dump.csv",sep=""),  
   stringsAsFactors = FALSE
 )
 
@@ -124,7 +128,7 @@ chami_friendship_summary_data <- chami_friendship_filtered_data %>%
 # banerjee combined:
 
 banerjee_combined_data <- read.csv(
-  "data/banerjee-combined-data/output/banerjee_combined_edgelist_spreading_data_dump.csv",
+  paste(cwd,"/data/banerjee-combined-data/output/banerjee_combined_edgelist_spreading_data_dump.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
@@ -151,7 +155,7 @@ banerjee_combined_summary_data <- banerjee_combined_filtered_data %>%
 # fb40:
 
 fb_data <- read.csv(
-  "data/fb100-data/output/fb100_edgelist_spreading_data_dump.csv",
+  paste(cwd,"/data/fb100-data/output/fb100_edgelist_spreading_data_dump.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
@@ -203,11 +207,15 @@ all_filtered_data = rbind(cai_filtered_data,
                           chami_advice_filtered_data ,
                           chami_friendship_filtered_data,
                           banerjee_combined_filtered_data,
-                          fb_filtered_data)
+                          fb_filtered_data) %>% 
+  mutate(network_group = as.factor(network_group))%>%
+  mutate(network_group = factor(network_group,levels(network_group)[c(2,1,5,4,3)]))
 
-write.csv(all_summaries,"data/all-spreading-time-summaries/all_summaries.csv")
+write.csv(all_summaries,
+          paste(cwd,"/data/all-spreading-time-summaries/all_summaries.csv",sep=""))
 
-write.csv(all_filtered_data,"data/all-spreading-time-summaries/all_filtered_data.csv")
+write.csv(all_filtered_data,
+          paste(cwd,"/data/all-spreading-time-summaries/all_filtered_data.csv",sep=""))
 
 
 
@@ -249,28 +257,35 @@ ggsave('figures/spreading_time_summaries/all_summaries_plot.pdf',
 # compute lower and upper whiskers
 #xlim1 = boxplot.stats(all_filtered_data$time_to_spread)$stats[c(1, 5)]
 
+#all_filtered_data$network_group <- c("Banerjee et. al.\n (2013)", 
+#                                     "Cai et. al. (2015)", 
+#                                     "Chami et. al. (2017) \n Advice Network",
+#                                     "Chami et. al. (2017) \n Friendship Network",
+#                                     "Traud et. al. (2012)")
+
 all_summaries_box_plot <- 
   ggplot(data = all_filtered_data, aes(x=network_group, y=time_to_spread,color=intervention),
          xlab='',ylim = c(1,40))+#+ 
   #coord_cartesian(ylim = c(1,40))+
   ylab("time to spread")+
   scale_color_manual(values = intervention_colors) + 
+  scale_fill_manual(values = intervention_colors) + 
   #geom_boxplot(aes(color=intervention),outlier.shape=NA,coef=0) +
   stat_summary(fun.y=mean, 
-               aes(color=intervention), 
+               aes(color=intervention,fill=intervention), 
                geom="point", 
                position=position_dodge(width=0.75), 
-               shape=13, 
-               size=5,
-               show_guide = TRUE)+ coord_cartesian(xlim = c(1,30)) + 
-  theme(legend.justification=c(1,1), legend.position=c(0.95,0.95))+ 
+               shape=25, 
+               size=7,
+               show_guide = TRUE)+ 
+  coord_cartesian(xlim = c(1,30)) + 
+  theme(legend.justification=c(1,1), legend.position=c(0.95,0.75))+ 
   scale_y_log10(breaks = c(3,4,6,10,18,34)) + 
   coord_flip(ylim = c(3,21))
   
 
 all_summaries_box_plot
 
-ggsave('figures/spreading_time_summaries/all_summaries_box_plot.pdf',
-       all_summaries_box_plot
-       , width = 12, height = 10)
+ggsave(paste(cwd,"/figures/spreading_time_summaries/all_summaries_box_plot.pdf",sep=""),
+       all_summaries_box_plot, width = 12, height = 10)
 
