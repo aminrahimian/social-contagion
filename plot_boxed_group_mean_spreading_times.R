@@ -3,7 +3,7 @@ library(latex2exp)
 library(dplyr)
 library(ggplot2)
 library(RColorBrewer)
-
+library(Hmisc)
 
 # load spreading data
 
@@ -275,17 +275,20 @@ all_summaries_box_plot <-
                aes(color=intervention,fill=intervention), 
                geom="point", 
                position=position_dodge(width=0.75), 
-               shape=25, 
-               size=7,
-               show_guide = TRUE)+ 
+               shape=3, 
+               size=5,
+               show_guide = TRUE) + 
+  stat_summary(fun.data = mean_cl_boot, 
+               aes(color=intervention), geom = "errorbar", 
+               size=3,width=0.5,
+               position=position_dodge(width=0.75), show_guide = TRUE)+ 
   coord_cartesian(xlim = c(1,30)) + 
-  theme(legend.justification=c(1,1), legend.position=c(0.95,0.75))+ 
+  theme(legend.justification=c(1,1), legend.position=c(0.95,0.7)) + 
   scale_y_log10(breaks = c(3,4,6,10,18,34)) + 
   coord_flip(ylim = c(3,21))
-  
 
 all_summaries_box_plot
 
-ggsave(paste(cwd,"/figures/spreading_time_summaries/all_summaries_box_plot.pdf",sep=""),
-       all_summaries_box_plot, width = 12, height = 10)
+ggsave(paste(cwd,"/figures/spreading_time_summaries/all_summaries_bar_plot_se.pdf",sep=""),
+       all_summaries_box_plot, width = 6, height = 5)
 
