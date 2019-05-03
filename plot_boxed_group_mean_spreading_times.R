@@ -4,6 +4,7 @@ library(dplyr)
 library(ggplot2)
 library(RColorBrewer)
 library(Hmisc)
+library(plotrix)
 
 # load spreading data
 
@@ -53,22 +54,15 @@ cai_data <- read.csv(
 cai_filtered_data <- cai_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
-  select(network_group,intervention_type,time_to_spread)%>%
+  select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread) %>% 
+  ) %>% 
   mutate(intervention = as.factor(intervention))%>%
   mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
-
-cai_summary_data <- cai_filtered_data %>%
-  group_by(network_group,intervention) %>%
-  summarise(
-    time_to_spread_mean = mean(time_to_spread),
-    time_to_spread_sd = sd(time_to_spread)
-  )
 
 # chami advice:
 
@@ -80,23 +74,15 @@ chami_advice_data <- read.csv(
 chami_advice_filtered_data <- chami_advice_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
-  select(network_group,intervention_type,time_to_spread)%>%
+  select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread) %>% 
+  ) %>% 
   mutate(intervention = as.factor(intervention))%>%
   mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
-
-
-chami_advice_summary_data <- chami_advice_filtered_data %>%
-  group_by(network_group,intervention) %>%
-  summarise(
-    time_to_spread_mean = mean(time_to_spread),
-    time_to_spread_sd = sd(time_to_spread)
-  )
 
 # chami friendship:
 
@@ -108,22 +94,15 @@ chami_friendship_data <- read.csv(
 chami_friendship_filtered_data <- chami_friendship_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
-  select(network_group,intervention_type,time_to_spread)%>%
+  select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread)%>% 
+  ) %>% 
   mutate(intervention = as.factor(intervention))%>%
   mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
-
-chami_friendship_summary_data <- chami_friendship_filtered_data %>%
-  group_by(network_group,intervention) %>%
-  summarise(
-    time_to_spread_mean = mean(time_to_spread),
-    time_to_spread_sd = sd(time_to_spread)
-  )
 
 # banerjee combined:
 
@@ -135,22 +114,15 @@ banerjee_combined_data <- read.csv(
 banerjee_combined_filtered_data <- banerjee_combined_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
-  select(network_group,intervention_type,time_to_spread)%>%
+  select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread)%>% 
+  ) %>%  
   mutate(intervention = as.factor(intervention))%>%
   mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
-
-banerjee_combined_summary_data <- banerjee_combined_filtered_data %>%
-  group_by(network_group,intervention) %>%
-  summarise(
-    time_to_spread_mean = mean(time_to_spread),
-    time_to_spread_sd = sd(time_to_spread)
-  )
 
 # fb40:
 
@@ -179,29 +151,15 @@ fb_data <- fb_data %>%
 fb_filtered_data <- fb_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
-  select(network_group,intervention_type,time_to_spread)%>%
+  select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
   )%>%
   mutate(
     network_group = network_group_name_map[network_group]
-  ) %>% select(network_group,intervention,time_to_spread)%>% 
+  ) %>%  
   mutate(intervention = as.factor(intervention))%>%
   mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
-
-fb_summary_data <- fb_filtered_data %>%
-  group_by(network_group,intervention) %>%
-  summarise(
-    time_to_spread_mean = mean(time_to_spread),
-    time_to_spread_sd = sd(time_to_spread)
-  )
-
-all_summaries = rbind(cai_summary_data, 
-                      chami_advice_summary_data ,
-                      chami_friendship_summary_data,
-                      banerjee_combined_summary_data,
-                      fb_summary_data)
-
 
 all_filtered_data = rbind(cai_filtered_data,
                           chami_advice_filtered_data ,
@@ -211,13 +169,40 @@ all_filtered_data = rbind(cai_filtered_data,
   mutate(network_group = as.factor(network_group))%>%
   mutate(network_group = factor(network_group,levels(network_group)[c(2,1,5,4,3)]))
 
+
+all_summaries <- all_filtered_data %>%
+  group_by(network_group,intervention) %>%
+  summarise(
+    time_to_spread_mean = mean(time_to_spread),
+    time_to_spread_sd = sd(time_to_spread),
+    time_to_spread_se = 2.58*std.error(time_to_spread),
+    time_to_spread_ub = mean(time_to_spread)+2.58*std.error(time_to_spread),
+    time_to_spread_lb = mean(time_to_spread)-2.58*std.error(time_to_spread)
+  )
+
+all_summaries_group_by_id <- all_filtered_data %>%
+  group_by(network_group,intervention,network_id) %>%
+  summarise(
+    time_to_spread = mean(time_to_spread)
+  ) %>%
+  group_by(network_group,intervention) %>%
+  summarise(
+    time_to_spread_mean = mean(time_to_spread),
+    time_to_spread_se = std.error(time_to_spread),
+    time_to_spread_ub = mean(time_to_spread)+std.error(time_to_spread),
+    time_to_spread_lb = mean(time_to_spread)-std.error(time_to_spread)
+  )
+
+
 write.csv(all_summaries,
           paste(cwd,"/data/all-spreading-time-summaries/all_summaries.csv",sep=""))
 
+
+write.csv(all_summaries_group_by_id,
+          paste(cwd,"/data/all-spreading-time-summaries/all_summaries_group_by_id.csv",sep=""))
+
 write.csv(all_filtered_data,
           paste(cwd,"/data/all-spreading-time-summaries/all_filtered_data.csv",sep=""))
-
-
 
 # ploting
 
@@ -235,24 +220,54 @@ intervention_colors <- c(
   "rewired" = brewer.pal(8, "Set1")[5]
 )
 
+intervention_shapes <- c(
+  "original" = 21,
+  "random addition" = 22,
+  "triadic addition" = 23,
+  "rewired" = 24
+)
+
 all_summaries_plot <- ggplot(
   aes(x = network_group, y=time_to_spread_mean, color=intervention),
   data = all_summaries, #%>%filter(group != "bakshy_role_no_feed"),
-  ylab='') +
-  xlab("time to spread")+
-  geom_line()+
-  geom_point()+
-  scale_color_manual(values = intervention_colors)
-  #scale_color_discrete(name = "Dataset/study")+
-  #ylab("p(k)/p(k-1)") +
-  #xlab("k") +
-  #theme(legend.position = c(0.75, 0.7))
+  xlab='',ylim = c(1,40))+ 
+  ylab("time to spread")+
+  scale_color_manual(values = intervention_colors) + 
+  scale_fill_manual(values = intervention_colors) +
+  scale_shape_manual(values = intervention_shapes) +
+  geom_pointrange(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub,shape=intervention),
+                  position=position_dodge(width=0.75))+
+  coord_cartesian(xlim = c(1,30)) + 
+  theme(legend.justification=c(1,1), legend.position=c(0.95,0.7)) + 
+  scale_y_log10(breaks = c(3,4,6,10,18,34)) + 
+  coord_flip(ylim = c(3,25))
 
 all_summaries_plot
 
 ggsave('figures/spreading_time_summaries/all_summaries_plot.pdf',
        all_summaries_plot
-       , width = 12, height = 10)
+       , width = 6, height = 5)
+
+all_summaries_group_by_id_plot <- ggplot(
+  aes(x = network_group, y=time_to_spread_mean, color=intervention),
+  data = all_summaries_group_by_id, #%>%filter(group != "bakshy_role_no_feed"),
+  xlab='',ylim = c(1,40))+ 
+  ylab("time to spread")+
+  scale_color_manual(values = intervention_colors) + 
+  scale_fill_manual(values = intervention_colors) +
+  scale_shape_manual(values = intervention_shapes) +
+  geom_pointrange(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub,shape=intervention),
+                  position=position_dodge(width=0.75))+
+  coord_cartesian(xlim = c(1,30)) + 
+  theme(legend.justification=c(1,1), legend.position=c(0.95,0.7)) + 
+  scale_y_log10(breaks = c(3,4,6,10,18,34)) + 
+  coord_flip(ylim = c(3,25))
+
+all_summaries_group_by_id_plot
+
+ggsave('figures/spreading_time_summaries/all_summaries_group_by_id_plot.pdf',
+       all_summaries_group_by_id_plot
+       , width = 6, height = 5)
 
 # compute lower and upper whiskers
 #xlim1 = boxplot.stats(all_filtered_data$time_to_spread)$stats[c(1, 5)]
@@ -270,17 +285,18 @@ all_summaries_box_plot <-
   ylab("time to spread")+
   scale_color_manual(values = intervention_colors) + 
   scale_fill_manual(values = intervention_colors) + 
+  scale_shape_manual(values = intervention_shapes) + 
   #geom_boxplot(aes(color=intervention),outlier.shape=NA,coef=0) +
-  stat_summary(fun.y=mean, 
-               aes(color=intervention,fill=intervention), 
-               geom="point", 
-               position=position_dodge(width=0.75), 
-               shape=3, 
-               size=5,
-               show_guide = TRUE) + 
+  #stat_summary(fun.y=mean, 
+  #             aes(color=intervention,fill=intervention), 
+  #             geom="point", 
+  #             position=position_dodge(width=0.75), 
+  #             shape=16, 
+  #             size=5,
+  #             show_guide = TRUE) + 
   stat_summary(fun.data = mean_cl_boot, 
                aes(color=intervention), geom = "errorbar", 
-               size=3,width=0.5,
+               size=6,width=0,
                position=position_dodge(width=0.75), show_guide = TRUE)+ 
   coord_cartesian(xlim = c(1,30)) + 
   theme(legend.justification=c(1,1), legend.position=c(0.95,0.7)) + 
