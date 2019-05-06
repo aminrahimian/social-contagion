@@ -12,8 +12,10 @@ library(RColorBrewer)
 # and another column called ratio_k for the ratio of adoptions at k to adoptions at k-1
 # any additional column is dropped
 
+cwd <- dirname(rstudioapi::getSourceEditorContext()$path)
+
 centola_data <- read.csv(
-  "data/empirical_adoption_rates/centola_data_from_fig3.csv",
+  paste(cwd,"/data/empirical_adoption_rates/centola_data_from_fig3.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
@@ -35,7 +37,7 @@ centola_data_processed$group <- rep("Centola (2010)",length(centola_data_process
 
 # load data
 bakshy_role_data <- read.csv(
-  "data/empirical_adoption_rates/bakshy_role_data_from_fig4a.csv",
+  paste(cwd,"/data/empirical_adoption_rates/bakshy_role_data_from_fig4a.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
@@ -111,7 +113,7 @@ bakshy_role_data_feed_1_processed <-
   bakshy_role_data_feed_1[c("k","ratio_k")]
 
 bakshy_role_data_feed_1_processed$group <- 
-  rep("Bakshy et. al. (2012)",length(bakshy_role_data_feed_1_processed$k))
+  rep("Bakshy et al. (2012)",length(bakshy_role_data_feed_1_processed$k))
 
 # remove the first row
 
@@ -121,7 +123,7 @@ bakshy_role_data_feed_1_processed <- bakshy_role_data_feed_1_processed[-c(1),]
 
 # load data
 mønsted_complex_data <- read.csv(
-  "data/empirical_adoption_rates/mønsted_complex_fig3a.csv",
+  paste(cwd,"/data/empirical_adoption_rates/mønsted_complex_fig3a.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
@@ -155,7 +157,7 @@ mønsted_complex_data_type_unique$ratio_k<- ratios
 
 mønsted_complex_data_type_unique_processed <- mønsted_complex_data_type_unique[c("k","ratio_k")]
 
-mønsted_complex_data_type_unique_processed$group <- rep("Mønsted et. al. (2017)",length(mønsted_complex_data_type_unique_processed$k))
+mønsted_complex_data_type_unique_processed$group <- rep("Mønsted et al. (2017)",length(mønsted_complex_data_type_unique_processed$k))
 
 # remove the first row
 
@@ -169,7 +171,7 @@ mønsted_complex_data_type_unique_processed <- head(mønsted_complex_data_type_u
 
 # load data
 ugander_structural_data <- read.csv(
-  "data/empirical_adoption_rates/ugander_structural_bonus_fig.csv",
+  paste(cwd,"/data/empirical_adoption_rates/ugander_structural_bonus_fig.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
@@ -203,7 +205,7 @@ ugander_structural_data_type_recruitment$ratio_k<- ratios
 
 ugander_structural_data_type_recruitment_processed <- ugander_structural_data_type_recruitment[c("k","ratio_k")]
 
-ugander_structural_data_type_recruitment_processed$group <- rep("Ugander et. al. (2012)",length(ugander_structural_data_type_recruitment_processed$k))
+ugander_structural_data_type_recruitment_processed$group <- rep("Ugander et al. (2012)",length(ugander_structural_data_type_recruitment_processed$k))
 
 # remove the first row
 
@@ -233,7 +235,7 @@ aral_data <- read.csv(
 
 aral_data_processed <- aral_data[-c(1),]
 
-aral_data_processed$group <- rep("Aral et. al. (2009)",length(aral_data_processed$k))
+aral_data_processed$group <- rep("Aral et al. (2009)",length(aral_data_processed$k))
 
 
 # combine all processed data frames
@@ -245,7 +247,14 @@ empirical_adoptions_rates = rbind(centola_data_processed,
                                   ugander_structural_data_type_recruitment_processed,
                                   aral_data_processed)
 
-write.csv(empirical_adoptions_rates, file = "data/empirical_adoption_rates/empirical_adoptions_rates.csv")
+write.csv(
+  empirical_adoptions_rates,
+  file = "data/empirical_adoption_rates/empirical_adoptions_rates.csv"
+)
+
+empirical_adoptions_rates <- read.csv(
+  "data/empirical_adoption_rates/empirical_adoptions_rates.csv"
+  )
 
 #################################################### plotting
 
@@ -257,33 +266,35 @@ theme_update(
   panel.grid.minor = element_blank()
 )
 group_colors <- c(
-  "Aral et. al. (2009)" = "black",
+  "Aral et al. (2009)" =  brewer.pal(8, "Set1")[5],
   "Centola (2010)" = "black",
   "bakshy_role_no_feed" = brewer.pal(8, "Set1")[1],
-  "Mønsted et. al. (2017)" = brewer.pal(8, "Set1")[3],
-  "Bakshy et. al. (2012)" = brewer.pal(8, "Set1")[2],
-  "Ugander et. al. (2012)" = brewer.pal(8, "Set1")[4]
+  "Mønsted et al. (2017)" = brewer.pal(8, "Set1")[3],
+  "Bakshy et al. (2012)" = brewer.pal(8, "Set1")[2],
+  "Ugander et al. (2012)" = brewer.pal(8, "Set1")[4]
 )
-intervention_shapes <- c(
-  "Aral et. al. (2009)" = 16,
-  "Centola (2010)" = 17,
-  "bakshy_role_no_feed" = 17,
-  "Bakshy et. al. (2012)" = 18,
-  "Mønsted et. al. (2017)" = 19,
-  "Ugander et. al. (2012)" = 20
+group_shapes <- c(
+  "Aral et al. (2009)" = 21,
+  "Centola (2010)" = 22,
+  "bakshy_role_no_feed" = 21,
+  "Bakshy et al. (2012)" = 23,
+  "Mønsted et al. (2017)" = 24,
+  "Ugander et al. (2012)" = 25
 )
 
 # plot ECDF averaging over networks
 empirical_adoption_rates_plot <- ggplot(
   aes(x = k, y=ratio_k,
-      color = group
+      color = group, shape = group, fill = group
   ),
-  data = empirical_adoptions_rates%>%filter(group != "bakshy_role_no_feed")
+  data = empirical_adoptions_rates %>%
+    filter(group != "bakshy_role_no_feed")
 ) +
-  geom_line()+
-  geom_point()+
-  scale_color_manual(values = group_colors) +
-  scale_color_discrete(name = "Dataset/study")+
+  geom_line() +
+  geom_point() +
+  scale_color_manual(values = group_colors, name = NULL) +
+  scale_shape_manual(values = group_shapes, name = NULL) +
+  scale_fill_manual(values = group_colors, name = NULL) +
   #scale_x_log10() +
   #stat_ecdf(lwd = .3) +
   #facet_wrap( ~ factor(intervention_size)) +
@@ -298,6 +309,32 @@ empirical_adoption_rates_plot <- ggplot(
   #)
 empirical_adoption_rates_plot
 
+library(directlabels)
+
+label_method = list(
+  dl.maxvar.points,
+  dl.trans(x=x-1),
+  rot=c(30,180)
+)
+
+empirical_adoption_rates_plot_dl <- empirical_adoption_rates_plot +
+  scale_y_continuous(position = "right") +
+  scale_x_continuous(lim = c(.4, 6), breaks = 2:6) +
+  theme(legend.position = "none") +
+  geom_dl(
+    aes(label = group),
+    alpha = 1,
+    size = 4,
+    method = list(
+      "maxvar.points",
+      cex = .75,
+      alpha = 1,
+      dl.trans(x = x - .2)
+    )
+  )
+empirical_adoption_rates_plot_dl
+
+
 ggsave('figures/empirical_adoption_rates/empirical_adoption_rates.pdf',
-       empirical_adoption_rates_plot, width = 4.5, height = 3.5)
+       empirical_adoption_rates_plot_dl, width = 5, height = 3.5)
 

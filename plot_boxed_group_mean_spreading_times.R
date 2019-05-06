@@ -34,11 +34,11 @@ intervention_name_map <- c(
 )
 
 network_group_name_map <- c(
-  "banerjee_combined_edgelist_" = "Banerjee et. al.\n (2013)",
-  "cai_edgelist_" = "Cai et. al. (2015)",
-  "chami_advice_edgelist_" = "Chami et. al. (2017) \n Advice Network",
-  "chami_friendship_edgelist_" = "Chami et. al. (2017) \n Friendship Network",
-  "fb100_edgelist_" = "Traud et. al. (2012)"
+  "banerjee_combined_edgelist_" = "Banerjee et al.\n (2013)",
+  "cai_edgelist_" = "Cai et al. (2015)",
+  "chami_advice_edgelist_" = "Chami et al. (2017) \n Advice Network",
+  "chami_friendship_edgelist_" = "Chami et al. (2017) \n Friendship Network",
+  "fb100_edgelist_" = "Traud et al. (2012)"
 )
 
 
@@ -265,18 +265,18 @@ all_summaries_group_by_id_plot <- ggplot(
 
 all_summaries_group_by_id_plot
 
-ggsave('figures/spreading_time_summaries/all_summaries_group_by_id_plot.pdf',
+ggsave(paste(cwd,"/figures/spreading_time_summaries/all_summaries_group_by_id_plot.pdf",sep=""),
        all_summaries_group_by_id_plot
-       , width = 6, height = 5)
+       , width = 5, height = 4)
 
 # compute lower and upper whiskers
 #xlim1 = boxplot.stats(all_filtered_data$time_to_spread)$stats[c(1, 5)]
 
-#all_filtered_data$network_group <- c("Banerjee et. al.\n (2013)", 
-#                                     "Cai et. al. (2015)", 
-#                                     "Chami et. al. (2017) \n Advice Network",
-#                                     "Chami et. al. (2017) \n Friendship Network",
-#                                     "Traud et. al. (2012)")
+#all_filtered_data$network_group <- c("Banerjee et al.\n (2013)", 
+#                                     "Cai et al. (2015)", 
+#                                     "Chami et al. (2017) \n Advice Network",
+#                                     "Chami et al. (2017) \n Friendship Network",
+#                                     "Traud et al. (2012)")
 
 all_summaries_box_plot <- 
   ggplot(data = all_filtered_data, aes(x=network_group, y=time_to_spread,color=intervention),
