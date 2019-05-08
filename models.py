@@ -465,7 +465,9 @@ class NetworkModel(object):
                     self.params['initial_infection_probability'] = 0.1
                     print('warning: The initial_infection_probability not supplied, set to default 0.1')
 
-                self.params['initial_states'] = np.random.binomial(1, [self.params['initial_infection_probability']]*
+                self.params['initial_states'] = active*\
+                                                np.random.binomial(1,
+                                                                   [self.params['initial_infection_probability']]*
                                                                    self.params['size'])
             elif self.params['initialization_mode'] is 'fixed_number_initial_infection':
 
@@ -508,6 +510,8 @@ class NetworkModel(object):
             elif self.params['network'].node[i]['state'] == susceptible:
                 self.list_of_susceptible_agents.append(i)
             else:
+                print('node', i)
+                print('state', self.params['network'].node[i]['state'])
                 print('state initialization miss-handled')
                 exit()
 

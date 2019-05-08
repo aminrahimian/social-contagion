@@ -227,7 +227,7 @@ ugander_structural_data_type_recruitment_processed <- head(ugander_structural_da
 # any additional column is dropped
 
 aral_data <- read.csv(
-  "data/empirical_adoption_rates/aral_data_from_fig3b.csv",
+  paste(cwd,"/data/empirical_adoption_rates/aral_data_from_fig3b.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
@@ -249,11 +249,11 @@ empirical_adoptions_rates = rbind(centola_data_processed,
 
 write.csv(
   empirical_adoptions_rates,
-  file = "data/empirical_adoption_rates/empirical_adoptions_rates.csv"
+  file = paste(cwd,"/data/empirical_adoption_rates/empirical_adoptions_rates.csv",sep="")
 )
 
 empirical_adoptions_rates <- read.csv(
-  "data/empirical_adoption_rates/empirical_adoptions_rates.csv"
+  paste(cwd,"/data/empirical_adoption_rates/empirical_adoptions_rates.csv",sep="")
   )
 
 #################################################### plotting
@@ -282,7 +282,6 @@ group_shapes <- c(
   "Ugander et al. (2012)" = 25
 )
 
-# plot ECDF averaging over networks
 empirical_adoption_rates_plot <- ggplot(
   aes(x = k, y=ratio_k,
       color = group, shape = group, fill = group
@@ -300,7 +299,7 @@ empirical_adoption_rates_plot <- ggplot(
   #facet_wrap( ~ factor(intervention_size)) +
   #ylab(unname(TeX(c("$p(k)/p(k-1)$")))) +
   #xlab(unname(TeX(c("k")))) +
-  ylab("p(k)/p(k-1)") +
+  ylab("p(k)/p(k-1) \n ") +
   xlab("k") +
   theme(legend.position = c(0.75, 0.7))
   #annotation_logticks(
@@ -312,7 +311,7 @@ empirical_adoption_rates_plot
 library(directlabels)
 
 label_method = list(
-  dl.maxvar.points,
+  maxvar.points,
   dl.trans(x=x-1),
   rot=c(30,180)
 )
@@ -335,6 +334,6 @@ empirical_adoption_rates_plot_dl <- empirical_adoption_rates_plot +
 empirical_adoption_rates_plot_dl
 
 
-ggsave('figures/empirical_adoption_rates/empirical_adoption_rates.pdf',
+ggsave(paste(cwd,'/figures/empirical_adoption_rates/empirical_adoption_rates.pdf',sep=""),
        empirical_adoption_rates_plot_dl, width = 5, height = 3.5)
 
