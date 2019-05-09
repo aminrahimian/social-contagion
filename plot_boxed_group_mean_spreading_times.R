@@ -267,23 +267,42 @@ ggsave('figures/spreading_time_summaries/all_summaries_plot.pdf',
        all_summaries_plot,
        width = 6, height = 5)
 
-all_summaries_plot_diff_ci <- ggplot(
-  aes(x = network_group, y=time_to_spread_mean, color=intervention),
-  data = all_summaries_group_by_id
-  ) +
+all_summaries_plot_diff_ci <- all_summaries_group_by_id %>%
+  ungroup() %>%
+  mutate(
+    network_group = factor(network_group, levels = sort(levels(network_group), T)),
+    ) %>%
+  ggplot(
+  aes(
+    x = network_group,
+    y = time_to_spread_mean,
+    ymin = time_to_spread_lb_diff,
+    ymax = time_to_spread_ub_diff,
+    color = intervention, shape = intervention, fill = intervention
+  )
+) +
   ylab("time to spread") +
   scale_color_manual(values = intervention_colors) + 
   scale_fill_manual(values = intervention_colors) +
   scale_shape_manual(values = intervention_shapes) +
-  geom_pointrange(
-    aes(ymin = time_to_spread_lb_diff, ymax = time_to_spread_ub_diff, shape = intervention),
-    position=position_dodge(width=0.75)
-  )+
+  geom_point(
+    position=position_dodge2(width=0.7, reverse = TRUE),
+    size = 2
+  ) +
+  geom_linerange(
+    position=position_dodge2(width=0.7, reverse = TRUE),
+    show.legend = F
+  ) +
   coord_cartesian(xlim = c(1,30)) + 
-  theme(legend.justification=c(1,1), legend.position=c(0.95,0.7)) + 
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.95, 0.3),
+    legend.title = element_blank(),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(.9, 'lines')
+  ) + 
   scale_y_log10(breaks = 2^(2:5)) +
   coord_flip()
-
 all_summaries_plot_diff_ci
 
 ggsave('figures/spreading_time_summaries/all_summaries_plot_diff_ci.pdf',
