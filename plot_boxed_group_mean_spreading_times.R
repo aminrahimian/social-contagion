@@ -54,6 +54,7 @@ cai_data <- read.csv(
 cai_filtered_data <- cai_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
+  filter(intervention_size %in% c(0, default_intervention_size)) %>% 
   select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
@@ -74,6 +75,7 @@ chami_advice_data <- read.csv(
 chami_advice_filtered_data <- chami_advice_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
+  filter(intervention_size %in% c(0, default_intervention_size)) %>% 
   select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
@@ -94,6 +96,7 @@ chami_friendship_data <- read.csv(
 chami_friendship_filtered_data <- chami_friendship_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
+  filter(intervention_size %in% c(0, default_intervention_size)) %>% 
   select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
@@ -114,6 +117,7 @@ banerjee_combined_data <- read.csv(
 banerjee_combined_filtered_data <- banerjee_combined_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
+  filter(intervention_size %in% c(0, default_intervention_size)) %>% 
   select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
@@ -151,6 +155,7 @@ fb_data <- fb_data %>%
 fb_filtered_data <- fb_data %>%
   filter(network_size > 10) %>%
   filter(model == MODEL_1) %>% 
+  filter(intervention_size %in% c(0, default_intervention_size)) %>% 
   select(network_group,intervention_type,time_to_spread,network_id)%>%
   mutate(
     intervention = intervention_name_map[intervention_type]
