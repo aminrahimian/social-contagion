@@ -23,8 +23,8 @@ MODEL_6 = "(0.001,1)"
 default_intervention_size = 10
 
 
-cwd <- dirname(rstudioapi::getSourceEditorContext()$path)
-
+#cwd <- dirname(rstudioapi::getSourceEditorContext()$path)
+cwd <- "."
 
 intervention_name_map <- c(
   "none" = "original",
@@ -36,8 +36,8 @@ intervention_name_map <- c(
 network_group_name_map <- c(
   "banerjee_combined_edgelist_" = "Banerjee et al.\n (2013)",
   "cai_edgelist_" = "Cai et al. (2015)",
-  "chami_advice_edgelist_" = "Chami et al. (2017) \n Advice Network",
-  "chami_friendship_edgelist_" = "Chami et al. (2017) \n Friendship Network",
+  "chami_advice_edgelist_" = "Chami et al. (2017) \n advice network",
+  "chami_friendship_edgelist_" = "Chami et al. (2017) \n friendship network",
   "fb100_edgelist_" = "Traud et al. (2012)"
 )
 
@@ -161,37 +161,56 @@ fb_filtered_data <- fb_data %>%
   mutate(intervention = as.factor(intervention))%>%
   mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
 
-all_filtered_data = rbind(cai_filtered_data,
-                          chami_advice_filtered_data ,
-                          chami_friendship_filtered_data,
-                          banerjee_combined_filtered_data,
-                          fb_filtered_data) %>% 
+all_filtered_data = rbind(
+  cai_filtered_data,
+  chami_advice_filtered_data ,
+  chami_friendship_filtered_data,
+  banerjee_combined_filtered_data,
+  fb_filtered_data
+) %>% 
   mutate(network_group = as.factor(network_group))%>%
-  mutate(network_group = factor(network_group,levels(network_group)[c(2,1,5,4,3)]))
+  mutate(network_group = factor(network_group, levels(network_group)[c(2,1,5,4,3)]))
 
 
+
+q <- qnorm(1 - .05/2)
 all_summaries <- all_filtered_data %>%
-  group_by(network_group,intervention) %>%
+  group_by(network_group, network_id) %>%
+  mutate(
+    time_to_spread_diff = time_to_spread - time_to_spread[intervention == "original"]
+  ) %>%
+  group_by(network_group, intervention) %>%
   summarise(
     time_to_spread_mean = mean(time_to_spread),
-    time_to_spread_sd = sd(time_to_spread),
-    time_to_spread_se = 2.58*std.error(time_to_spread),
-    time_to_spread_ub = mean(time_to_spread)+2.58*std.error(time_to_spread),
-    time_to_spread_lb = mean(time_to_spread)-2.58*std.error(time_to_spread)
-  )
+    time_to_spread_mean_diff = mean(time_to_spread_diff),
+    time_to_spread_se = std.error(time_to_spread),
+    time_to_spread_diff_se = std.error(time_to_spread_diff),
+    time_to_spread_ub = time_to_spread_mean + q * time_to_spread_se,
+    time_to_spread_lb = time_to_spread_mean - q * time_to_spread_se,
+    time_to_spread_ub_diff = time_to_spread_mean + q * time_to_spread_diff_se,
+    time_to_spread_lb_diff = time_to_spread_mean - q * time_to_spread_diff_se
+    )
 
 all_summaries_group_by_id <- all_filtered_data %>%
-  group_by(network_group,intervention,network_id) %>%
+  group_by(network_group, network_id, intervention) %>%
   summarise(
     time_to_spread = mean(time_to_spread)
+    ) %>%
+  group_by(network_group, network_id) %>%
+  mutate(
+    time_to_spread_diff = time_to_spread - time_to_spread[intervention == "original"]
   ) %>%
-  group_by(network_group,intervention) %>%
+  group_by(network_group, intervention) %>%
   summarise(
     time_to_spread_mean = mean(time_to_spread),
+    time_to_spread_mean_diff = mean(time_to_spread_diff),
     time_to_spread_se = std.error(time_to_spread),
-    time_to_spread_ub = mean(time_to_spread)+std.error(time_to_spread),
-    time_to_spread_lb = mean(time_to_spread)-std.error(time_to_spread)
-  )
+    time_to_spread_diff_se = std.error(time_to_spread_diff),
+    time_to_spread_ub = time_to_spread_mean + q * time_to_spread_se,
+    time_to_spread_lb = time_to_spread_mean - q * time_to_spread_se,
+    time_to_spread_ub_diff = time_to_spread_mean + q * time_to_spread_diff_se,
+    time_to_spread_lb_diff = time_to_spread_mean - q * time_to_spread_diff_se
+    )
 
 
 write.csv(all_summaries,
@@ -245,8 +264,50 @@ all_summaries_plot <- ggplot(
 all_summaries_plot
 
 ggsave('figures/spreading_time_summaries/all_summaries_plot.pdf',
-       all_summaries_plot
-       , width = 6, height = 5)
+       all_summaries_plot,
+       width = 6, height = 5)
+
+all_summaries_plot_diff_ci <- all_summaries_group_by_id %>%
+  ungroup() %>%
+  mutate(
+    network_group = factor(network_group, levels = sort(levels(network_group), T)),
+    ) %>%
+  ggplot(
+  aes(
+    x = network_group,
+    y = time_to_spread_mean,
+    ymin = time_to_spread_lb_diff,
+    ymax = time_to_spread_ub_diff,
+    color = intervention, shape = intervention, fill = intervention
+  )
+) +
+  ylab("time to spread") +
+  scale_color_manual(values = intervention_colors) + 
+  scale_fill_manual(values = intervention_colors) +
+  scale_shape_manual(values = intervention_shapes) +
+  geom_point(
+    position=position_dodge2(width=0.7, reverse = TRUE),
+    size = 2
+  ) +
+  geom_linerange(
+    position=position_dodge2(width=0.7, reverse = TRUE),
+    show.legend = F
+  ) +
+  coord_cartesian(xlim = c(1,30)) + 
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.95, 0.3),
+    legend.title = element_blank(),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(.9, 'lines')
+  ) + 
+  scale_y_log10(breaks = 2^(2:5)) +
+  coord_flip()
+all_summaries_plot_diff_ci
+
+ggsave('figures/spreading_time_summaries/all_summaries_plot_diff_ci.pdf',
+       all_summaries_plot_diff_ci,
+       width = 5, height = 3.5)
 
 all_summaries_group_by_id_plot <- ggplot(
   aes(x = network_group, y=time_to_spread_mean, color=intervention),
