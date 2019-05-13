@@ -69,7 +69,8 @@ G[1][5].update(weight=4)
 colors = [G[u][v]['color'] for u,v in G.edges]
 weights = [G[u][v]['weight'] for u,v in G.edges]
 NX.draw_circular(G, edge_color=colors, width=weights)
-plt.text(-0,0,'$\mathcal{C}_{2}^{\eta}$', fontsize=30,
+plt.text(-0,0,'$\mathcal{C}_{2}^{\eta} = $  '
+              '\\\ $\mathcal{C}_1 \cup \mathcal{G}_{\eta} \cup \mathcal{D}_{\eta}$', fontsize=30,
          fontweight='bold', fontdict=None, withdash=False)
 
 plt.show()
@@ -126,7 +127,8 @@ G[2][6].update(weight=4)
 colors = [G[u][v]['color'] for u,v in G.edges]
 weights = [G[u][v]['weight'] for u,v in G.edges]
 NX.draw_circular(G, edge_color=colors, width=weights)
-plt.text(-0,0,'$\mathcal{C}_{2}^{\eta}$', fontsize=30,
+plt.text(-0.2,-0.25, '$ \;$ $\mathcal{C}_{2}^{\eta}=$ '
+               '\\\ $\mathcal{C}_1 \cup \mathcal{G}_{\eta} \cup \mathcal{D}_{\eta}$ ', fontsize=30,
          fontweight='bold', fontdict=None, withdash=False)
 
 plt.show()

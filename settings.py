@@ -43,7 +43,7 @@ def natural_keys(text):
 
 
 # real world networks simulation settings:
-network_group = 'fb100_edgelist_'
+network_group = 'chami_union_edgelist_'
 # 'chami_union_edgelist_'
 # 'fb100_edgelist_'
 # 'cai_edgelist_'
@@ -336,17 +336,17 @@ except OSError as e:
 # commonly used settings:
 #
 # for computations:
-do_computations = True
-do_multiprocessing = True
-save_computations = True
-load_computations = False
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = False
-simulator_mode = False
+# do_computations = True
+# do_multiprocessing = True
+# save_computations = True
+# load_computations = False
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = False
+# simulator_mode = False
 #
-# for plotting:
+# # # for plotting:
 # do_computations = False
 # do_multiprocessing = False
 # save_computations = False
@@ -356,7 +356,7 @@ simulator_mode = False
 # show_plots = False
 # data_dump = False
 # simulator_mode = False
-#
+
 # # # for data_dump:
 # do_computations = False
 # do_multiprocessing = False
@@ -369,16 +369,16 @@ simulator_mode = False
 # simulator_mode = False
 
 # for simulator:
-# do_computations = True
-# do_multiprocessing = False
-# save_computations = False
-# load_computations = False
-# # simulator uses a different mathplotlib setting for plotting
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = False
-# simulator_mode = True
+do_computations = True
+do_multiprocessing = False
+save_computations = True
+load_computations = False
+# simulator uses a different mathplotlib setting for plotting
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = False
+simulator_mode = True
 
 
 #  check that different modes are set consistently
@@ -407,7 +407,8 @@ assert not (simulator_mode and do_plots), "simulator_mode and do_plots use diffe
                                           "(conflicting) matplotlib settings, and " \
                                           "cannot be both true"
 
-layout = 'spring'
+layout = 'circular'
+# 'spring'
 # 'circular'
 # layout could be circular, spring, this the graph visualization layout
 
@@ -425,7 +426,7 @@ if simulator_mode:
     import pycxsimulator
     import pylab as PL
 
-    simulate_real_networks = True
+    simulate_real_networks = False
 
     highlight_infecting_edges = True
 
@@ -466,11 +467,11 @@ if simulator_mode:
             'gamma': 0.0,
         }
     else:
-        simulator_ID = '1000_test'
+        simulator_ID = '44_net'
 
         initial_seeds = 2
 
-        network_size = 1000
+        network_size = 44
 
         simulator_params = {
             'size': network_size,  # populationSize,
@@ -480,7 +481,7 @@ if simulator_mode:
             'delta': 0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 4,
             'fixed_number_edges_added': 2,
-            'fixed_prob_high': 0.02,
+            'fixed_prob_high': 0.99,
             'fixed_prob': 0.01,
             'theta': 2,
             'alpha': 1,
