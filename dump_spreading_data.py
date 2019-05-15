@@ -3,9 +3,9 @@
 from settings import *
 
 
-rewiring_percentage_list = [10]  # [5, 10, 15, 20, 25]
+rewiring_percentage_list = [5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
 
-percent_more_edges_list = [10]  # [5, 10, 15, 20, 25]
+percent_more_edges_list = [5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
 
 include_original_networks = True
 include_rewiring_networks = True
