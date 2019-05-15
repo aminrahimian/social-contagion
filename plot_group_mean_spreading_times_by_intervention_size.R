@@ -171,19 +171,16 @@ all_summaries_plot_line_error_bar <- ggplot(
       shape=intervention,
       fill=intervention),
   data = all_summaries_group_by_id_intervention_size%>%filter(network_group=="Cai et al. (2015)")) +
-  scale_color_manual(values = intervention_colors) + 
-  scale_fill_manual(values = intervention_colors) +
-  scale_shape_manual(values = intervention_shapes) +
+  scale_color_manual(name = "Cai et al. (2015)", values = intervention_colors) + 
+  scale_fill_manual(name = "Cai et al. (2015)", values = intervention_colors) +
+  scale_shape_manual(name = "Cai et al. (2015)", values = intervention_shapes) +
   geom_errorbar(aes(ymin=time_to_spread_lb_diff, ymax=time_to_spread_ub_diff), 
                 width=.1, position=position_dodge(width=0.75)) +
   geom_line(position=position_dodge(width=0.75)) +
-  geom_point(position=position_dodge(width=0.75),size=2) +  
-  labs(color ="Cai et al. (2015)")  + 
-  guides(shape=FALSE) +
-  guides(fill=FALSE) +
+  geom_point(position=position_dodge(width=0.75),size=2) +
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.95, 0.95),
+    legend.position=c(0.99, 0.98),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(.9, 'lines')
   ) + xlab("intervention size") + ylab("time to spread")
@@ -201,19 +198,16 @@ all_summaries_plot_line_error_bar <- ggplot(
       shape=intervention,
       fill=intervention),
   data = all_summaries_group_by_id_intervention_size%>%filter(network_group=="Banerjee et al.\n (2013)")) +
-  scale_color_manual(values = intervention_colors) + 
-  scale_fill_manual(values = intervention_colors) +
-  scale_shape_manual(values = intervention_shapes) +
+  scale_color_manual(name = "Banerjee et al. (2013)", values = intervention_colors) + 
+  scale_fill_manual(name = "Banerjee et al. (2013)", values = intervention_colors) +
+  scale_shape_manual(name = "Banerjee et al. (2013)", values = intervention_shapes) +
   geom_errorbar(aes(ymin=time_to_spread_lb_diff, ymax=time_to_spread_ub_diff), 
                 width=.1, position=position_dodge(width=0.75)) +
   geom_line(position=position_dodge(width=0.75)) +
   geom_point(position=position_dodge(width=0.75),size=2) + 
-  labs(color ="Banerjee et al. (2013)")  + 
-  guides(shape=FALSE) +
-  guides(fill=FALSE) +
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.95, 0.95),
+    legend.position=c(0.99, 0.98),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(.9, 'lines')
   )   + xlab("intervention size") + ylab("time to spread")
@@ -232,19 +226,16 @@ all_summaries_plot_line_error_bar <- ggplot(
       fill=intervention),
   data = all_summaries_group_by_id_intervention_size
   %>%filter(network_group=="Chami et al. (2017) \n advice network")) +
-  scale_color_manual(values = intervention_colors) + 
-  scale_fill_manual(values = intervention_colors) +
-  scale_shape_manual(values = intervention_shapes) +
+  scale_color_manual(name = "Chami et al. (2017) \n advice network", values = intervention_colors) + 
+  scale_fill_manual(name = "Chami et al. (2017) \n advice network",values = intervention_colors) +
+  scale_shape_manual(name = "Chami et al. (2017) \n advice network",values = intervention_shapes) +
   geom_errorbar(aes(ymin=time_to_spread_lb_diff, ymax=time_to_spread_ub_diff), 
                 width=.1, position=position_dodge(width=0.75)) +
   geom_line(position=position_dodge(width=0.75)) +
   geom_point(position=position_dodge(width=0.75),size=2) + 
-  labs(color ="Chami et al. (2017) \n advice network")  +
-  guides(shape=FALSE) +
-  guides(fill=FALSE) +
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.95, 0.95),
+    legend.position=c(0.35, 0.35),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(.9, 'lines')
   )   + xlab("intervention size") + ylab("time to spread")
@@ -262,16 +253,13 @@ all_summaries_plot_line_error_bar <- ggplot(
       shape=intervention,
       fill=intervention),
   data = all_summaries_group_by_id_intervention_size%>%filter(network_group=="Chami et al. (2017) \n friendship network")) +
-  scale_color_manual(values = intervention_colors) + 
-  scale_fill_manual(values = intervention_colors) +
-  scale_shape_manual(values = intervention_shapes) +
+  scale_color_manual(name = "Chami et al. (2017) \n friendship network", values = intervention_colors) + 
+  scale_fill_manual(name = "Chami et al. (2017) \n friendship network", values = intervention_colors) +
+  scale_shape_manual(name = "Chami et al. (2017) \n friendship network", values = intervention_shapes) +
   geom_errorbar(aes(ymin=time_to_spread_lb_diff, ymax=time_to_spread_ub_diff), 
                 width=.1, position=position_dodge(width=0.75)) +
   geom_line(position=position_dodge(width=0.75)) +
-  geom_point(position=position_dodge(width=0.75),size=2) + 
-  labs(color ="Chami et al. (2017) \n friendship network")  +
-  guides(shape=FALSE) +
-  guides(fill=FALSE) +
+  geom_point(position=position_dodge(width=0.75),size=2) +
   theme(
     legend.justification=c(1, 1),
     legend.position=c(0.95, 0.95),
