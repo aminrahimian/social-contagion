@@ -23,8 +23,8 @@ MODEL_6 = "(0.001,1)"
 default_intervention_size = 10
 
 
-#cwd <- dirname(rstudioapi::getSourceEditorContext()$path)
-cwd <- "."
+cwd <- dirname(rstudioapi::getSourceEditorContext()$path)
+#cwd <- "."
 
 intervention_name_map <- c(
   "none" = "original",
