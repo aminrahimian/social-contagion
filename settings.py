@@ -5,6 +5,7 @@
 
 import random as RD
 import numpy as np
+from numpy import random
 import pickle
 import os
 import errno
@@ -22,6 +23,7 @@ COMPLEX = 1
 
 SENTINEL = object()
 
+theta_list = [3, 4, 5, 6]
 
 def get_n_smallest_key_values(dictionary, n):
     smallest_entries = sorted(
@@ -43,7 +45,8 @@ def natural_keys(text):
 
 
 # real world networks simulation settings:
-network_group = 'chami_union_edgelist_'
+network_group = 'cai_edgelist_'
+#'chami_union_edgelist_'
 # 'chami_union_edgelist_'
 # 'fb100_edgelist_'
 # 'cai_edgelist_'
@@ -61,6 +64,13 @@ if network_group == 'cai_edgelist_':
 
     DELIMITER = ' '
 
+    GENERATE_NET_LIST_FROM_AVAILABLE_SAMPLES = False
+
+    TAKE_SMALLEST_N = True
+
+    if TAKE_SMALLEST_N:
+        SMALLEST_N = 5
+
 elif network_group == 'chami_friendship_edgelist_':
 
     root_data_address = './data/chami-friendship-data/'
@@ -70,12 +80,6 @@ elif network_group == 'chami_friendship_edgelist_':
 elif network_group == 'chami_advice_edgelist_':
 
     root_data_address = './data/chami-advice-data/'
-
-    DELIMITER = ','
-
-elif network_group == 'chami_union_edgelist_':
-
-    root_data_address = './data/chami-union-data/'
 
     DELIMITER = ','
 
@@ -203,7 +207,7 @@ elif model_id == '_model_6':
     delta = 0.0
 elif model_id == '_model_7':
     MODEL = '(0,1)'
-    fixed_prob_high = 1.0
+    fixed_prob_high = 1
     fixed_prob_low = 0.0
     alpha = 1.0
     gamma = 0.0
@@ -335,16 +339,16 @@ except OSError as e:
 
 # commonly used settings:
 #
-# for computations:
-# do_computations = True
-# do_multiprocessing = True
-# save_computations = True
-# load_computations = False
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = False
-# simulator_mode = False
+# # for computations:
+do_computations = True
+do_multiprocessing = True
+save_computations = True
+load_computations = False
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = False
+simulator_mode = False
 #
 # # # for plotting:
 # do_computations = False
@@ -353,11 +357,11 @@ except OSError as e:
 # load_computations = True
 # do_plots = True
 # save_plots = True
-# show_plots = False
+# show_plots = True
 # data_dump = False
 # simulator_mode = False
 
-# # # for data_dump:
+# # # # for data_dump:
 # do_computations = False
 # do_multiprocessing = False
 # save_computations = False
@@ -368,17 +372,17 @@ except OSError as e:
 # data_dump = True
 # simulator_mode = False
 
-# for simulator:
-do_computations = True
-do_multiprocessing = False
-save_computations = True
-load_computations = False
-# simulator uses a different mathplotlib setting for plotting
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = False
-simulator_mode = True
+# #for simulator:
+# do_computations = True
+# do_multiprocessing = False
+# save_computations = True
+# load_computations = False
+# #simulator uses a different mathplotlib setting for plotting
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = False
+# simulator_mode = True
 
 
 #  check that different modes are set consistently
@@ -436,9 +440,9 @@ if simulator_mode:
 
     if simulate_real_networks:
 
-        simulator_ID = 'fb100_edgelist_American75'  # 'cai_edgelist_1'
+        simulator_ID = 'cai_edgelist_1' #'fb100_edgelist_American75'
 
-        root_data_address = './data/fb100-data/'
+        root_data_address = '/data/cai-data/' #/data/fb100-data/'
 
         edgelist_directory_address = root_data_address + 'edgelists/'
 
@@ -457,11 +461,11 @@ if simulator_mode:
             # 'size': network_size,  # populationSize,
             'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
             # two initial seeds, next to each other
-            'delta': 0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'delta': 0, #0.0000000000000001,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             # 'nearest_neighbors': 4,
             # 'fixed_number_edges_added': 2,
             'fixed_prob_high': 1,
-            'fixed_prob': 0.0,
+            'fixed_prob': 0.05,
             'theta': 2,
             'alpha': 1.0,
             'gamma': 0.0,

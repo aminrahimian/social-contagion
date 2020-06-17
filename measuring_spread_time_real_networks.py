@@ -372,8 +372,8 @@ if __name__ == '__main__':
     assert do_computations, "we should be in do_computations mode"
 
     if do_multiprocessing:
-        with multiprocessing.Pool(processes = 3) as pool:
-        # with multiprocessing.Pool(processes = number_CPU) as pool:
+        # with multiprocessing.Pool(processes = 3) as pool:
+        with multiprocessing.Pool(processes = number_CPU) as pool:
             # do computations for the original networks:
             if do_computations_for_original_network:
                 pool.starmap(measure_rewiring_spread_time, product(network_id_list, [0], theta_list))
