@@ -1,9 +1,9 @@
 # compute the spread time in the original network and under edge addition and rewiring interventions
 
 from models import *
+import multiprocessing
 from multiprocessing import Pool
 from pathlib import Path
-
 
 VERBOSE = True
 
@@ -15,10 +15,10 @@ rewiring_percentage_list = [10]
 
 percent_more_edges_list = [10]
 
-do_computations_for_original_network = False
+do_computations_for_original_network = True
 
-intervention_type = 'triad-addition'
-#'all'  # 'rewiring' #'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
+intervention_type = 'all'
+#'triad-addition' #'all'  # 'rewiring' #'all'  # 'triad-addition'  # 'random-addition'# 'rewiring' #
 
 all_interventions = ['triad-addition', 'random-addition', 'rewiring']
 
@@ -28,8 +28,10 @@ number_initial_seeds = 2
 
 CAP = 0.9
 
+theta_list = [3, 4, 5, 6]
 
-def measure_rewiring_spread_time(network_id, rewiring_percentage):
+
+def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
     #  load in the network and extract preliminary data
     fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
     G = NX.read_edgelist(fh, delimiter=DELIMITER)
@@ -38,11 +40,11 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
         G = max(NX.connected_component_subgraphs(G), key=len)
         print('largest connected component extracted with size ', len(G.nodes()))
     #  remove self loops:
-    if len(list(G.selfloop_edges())) > 0:
+    if len(list(NX.selfloop_edges(G))) > 0:
         print(
-            'warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
+            'warning the graph has ' + str(len(list(NX.selfloop_edges(G)))) + ' self-loops that will be removed')
         print('number of edges before self loop removal: ', G.size())
-        G.remove_edges_from(G.selfloop_edges())
+        G.remove_edges_from(NX.selfloop_edges(G))
         print('number of edges before self loop removal: ', G.size())
     network_size = NX.number_of_nodes(G)
 
@@ -52,11 +54,11 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
         if CHECK_FOR_EXISTING_PKL_SAMPLES:
             path = Path(spreading_pickled_samples_directory_address + 'infection_size_original_'
                         + network_group + network_id
-                        + model_id + '.pkl')
+                        + model_id + '_' + str(theta) + '.pkl')
             if path.is_file():
                 print('infection_size_original_'
                       + network_group + network_id
-                      + model_id + ' already exists')
+                      + model_id + '_' + str(theta) + ' already exists')
                 return
 
         params_original = {
@@ -71,7 +73,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
             'fixed_prob': fixed_prob_low,
             'alpha': alpha,
             'gamma': gamma,
-            'theta': 2,
+            'theta': theta,
             'rewire': False,
             'rewiring_mode': 'random_random',
             'num_edges_for_random_random_rewiring': None,
@@ -103,12 +105,12 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
             pickle.dump(speed_samples_original, open(spreading_pickled_samples_directory_address
                                                      + 'speed_samples_original_'
                                                      + network_group + network_id
-                                                     + model_id + '.pkl', 'wb'))
+                                                     + model_id + '_' + str(theta) + '.pkl', 'wb'))
 
             pickle.dump(infection_size_samples_original, open(spreading_pickled_samples_directory_address
                                                               + 'infection_size_original_'
                                                               + network_group + network_id
-                                                              + model_id + '.pkl', 'wb'))
+                                                              + model_id + '_' + str(theta) + '.pkl', 'wb'))
     else:  # rewiring
 
         print('network id', network_id, 'rewiring: ', rewiring_percentage)
@@ -117,11 +119,11 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
             path = Path(spreading_pickled_samples_directory_address + 'infection_size_samples_'
                         + str(rewiring_percentage) + '_percent_rewiring_'
                         + network_group + network_id
-                        + model_id + '.pkl')
+                        + model_id + '_' + str(theta) + '.pkl')
             if path.is_file():
                 print('infection_size_samples_' + str(rewiring_percentage) + '_percent_rewiring_'
                       + network_group + network_id
-                      + model_id + ' already exists')
+                      + model_id + '_' + str(theta) + ' already exists')
                 return
 
         params_rewired = {
@@ -136,7 +138,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
             'fixed_prob': fixed_prob_low,
             'alpha': alpha,
             'gamma': gamma,
-            'theta': 2,
+            'theta': theta,
             'rewire': True,
             'rewiring_mode': 'random_random',
             'num_edges_for_random_random_rewiring': 0.01 * rewiring_percentage * G.number_of_edges(),
@@ -170,27 +172,27 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage):
                         open(spreading_pickled_samples_directory_address + 'speed_samples_'
                              + str(rewiring_percentage) +
                              '_percent_rewiring_' + network_group + network_id
-                             + model_id + '.pkl', 'wb'))
+                             + model_id + '_' + str(theta) + '.pkl', 'wb'))
             pickle.dump(infection_size_samples_rewired,
                         open(spreading_pickled_samples_directory_address + 'infection_size_samples_'
                              + str(rewiring_percentage) +
                              '_percent_rewiring_' + network_group + network_id
-                             + model_id + '.pkl', 'wb'))
+                             + model_id + '_' + str(theta) + '.pkl', 'wb'))
     return
 
 
-def measure_triad_addition_spread_time(network_id, percent_more_edges):
-    print('network id', network_id, 'triad edge addition: ', percent_more_edges)
+def measure_triad_addition_spread_time(network_id, percent_more_edges, theta):
+    print('network id', network_id, 'triad edge addition: ', percent_more_edges, 'theta: ', theta)
 
     if CHECK_FOR_EXISTING_PKL_SAMPLES:
         path = Path(spreading_pickled_samples_directory_address + 'infection_size_samples_'
                     + str(percent_more_edges) + '_percent_' + 'add_triad_'
                     + network_group + network_id
-                    + model_id + '.pkl')
+                    + model_id + '_' + str(theta) + '.pkl')
         if path.is_file():
             print('infection_size_samples_' + str(percent_more_edges) + '_percent_' + 'add_triad_'
                   + network_group + network_id
-                  + model_id + ' already exists')
+                  + model_id + '_' + str(theta) + ' already exists')
             return
 
     #  load in the network and extract preliminary data
@@ -202,11 +204,11 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
         G = max(NX.connected_component_subgraphs(G), key=len)
         print('largest connected component extracted with size ', len(G.nodes()))
     #  remove self loops:
-    if len(list(G.selfloop_edges())) > 0:
+    if len(list(NX.selfloop_edges(G))) > 0:
         print(
-            'warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
+            'warning the graph has ' + str(len(list(NX.selfloop_edges(G)))) + ' self-loops that will be removed')
         print('number of edges before self loop removal: ', G.size())
-        G.remove_edges_from(G.selfloop_edges())
+        G.remove_edges_from(NX.selfloop_edges(G))
         print('number of edges before self loop removal: ', G.size())
     network_size = NX.number_of_nodes(G)
 
@@ -224,7 +226,7 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
         'fixed_prob': fixed_prob_low,
         'alpha': alpha,
         'gamma': gamma,
-        'theta': 2,
+        'theta': theta,
         'rewire': False,
     }
 
@@ -258,28 +260,28 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges):
         pickle.dump(speed_samples_add_triad, open(spreading_pickled_samples_directory_address + 'speed_samples_'
                                                   + str(percent_more_edges) + '_percent_' + 'add_triad_'
                                                   + network_group + network_id
-                                                  + model_id + '.pkl', 'wb'))
+                                                  + model_id + '_' + str(theta) + '.pkl', 'wb'))
         pickle.dump(infection_size_samples_add_triad, open(spreading_pickled_samples_directory_address
                                                            + 'infection_size_samples_'
                                                            + str(percent_more_edges) + '_percent_' + 'add_triad_'
                                                            + network_group + network_id
-                                                           + model_id + '.pkl', 'wb'))
+                                                           + model_id + '_' + str(theta) + '.pkl', 'wb'))
     return
 
 
-def measure_random_addition_spread_time(network_id, percent_more_edges):
-    print('network id', network_id, 'random edge addition: ', percent_more_edges)
+def measure_random_addition_spread_time(network_id, percent_more_edges, theta):
+    print('network id', network_id, 'random edge addition: ', percent_more_edges, 'theta: ', theta)
 
     if CHECK_FOR_EXISTING_PKL_SAMPLES:
         path = Path(spreading_pickled_samples_directory_address + 'infection_size_samples_'
                     + str(percent_more_edges) + '_percent_' + 'add_random_'
                     + network_group + network_id
-                    + model_id + '.pkl')
+                    + model_id + '_' + str(theta) + '.pkl')
         if path.is_file():
             print('infection_size_samples_' + str(percent_more_edges)
                   + '_percent_' + 'add_random_'
                   + network_group + network_id
-                  + model_id + ' already exists')
+                  + model_id + '_' + str(theta) + ' already exists')
             return
 
     #  load in the network and extract preliminary data
@@ -291,11 +293,11 @@ def measure_random_addition_spread_time(network_id, percent_more_edges):
         G = max(NX.connected_component_subgraphs(G), key=len)
         print('largest connected component extracted with size ', len(G.nodes()))
     #  remove self loops:
-    if len(list(G.selfloop_edges())) > 0:
+    if len(list(NX.selfloop_edges(G))) > 0:
         print(
-            'warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
+            'warning the graph has ' + str(len(list(NX.selfloop_edges(G)))) + ' self-loops that will be removed')
         print('number of edges before self loop removal: ', G.size())
-        G.remove_edges_from(G.selfloop_edges())
+        G.remove_edges_from(NX.selfloop_edges(G))
         print('number of edges before self loop removal: ', G.size())
 
     network_size = NX.number_of_nodes(G)
@@ -314,7 +316,7 @@ def measure_random_addition_spread_time(network_id, percent_more_edges):
         'fixed_prob': fixed_prob_low,
         'alpha': alpha,
         'gamma': gamma,
-        'theta': 2,
+        'theta': theta,
         'rewire': False,
     }
 
@@ -347,22 +349,22 @@ def measure_random_addition_spread_time(network_id, percent_more_edges):
                     open(spreading_pickled_samples_directory_address + 'speed_samples_'
                          + str(percent_more_edges) + '_percent_' + 'add_random_'
                          + network_group + network_id
-                         + model_id + '.pkl', 'wb'))
+                         + model_id + '_' + str(theta) + '.pkl', 'wb'))
         pickle.dump(infection_size_samples_add_random,
                     open(spreading_pickled_samples_directory_address + 'infection_size_samples_'
                          + str(percent_more_edges) + '_percent_' + 'add_random_'
                          + network_group + network_id
-                         + model_id + '.pkl', 'wb'))
+                         + model_id + '_' + str(theta) + '.pkl', 'wb'))
     return
 
 
-def measure_any_intervention_spread_time(intervention_type, network_id, percent_more_edges):
+def measure_any_intervention_spread_time(intervention_type, network_id, percent_more_edges, theta):
     if intervention_type == 'rewiring':
-        measure_rewiring_spread_time(network_id, percent_more_edges)
+        measure_rewiring_spread_time(network_id, percent_more_edges, theta)
     elif intervention_type == 'triad-addition':
-        measure_triad_addition_spread_time(network_id, percent_more_edges)
+        measure_triad_addition_spread_time(network_id, percent_more_edges, theta)
     elif intervention_type == 'random-addition':
-        measure_random_addition_spread_time(network_id, percent_more_edges)
+        measure_random_addition_spread_time(network_id, percent_more_edges, theta)
 
 
 if __name__ == '__main__':
@@ -370,31 +372,32 @@ if __name__ == '__main__':
     assert do_computations, "we should be in do_computations mode"
 
     if do_multiprocessing:
-        with multiprocessing.Pool(processes=number_CPU) as pool:
+        with multiprocessing.Pool(processes = 3) as pool:
+        # with multiprocessing.Pool(processes = number_CPU) as pool:
             # do computations for the original networks:
             if do_computations_for_original_network:
-                pool.starmap(measure_rewiring_spread_time, product(network_id_list, [0]))
+                pool.starmap(measure_rewiring_spread_time, product(network_id_list, [0], theta_list))
             # do computations for the modified networks:
             if intervention_type == 'rewiring':
-                pool.starmap(measure_rewiring_spread_time, product(network_id_list, rewiring_percentage_list))
+                pool.starmap(measure_rewiring_spread_time, product(network_id_list, rewiring_percentage_list, theta_list))
                 pool.close()
                 pool.join()
             elif intervention_type == 'triad-addition':
-                pool.starmap(measure_triad_addition_spread_time, product(network_id_list, percent_more_edges_list))
+                pool.starmap(measure_triad_addition_spread_time, product(network_id_list, percent_more_edges_list, theta_list))
                 pool.close()
                 pool.join()
             elif intervention_type == 'random-addition':
-                pool.starmap(measure_random_addition_spread_time, product(network_id_list, percent_more_edges_list))
+                pool.starmap(measure_random_addition_spread_time, product(network_id_list, percent_more_edges_list, theta_list))
                 pool.close()
                 pool.join()
             elif intervention_type == 'all':
                 pool.starmap(measure_any_intervention_spread_time,
-                             product(all_interventions, network_id_list, percent_more_edges_list))
+                             product(all_interventions, network_id_list, percent_more_edges_list, theta_list))
                 pool.close()
                 pool.join()
             elif intervention_type == 'addition':
                 pool.starmap(measure_any_intervention_spread_time,
-                             product(addition_interventions, network_id_list, percent_more_edges_list))
+                             product(addition_interventions, network_id_list, percent_more_edges_list, theta_list))
                 pool.close()
                 pool.join()
             else:
@@ -404,36 +407,44 @@ if __name__ == '__main__':
         # do computations for the original networks:
         if do_computations_for_original_network:
             for network_id in network_id_list:
-                measure_rewiring_spread_time(network_id, 0)
+                for theta in theta_list:
+                    measure_rewiring_spread_time(network_id, 0, theta)
         # do computations for the modified networks:
         if intervention_type == 'rewiring':
             # spreading time computations for rewiring interventions
             for network_id in network_id_list:
                 for rewiring_percentage in rewiring_percentage_list:
-                    measure_rewiring_spread_time(network_id, rewiring_percentage)
+                    for theta in theta_list:
+                        measure_rewiring_spread_time(network_id, rewiring_percentage, theta)
         elif intervention_type == 'triad-addition':
             # spreading time computations for triad edge addition interventions
             for network_id in network_id_list:
                 for percent_more_edges in percent_more_edges_list:
-                    measure_triad_addition_spread_time(network_id, percent_more_edges)
+                    for theta in theta_list:
+                        measure_triad_addition_spread_time(network_id, percent_more_edges, theta)
         elif intervention_type == 'random-addition':
             # spreading time computations for random edge addition interventions
             for network_id in network_id_list:
                 for percent_more_edges in percent_more_edges_list:
-                    measure_random_addition_spread_time(network_id, percent_more_edges)
+                    for theta in theta_list:
+                        measure_random_addition_spread_time(network_id, percent_more_edges, theta)
         elif intervention_type == 'all':
             # spreading time computations for all interventions
             for network_id in network_id_list:
+                # for theta in theta_list:
                 for rewiring_percentage in rewiring_percentage_list:
-                    measure_rewiring_spread_time(network_id, rewiring_percentage)
+                    for theta in theta_list:
+                        measure_rewiring_spread_time(network_id, rewiring_percentage, theta)
                 for percent_more_edges in percent_more_edges_list:
-                    measure_triad_addition_spread_time(network_id, percent_more_edges)
-                    measure_random_addition_spread_time(network_id, percent_more_edges)
+                    for theta in theta_list:
+                        measure_triad_addition_spread_time(network_id, percent_more_edges, theta)
+                        measure_random_addition_spread_time(network_id, percent_more_edges, theta)
         elif intervention_type == 'addition':
             # spreading time computations for all interventions
             for network_id in network_id_list:
                 for percent_more_edges in percent_more_edges_list:
-                    measure_triad_addition_spread_time(network_id, percent_more_edges)
-                    measure_random_addition_spread_time(network_id, percent_more_edges)
+                    for theta in theta_list:
+                        measure_triad_addition_spread_time(network_id, percent_more_edges, theta)
+                        measure_random_addition_spread_time(network_id, percent_more_edges, theta)
         else:
             assert False, "intervention type not supported"
