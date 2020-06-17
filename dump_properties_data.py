@@ -4,8 +4,9 @@ from settings import *
 
 from models import measure_property
 
+import pandas as pd
 
-intervention_size_list = [5, 10, 15, 20, 25]
+intervention_size_list = [10] #[5, 10, 15, 20, 25]
 
 old_properties = ['avg_clustering', 'average_shortest_path_length', 'diameter', 'size_2_core']
 
@@ -64,10 +65,10 @@ if __name__ == '__main__':
                 print('largest connected component extracted with size ', len(G.nodes()))
 
             #  remove self loops:
-            if len(list(G.selfloop_edges())) > 0:
-                print('warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
+            if len(list(NX.selfloop_edges(G))) > 0:
+                print('warning the graph has ' + str(len(list(NX.selfloop_edges(G)))) + ' self-loops that will be removed')
                 print('number of edges before self loop removal: ', G.size())
-                G.remove_edges_from(G.selfloop_edges())
+                G.remove_edges_from(NX.selfloop_edges(G))
                 print('number of edges before self loop removal: ', G.size())
 
             network_size = NX.number_of_nodes(G)
@@ -96,7 +97,7 @@ if __name__ == '__main__':
             extended_frame = [df, new_df]  # , df_add_triad, df_rewired, df_original]
 
             df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(
-                drop=True)
+            drop=True)
 
     # interventions
 
@@ -129,11 +130,11 @@ if __name__ == '__main__':
                 G = max(NX.connected_component_subgraphs(G), key=len)
                 print('largest connected component extracted with size ', len(G.nodes()))
 
-            if len(list(G.selfloop_edges())) > 0:
+            if len(list(NX.selfloop_edges(G))) > 0:
                 print(
-                    'warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed.')
+                    'warning the graph has ' + str(len(list(NX.selfloop_edges(G)))) + ' self-loops that will be removed.')
                 print('number of edges before self loop removal: ', G.size())
-                G.remove_edges_from(G.selfloop_edges())
+                G.remove_edges_from(NX.selfloop_edges(G))
                 print('number of edges before self loop removal: ', G.size())
 
             network_size = NX.number_of_nodes(G)
