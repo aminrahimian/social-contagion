@@ -8,7 +8,6 @@
 *.pckl
 *.sh 
 *.xls
-#*.slurm
 .nfs*
 /data/
 /code/.idea/
