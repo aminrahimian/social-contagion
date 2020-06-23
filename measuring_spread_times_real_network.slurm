@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name="measuring_spread_time_real_networks"
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=40
-#SBATCH --mem-per-cpu=4G
+#SBATCH --cpus-per-task=4
+#SBATCH --mem-per-cpu=1G
 #SBATCH --partition=sched_mit_sloan_batch
 #SBATCH --time=4-00:00:00
-#SBATCH --array=1-17
+#SBATCH --array=1-175
 
 
 #SBATCH -o /home/clintonr/contagion/measuring_spread_time_real_networks.out

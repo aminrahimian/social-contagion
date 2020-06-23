@@ -531,7 +531,7 @@ if do_multiprocessing:
     import multiprocessing
     from itertools import product
     if 'SLURM_ARRAY_TASK_ID' in os.environ:
-        number_CPU = 3
+        number_CPU = 4
     else:
         number_CPU = 40
 
