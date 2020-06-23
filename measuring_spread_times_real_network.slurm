@@ -5,7 +5,7 @@
 #SBATCH --mem-per-cpu=1G
 #SBATCH --partition=sched_mit_sloan_batch
 #SBATCH --time=4-00:00:00
-#SBATCH --array=1-175
+#SBATCH --array=1-10
 
 
 #SBATCH -o /home/clintonr/contagion/measuring_spread_time_real_networks.out
