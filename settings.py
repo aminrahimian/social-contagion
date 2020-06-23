@@ -23,7 +23,8 @@ COMPLEX = 1
 
 SENTINEL = object()
 
-theta_list = [3, 4, 5, 6]
+# theta_list = [2, 3, 4, 5]
+theta_list = [[1, 0, 0, 0]] #, [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
 def get_n_smallest_key_values(dictionary, n):
     smallest_entries = sorted(

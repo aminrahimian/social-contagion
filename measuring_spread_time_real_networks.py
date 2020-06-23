@@ -28,9 +28,6 @@ number_initial_seeds = 2
 
 CAP = 0.9
 
-theta_list = [3, 4, 5, 6]
-
-
 def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
     #  load in the network and extract preliminary data
     fh = open(edgelist_directory_address + network_group + network_id + '.txt', 'rb')
@@ -73,7 +70,8 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
             'fixed_prob': fixed_prob_low,
             'alpha': alpha,
             'gamma': gamma,
-            'theta': theta,
+            # 'theta': theta,
+            'theta_distribution': theta,
             'rewire': False,
             'rewiring_mode': 'random_random',
             'num_edges_for_random_random_rewiring': None,
@@ -84,7 +82,8 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
             params_original['relative_threshold'] = zeta
             dynamics_original = RelativeLinear(params_original)
         elif model_id in ['_model_1', '_model_2', '_model_3', '_model_6', '_model_7']:
-            dynamics_original = DeterministicLinear(params_original)
+            # dynamics_original = DeterministicLinear(params_original)
+            dynamics_original = ProbabilityDistributionLinear(params_original)
         else:
             print('model_id is not valid')
             exit()
@@ -138,7 +137,8 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
             'fixed_prob': fixed_prob_low,
             'alpha': alpha,
             'gamma': gamma,
-            'theta': theta,
+            # 'theta': theta,
+            'theta_distribution': theta,
             'rewire': True,
             'rewiring_mode': 'random_random',
             'num_edges_for_random_random_rewiring': 0.01 * rewiring_percentage * G.number_of_edges(),
@@ -150,7 +150,8 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
             params_rewired['relative_threshold'] = zeta
             dynamics_rewired = RelativeLinear(params_rewired)
         elif model_id in ['_model_1', '_model_2', '_model_3', '_model_6', '_model_7']:
-            dynamics_rewired = DeterministicLinear(params_rewired)
+            # dynamics_rewired = DeterministicLinear(params_rewired)
+            dynamics_rewired = ProbabilityDistributionLinear(params_rewired)
         else:
             print('model_id is not valid')
             exit()
@@ -182,7 +183,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
 
 
 def measure_triad_addition_spread_time(network_id, percent_more_edges, theta):
-    print('network id', network_id, 'triad edge addition: ', percent_more_edges, 'theta: ', theta)
+    print('network id', network_id, 'triad edge addition: ', percent_more_edges, 'theta_distribution: ', theta)
 
     if CHECK_FOR_EXISTING_PKL_SAMPLES:
         path = Path(spreading_pickled_samples_directory_address + 'infection_size_samples_'
@@ -226,7 +227,8 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges, theta):
         'fixed_prob': fixed_prob_low,
         'alpha': alpha,
         'gamma': gamma,
-        'theta': theta,
+        # 'theta': theta,
+        'theta_distribution': theta,
         'rewire': False,
     }
 
@@ -236,7 +238,8 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges, theta):
         params_add_triad['relative_threshold'] = zeta
         dynamics_add_triad = RelativeLinear(params_add_triad)
     elif model_id in ['_model_1', '_model_2', '_model_3', '_model_6', '_model_7']:
-        dynamics_add_triad = DeterministicLinear(params_add_triad)
+        # dynamics_add_triad = DeterministicLinear(params_add_triad)
+        dynamics_add_triad = ProbabilityDistributionLinear(params_add_triad)
     else:
         print('model_id is not valid')
         exit()
@@ -270,7 +273,7 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges, theta):
 
 
 def measure_random_addition_spread_time(network_id, percent_more_edges, theta):
-    print('network id', network_id, 'random edge addition: ', percent_more_edges, 'theta: ', theta)
+    print('network id', network_id, 'random edge addition: ', percent_more_edges, 'theta_distribution: ', theta)
 
     if CHECK_FOR_EXISTING_PKL_SAMPLES:
         path = Path(spreading_pickled_samples_directory_address + 'infection_size_samples_'
@@ -316,7 +319,8 @@ def measure_random_addition_spread_time(network_id, percent_more_edges, theta):
         'fixed_prob': fixed_prob_low,
         'alpha': alpha,
         'gamma': gamma,
-        'theta': theta,
+        # 'theta': theta,
+        'theta_distribution': theta,
         'rewire': False,
     }
 
@@ -326,7 +330,8 @@ def measure_random_addition_spread_time(network_id, percent_more_edges, theta):
         params_add_random['relative_threshold'] = zeta
         dynamics_add_random = RelativeLinear(params_add_random)
     elif model_id in ['_model_1', '_model_2', '_model_3','_model_6', '_model_7']:
-        dynamics_add_random = DeterministicLinear(params_add_random)
+        dynamics_add_random = ProbabilityDistributionLinear(params_add_random)
+        # dynamics_add_random = DeterministicLinear(params_add_random)
     else:
         print('model_id is not valid')
         exit()

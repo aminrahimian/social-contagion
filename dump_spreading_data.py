@@ -22,7 +22,8 @@ if not include_spread_size:
     tracked_properties = ['network_group',
                           'network_id',
                           'network_size',
-                          'theta',
+                          # 'theta',
+                          'theta_distribution',
                           'intervention_type',
                           'intervention_size',
                           'sample_id',
@@ -33,7 +34,8 @@ else:
     tracked_properties = ['network_group',
                           'network_id',
                           'network_size',
-                          'theta',
+                          # 'theta',
+                          'theta_distribution',
                           'intervention_type',
                           'intervention_size',
                           'sample_id',
@@ -117,7 +119,8 @@ if __name__ == "__main__":
                                                    columns=['network_group',
                                                             'network_id',
                                                             'network_size',
-                                                            'theta',
+                                                            # 'theta',
+                                                            'theta_distribution',
                                                             'intervention_type',
                                                             'intervention_size',
                                                             'model'])
@@ -188,7 +191,8 @@ if __name__ == "__main__":
                                                           columns=['network_group',
                                                                    'network_id',
                                                                    'network_size',
-                                                                   'theta',
+                                                                   # 'theta',
+                                                                   'theta_distribution',
                                                                    'intervention_type',
                                                                    'intervention_size',
                                                                    'model'])
@@ -290,8 +294,8 @@ if __name__ == "__main__":
                     df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size, theta,
                                                                     'random_addition', percent_more_edges,
                                                                     MODEL]] * len(speed_samples_add_random),
-                                                             columns=['network_group', 'network_id', 'network_size', 'theta',
-                                                                      'intervention_type',
+                                                             columns=['network_group', 'network_id', 'network_size',
+                                                                      'theta_distribution', 'intervention_type',
                                                                       'intervention_size', 'model'])
 
                     df_sample_ids_add_random = pd.Series(list(range(len(speed_samples_add_random))), name='sample_id')
@@ -316,7 +320,8 @@ if __name__ == "__main__":
                                                             columns=['network_group',
                                                                      'network_id',
                                                                      'network_size',
-                                                                     'theta',
+                                                                     # 'theta',
+                                                                     'theta_distribution',
                                                                      'intervention_type',
                                                                      'intervention_size',
                                                                      'model'])
@@ -384,7 +389,9 @@ if __name__ == "__main__":
                     df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size, theta,
                                                                     'random_addition', percent_more_edges,
                                                                     MODEL]] * len(speed_samples_add_random),
-                                                             columns=['network_group', 'network_id', 'network_size', 'theta',
+                                                             columns=['network_group', 'network_id', 'network_size',
+                                                                      # 'theta',
+                                                                      'theta_distribution',
                                                                       'intervention_type',
                                                                       'intervention_size', 'model'])
 
@@ -414,7 +421,7 @@ if __name__ == "__main__":
         df = pd.read_csv(output_directory_address + network_group + 'spreading_data_dump.csv')
 
         #Filter the desired rows from our original dump file
-        criterion = df['theta'] == theta
+        criterion = df['theta_distribution'] == theta
 
         df_new = df[criterion]
 
