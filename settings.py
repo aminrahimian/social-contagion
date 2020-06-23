@@ -24,7 +24,7 @@ COMPLEX = 1
 SENTINEL = object()
 
 # theta_list = [2, 3, 4, 5]
-theta_list = [[1, 0, 0, 0]] #, [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+theta_list = [[1, 0, 0, 0] , [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
 def get_n_smallest_key_values(dictionary, n):
     smallest_entries = sorted(
@@ -67,7 +67,7 @@ if network_group == 'cai_edgelist_':
 
     GENERATE_NET_LIST_FROM_AVAILABLE_SAMPLES = False
 
-    TAKE_SMALLEST_N = True
+    TAKE_SMALLEST_N = False
 
     if TAKE_SMALLEST_N:
         SMALLEST_N = 5

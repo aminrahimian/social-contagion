@@ -700,7 +700,7 @@ class NetworkModel(object):
         # complex contagion threshold
         if 'theta' not in self.fixed_params:  # complex contagion threshold parameter
             self.params['theta'] = RD.choice([1, 2, 3, 4])  # np.random.randint(1, 4)
-        if 'theta_distribution' not in self.fixed_params: # complex contagion threshold distribution parameter
+        if 'theta_distribution' not in self.fixed_params: # complex contagion probability distribution of thresholds parameter
             self.params['threshold'] = [0.25, 0.25, 0.25, 0.25] #default to equally likely to choose each number
         #  The default values gamma = 0 and alpha = 1 ensure that all infected nodes always remain active
         if 'gamma' not in self.fixed_params:  # rate of transition from active to inactive
