@@ -27,7 +27,7 @@ SENTINEL = object()
 # theta_list = [2, 3, 4, 5]
 theta_list = [[1, 0, 0, 0] , [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
-assert sys.version_info == (3, 6, 3, 'final', 0), 'please use python 3.6.3'
+assert (sys.version_info >= (3, 6) and sys.version_info <= (3,7)), 'please use python 3.6'
 # print(sys.version_info)
 # print(type(NX.__version__))
 assert((NX.__version__ == '1.11' or '1.10')), 'please use networkx 1.11 or 1.10'
