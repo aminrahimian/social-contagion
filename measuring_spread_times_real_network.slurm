@@ -13,7 +13,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=clintonr@mit.edu
 
-module load python/modules/3.6.3
-module load sloan/python/modules/3.6
+cd /home/clintonr/contagion/
 
-python3 /home/clintonr/contagion/measuring_spread_time_real_networks.py ${SLURM_ARRAY_TASK_ID}
+/home/clintonr/miniconda3/envs/py36/bin/python3.6
+measuring_spread_time_real_networks.py ${SLURM_ARRAY_TASK_ID}
