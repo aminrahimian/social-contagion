@@ -37,11 +37,11 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
         G = max(NX.connected_component_subgraphs(G), key=len)
         print('largest connected component extracted with size ', len(G.nodes()))
     #  remove self loops:
-    if len(list(NX.selfloop_edges(G))) > 0:
+    if len(list(G.selfloop_edges())) > 0:
         print(
-            'warning the graph has ' + str(len(list(NX.selfloop_edges(G)))) + ' self-loops that will be removed')
+            'warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
         print('number of edges before self loop removal: ', G.size())
-        G.remove_edges_from(NX.selfloop_edges(G))
+        G.remove_edges_from(G.selfloop_edges())
         print('number of edges before self loop removal: ', G.size())
     network_size = NX.number_of_nodes(G)
 
@@ -205,11 +205,11 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges, theta):
         G = max(NX.connected_component_subgraphs(G), key=len)
         print('largest connected component extracted with size ', len(G.nodes()))
     #  remove self loops:
-    if len(list(NX.selfloop_edges(G))) > 0:
+    if len(list(G.selfloop_edges())) > 0:
         print(
-            'warning the graph has ' + str(len(list(NX.selfloop_edges(G)))) + ' self-loops that will be removed')
+            'warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
         print('number of edges before self loop removal: ', G.size())
-        G.remove_edges_from(NX.selfloop_edges(G))
+        G.remove_edges_from(G.selfloop_edges())
         print('number of edges before self loop removal: ', G.size())
     network_size = NX.number_of_nodes(G)
 
@@ -296,11 +296,11 @@ def measure_random_addition_spread_time(network_id, percent_more_edges, theta):
         G = max(NX.connected_component_subgraphs(G), key=len)
         print('largest connected component extracted with size ', len(G.nodes()))
     #  remove self loops:
-    if len(list(NX.selfloop_edges(G))) > 0:
+    if len(list(G.selfloop_edges())) > 0:
         print(
-            'warning the graph has ' + str(len(list(NX.selfloop_edges(G)))) + ' self-loops that will be removed')
+            'warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed')
         print('number of edges before self loop removal: ', G.size())
-        G.remove_edges_from(NX.selfloop_edges(G))
+        G.remove_edges_from(G.selfloop_edges())
         print('number of edges before self loop removal: ', G.size())
 
     network_size = NX.number_of_nodes(G)
@@ -377,8 +377,8 @@ if __name__ == '__main__':
     assert do_computations, "we should be in do_computations mode"
 
     if do_multiprocessing:
-        # with multiprocessing.Pool(processes = 3) as pool:
-        with multiprocessing.Pool(processes = number_CPU) as pool:
+        with multiprocessing.Pool(processes = 4) as pool:
+        # with multiprocessing.Pool(processes = number_CPU) as pool:
             # do computations for the original networks:
             if do_computations_for_original_network:
                 pool.starmap(measure_rewiring_spread_time, product(network_id_list, [0], theta_list))

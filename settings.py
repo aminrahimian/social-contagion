@@ -11,6 +11,7 @@ import os
 import errno
 import networkx as NX
 import re
+import sys
 
 susceptible = 0.0
 infected = 1.0
@@ -25,6 +26,11 @@ SENTINEL = object()
 
 # theta_list = [2, 3, 4, 5]
 theta_list = [[1, 0, 0, 0] , [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+
+assert sys.version_info == (3, 6, 3, 'final', 0), 'please use python 3.6.3'
+# print(sys.version_info)
+# print(type(NX.__version__))
+assert((NX.__version__ == '1.11' or '1.10')), 'please use networkx 1.11 or 1.10'
 
 def get_n_smallest_key_values(dictionary, n):
     smallest_entries = sorted(
@@ -67,10 +73,10 @@ if network_group == 'cai_edgelist_':
 
     GENERATE_NET_LIST_FROM_AVAILABLE_SAMPLES = False
 
-    TAKE_SMALLEST_N = False
+    TAKE_SMALLEST_N = True
 
     if TAKE_SMALLEST_N:
-        SMALLEST_N = 5
+        SMALLEST_N = 2
 
 elif network_group == 'chami_friendship_edgelist_':
 

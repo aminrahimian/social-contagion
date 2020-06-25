@@ -487,31 +487,31 @@ class NetworkModel(object):
                 assert False, "undefined initialization_mode"
 
         for i in self.params['network'].nodes():
-            self.params['network'].nodes[i]['number_of_active_infected_neighbors'] = 0
-            self.params['network'].nodes[i]['time_since_infection'] = 0
-            self.params['network'].nodes[i]['time_since_activation'] = 0
-            self.params['network'].nodes[i]['threshold'] = self.params['thresholds'][self.node_list.index(i)]
+            self.params['network'].node[i]['number_of_active_infected_neighbors'] = 0
+            self.params['network'].node[i]['time_since_infection'] = 0
+            self.params['network'].node[i]['time_since_activation'] = 0
+            self.params['network'].node[i]['threshold'] = self.params['thresholds'][self.node_list.index(i)]
 
         self.time_since_infection_is_updated = True
         self.time_since_activation_is_updated = True
 
         for i in self.params['network'].nodes():
-            self.params['network'].nodes[i]['state'] = self.params['initial_states'][self.node_list.index(i)]
-            if self.params['network'].nodes[i]['state'] == infected * active:
+            self.params['network'].node[i]['state'] = self.params['initial_states'][self.node_list.index(i)]
+            if self.params['network'].node[i]['state'] == infected * active:
                 self.list_of_active_infected_agents.append(i)
                 self.list_of_most_recent_activations.append(i)
                 # for j in self.params['network'].neighbors(i):
-                #     self.params['network'].nodes[j]['number_of_active_infected_neighbors'] += 1
+                #     self.params['network'].node[j]['number_of_active_infected_neighbors'] += 1
                 #     if ((j not in self.list_of_exposed_agents) and
-                #             (self.params['network'].nodes[j]['state'] == susceptible)):
+                #             (self.params['network'].node[j]['state'] == susceptible)):
                 #         self.list_of_exposed_agents.append(j)
-            elif self.params['network'].nodes[i]['state'] == infected * inactive:
+            elif self.params['network'].node[i]['state'] == infected * inactive:
                 self.list_of_inactive_infected_agents.append(i)
-            elif self.params['network'].nodes[i]['state'] == susceptible:
+            elif self.params['network'].node[i]['state'] == susceptible:
                 self.list_of_susceptible_agents.append(i)
             else:
                 print('nodes', i)
-                print('state', self.params['network'].nodes[i]['state'])
+                print('state', self.params['network'].node[i]['state'])
                 print('state initialization miss-handled')
                 exit()
 
@@ -522,9 +522,9 @@ class NetworkModel(object):
 
         for i in self.list_of_active_infected_agents + self.list_of_inactive_infected_agents:
             for j in self.params['network'].neighbors(i):
-                self.params['network'].nodes[j]['number_of_active_infected_neighbors'] += 1
+                self.params['network'].node[j]['number_of_active_infected_neighbors'] += 1
                 if ((j not in self.list_of_exposed_agents) and
-                        (self.params['network'].nodes[j]['state'] == susceptible)):
+                        (self.params['network'].node[j]['state'] == susceptible)):
                     self.list_of_exposed_agents.append(j)
 
         self.number_of_active_infected_neighbors_is_updated = True
@@ -767,7 +767,7 @@ class ContagionModel(NetworkModel):
         dummy_network = self.params['network'].copy()
 
         all_nodes_states = list(
-            map(lambda node_pointer: 1.0 * self.params['network'].nodes[node_pointer]['state'],
+            map(lambda node_pointer: 1.0 * self.params['network'].node[node_pointer]['state'],
                 self.params['network'].nodes()))
         total_number_of_infected = 2*np.sum(abs(np.asarray(all_nodes_states)))
         fraction_of_infected = total_number_of_infected / self.params['size']
@@ -785,7 +785,7 @@ class ContagionModel(NetworkModel):
             dummy_network = self.params['network'].copy()
             time += 1
             all_nodes_states = list(
-                map(lambda node_pointer: 1.0 * self.params['network'].nodes[node_pointer]['state'],
+                map(lambda node_pointer: 1.0 * self.params['network'].node[node_pointer]['state'],
                     self.params['network'].nodes()))
             total_number_of_infected = 2 * np.sum(abs(np.asarray(all_nodes_states)))
             fraction_of_infected = total_number_of_infected / self.params['size']
@@ -1039,7 +1039,7 @@ class Activation(ContagionModel):
         for i in self.params['network'].nodes():
             self.activation_probabilities[self.node_list.index(i)] = \
                 self.activation_functions[self.node_list.index(i)](
-                    self.params['network'].nodes[i]['number_of_active_infected_neighbors'])
+                    self.params['network'].node[i]['number_of_active_infected_neighbors'])
 
         self.activation_probabilities_is_set = True
 
@@ -1076,7 +1076,7 @@ class Activation(ContagionModel):
 
                 # initial check on the lists and states:
 
-                assert current_network.nodes[i]['state'] == infected * active, \
+                assert current_network.node[i]['state'] == infected * active, \
                     "error: list_of_active_infected_agents is mishandled"
                 assert i not in self.list_of_exposed_agents, \
                     "list_of_exposed_agents is mishandled"
@@ -1087,8 +1087,8 @@ class Activation(ContagionModel):
 
                 # updating the time_since_variables:
 
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] += 1
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] += 1
 
         if self.params['delta'] > 0 or self.params['alpha'] > 0:
 
@@ -1100,9 +1100,9 @@ class Activation(ContagionModel):
 
                 # initial check on lists and states:
 
-                assert current_network.nodes[i]['state'] == infected * inactive, \
+                assert current_network.node[i]['state'] == infected * inactive, \
                     "list_of_inactive_infected_agents is mishandled"
-                assert self.params['network'].nodes[i]['time_since_activation'] == 0, \
+                assert self.params['network'].node[i]['time_since_activation'] == 0, \
                     "time_since_activation is mishandled"
                 assert i not in self.list_of_exposed_agents, \
                     "list_of_exposed_agents is mishandled"
@@ -1115,8 +1115,8 @@ class Activation(ContagionModel):
 
                 # updating the time_since_variables:
 
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
 
         del self.list_of_susceptible_agents[:]
         del self.list_of_active_infected_agents[:]
@@ -1154,11 +1154,11 @@ class Activation(ContagionModel):
 
             # initial check on the lists and states:
 
-            assert current_network.nodes[i]['state'] == susceptible, \
+            assert current_network.node[i]['state'] == susceptible, \
                 "list_of_exposed_agents is mishandled."
-            assert self.params['network'].nodes[i]['time_since_infection'] == 0, \
+            assert self.params['network'].node[i]['time_since_infection'] == 0, \
                 'time_since_infection is mishandled!'
-            assert self.params['network'].nodes[i]['time_since_activation'] == 0, \
+            assert self.params['network'].node[i]['time_since_activation'] == 0, \
                 'time_since_activation is mishandled!'
             assert i in self.list_of_susceptible_agents, \
                 "list_of_susceptible_agents is mishandled"
@@ -1188,14 +1188,14 @@ class Activation(ContagionModel):
 
             if i_random_draw < self.activation_probabilities[self.node_list.index(i)]:
 
-                self.params['network'].nodes[i]['state'] = infected*active
+                self.params['network'].node[i]['state'] = infected*active
                 for k in self.params['network'].neighbors(i):
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                     if k not in self.updated_list_of_exposed_agents \
-                            and self.params['network'].nodes[k]['state'] == susceptible:
+                            and self.params['network'].node[k]['state'] == susceptible:
                         self.updated_list_of_exposed_agents.append(k)
-                self.params['network'].nodes[i]['time_since_infection'] = 0
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] = 0
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.number_of_active_infected_neighbors_is_updated = True
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
@@ -1221,8 +1221,8 @@ class Activation(ContagionModel):
                 self.list_of_exposed_agents_is_updated = True
                 self.list_of_most_recent_activations_is_updated = True
             else:
-                self.params['network'].nodes[i]['time_since_infection'] = 0
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] = 0
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
@@ -1255,7 +1255,7 @@ class Activation(ContagionModel):
 
             # initial check on the lists and states:
 
-            assert current_network.nodes[i]['state'] == infected*active, \
+            assert current_network.node[i]['state'] == infected*active, \
                 "list_of_active_infected_agents is mishandled"
             assert i not in self.list_of_exposed_agents, \
                 "list_of_exposed_agents is mishandled"
@@ -1285,16 +1285,16 @@ class Activation(ContagionModel):
 
                 # set up the states:
 
-                self.params['network'].nodes[i]['state'] = susceptible
+                self.params['network'].node[i]['state'] = susceptible
 
                 for k in self.params['network'].neighbors(i):
-                    assert self.params['network'].nodes[k]['number_of_active_infected_neighbors'] > 0, \
+                    assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                         'error: number_of_active_infected_neighbors is mishandled'
                     # here number_of_active_infected_neighbors for neighbor k should be at least one
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] -= 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] = 0
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] = 0
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
@@ -1327,15 +1327,15 @@ class Activation(ContagionModel):
 
                 # set up the states:
 
-                self.params['network'].nodes[i]['state'] = infected * inactive
+                self.params['network'].node[i]['state'] = infected * inactive
                 for k in self.params['network'].neighbors(i):
-                    assert self.params['network'].nodes[k]['number_of_active_infected_neighbors'] > 0, \
+                    assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                         'error: number_of_active_infected_neighbors is mishandled'
                     # here number_of_active_infected_neighbors for neighbor k should be at least one
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] -= 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
@@ -1360,8 +1360,8 @@ class Activation(ContagionModel):
 
             # else there are no state transitions for node i, but we still need to update the time_since variables:
             else:
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] += 1
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] += 1
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
@@ -1394,9 +1394,9 @@ class Activation(ContagionModel):
 
             # initial check on lists and states:
 
-            assert current_network.nodes[i]['state'] == infected * inactive, \
+            assert current_network.node[i]['state'] == infected * inactive, \
                 "list_of_inactive_infected_agents is mishandled"
-            assert self.params['network'].nodes[i]['time_since_activation'] == 0, \
+            assert self.params['network'].node[i]['time_since_activation'] == 0, \
                 "time_since_activation is mishandled"
             assert i not in self.list_of_exposed_agents, \
                 "list_of_exposed_agents is mishandled"
@@ -1428,11 +1428,11 @@ class Activation(ContagionModel):
 
                 # set up the states:
 
-                self.params['network'].nodes[i]['state'] = susceptible
+                self.params['network'].node[i]['state'] = susceptible
                 # number_of_active_infected_neighbors will not change
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] = 0
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] = 0
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
@@ -1465,12 +1465,12 @@ class Activation(ContagionModel):
 
                 # set up the states:
 
-                self.params['network'].nodes[i]['state'] = infected * active
+                self.params['network'].node[i]['state'] = infected * active
                 for k in self.params['network'].neighbors(i):
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.number_of_active_infected_neighbors_is_updated = True
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
@@ -1499,8 +1499,8 @@ class Activation(ContagionModel):
 
             # else there are no state transitions for node i, but we still need to update the time_since variables:
             else:
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
@@ -1578,10 +1578,10 @@ class SIS_threshold(Activation):
             for i in self.params['network'].nodes():
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                  ((1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0
-                                                  * (self.params['network'].nodes[i]['threshold']
+                                                  * (self.params['network'].node[i]['threshold']
                                                      < number_of_infected_neighbors)) +
                                                  (self.params['fixed_prob']* 1.0 *
-                                                 ((self.params['network'].nodes[i]['threshold']
+                                                 ((self.params['network'].node[i]['threshold']
                                                    >= number_of_infected_neighbors)
                                                   and (not (number_of_infected_neighbors < 1)))) +
                                                  0.0 * (number_of_infected_neighbors < 0))
@@ -1589,10 +1589,10 @@ class SIS_threshold(Activation):
             for i in self.params['network'].nodes():
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                  ((1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0
-                                                  * (self.params['network'].nodes[i]['threshold']
+                                                  * (self.params['network'].node[i]['threshold']
                                                      < number_of_infected_neighbors)) +
                                                  (self.params['fixed_prob'] * 1.0 *
-                                                  (self.params['network'].nodes[i]['threshold'] >=
+                                                  (self.params['network'].node[i]['threshold'] >=
                                                    number_of_infected_neighbors)))
 
         self.activation_functions_is_set = True
@@ -1617,11 +1617,11 @@ class SIS_threshold_soft(Activation):
         for i in self.params['network'].nodes():
             self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                              (1 - (1 - self.params['beta']) ** number_of_infected_neighbors) * 1.0 *
-                                             (self.params['network'].nodes[i]['threshold']
+                                             (self.params['network'].node[i]['threshold']
                                               < number_of_infected_neighbors) +
                                              (1 - ((1 - (self.params['beta']/self.params['multiplier']))
                                                    ** number_of_infected_neighbors))
-                                             * 1.0 * (self.params['network'].nodes[i]['threshold'] >=
+                                             * 1.0 * (self.params['network'].node[i]['threshold'] >=
                                                       number_of_infected_neighbors))
             # this is always zero at zero.
         self.activation_functions_is_set = True
@@ -1660,7 +1660,7 @@ class Probit(Activation):
             if self.params['zero_at_zero']:
 
                 for i in self.params['network'].nodes():
-                    probit_function = norm(self.params['network'].nodes[i]['threshold'], self.params['sigma'])
+                    probit_function = norm(self.params['network'].node[i]['threshold'], self.params['sigma'])
                     if self.params['zero_at_zero']:
                         self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                          (1.0 * (number_of_infected_neighbors > 0)
@@ -1706,7 +1706,7 @@ class Logit(Activation):
                 for i in self.params['network'].nodes():
                     self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                      ((1/(1 + np.exp((1 / self.params['sigma']) *
-                                                            (self.params['network'].nodes[node_index]['threshold'] -
+                                                            (self.params['network'].node[node_index]['threshold'] -
                                                              number_of_infected_neighbors)))) *
                                                       1.0 * (number_of_infected_neighbors > 0)) +
                                                      0.0 * 1.0 * (number_of_infected_neighbors == 0))
@@ -1714,7 +1714,7 @@ class Logit(Activation):
                 for i in self.params['network'].nodes():
                     self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                      (1/(1 + np.exp((1 / self.params['sigma']) *
-                                                            (self.params['network'].nodes[node_index]['threshold'] -
+                                                            (self.params['network'].node[node_index]['threshold'] -
                                                              number_of_infected_neighbors)))) * 1.0)
         self.activation_functions_is_set = True
 
@@ -1742,17 +1742,17 @@ class LinearThreshold(Activation):
             if self.params['zero_at_zero']:
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
                                                  self.params['fixed_prob_high'] * 1.0 * (
-                                                         self.params['network'].nodes[i]['threshold']
+                                                         self.params['network'].node[i]['threshold']
                                                          <= number_of_infected_neighbors) +
-                                                 self.params['fixed_prob'] * 1.0 * ((self.params['network'].nodes[i][
+                                                 self.params['fixed_prob'] * 1.0 * ((self.params['network'].node[i][
                                                               'threshold'] > number_of_infected_neighbors)
                                                          and (not (number_of_infected_neighbors < 1))) +
                                                  0.0 * 1.0 * (number_of_infected_neighbors < 1))
             else:  # not zero at zero
                 self.activation_functions.append(lambda number_of_infected_neighbors, node_index=i:
-                                                 self.params['fixed_prob_high'] * 1.0 * (self.params['network'].nodes[i][
+                                                 self.params['fixed_prob_high'] * 1.0 * (self.params['network'].node[i][
                                                              'threshold'] <= number_of_infected_neighbors) +
-                                                 self.params['fixed_prob'] * 1.0 * ((self.params['network'].nodes[i][
+                                                 self.params['fixed_prob'] * 1.0 * ((self.params['network'].node[i][
                                                               'threshold'] > number_of_infected_neighbors)))
 
         self.activation_functions_is_set = True
@@ -1855,12 +1855,12 @@ class LinearThreshold(Activation):
 
                 # initial check on lists and states:
 
-                assert current_network.nodes[i]['state'] == susceptible, \
+                assert current_network.node[i]['state'] == susceptible, \
                     "list_of_potential_complex_contagion_infections is mishandled" \
-                    + " " + str(i) + " " + str(current_network.nodes[i]['state'])
-                assert self.params['network'].nodes[i]['time_since_infection'] == 0, \
+                    + " " + str(i) + " " + str(current_network.node[i]['state'])
+                assert self.params['network'].node[i]['time_since_infection'] == 0, \
                     'time_since_infection is mishandled!'
-                assert self.params['network'].nodes[i]['time_since_activation'] == 0, \
+                assert self.params['network'].node[i]['time_since_activation'] == 0, \
                     'time_since_activation is mishandled!'
                 assert i in self.list_of_exposed_agents, \
                     "list_of_exposed_agents is mishandled"
@@ -1890,14 +1890,14 @@ class LinearThreshold(Activation):
 
                 if i_random_draw < self.activation_probabilities[node_i_index]:
 
-                    self.params['network'].nodes[i]['state'] = infected * active
+                    self.params['network'].node[i]['state'] = infected * active
                     for k in self.params['network'].neighbors(i):
-                        self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                        self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                         if k not in self.updated_list_of_exposed_agents \
-                                and self.params['network'].nodes[k]['state'] == susceptible:
+                                and self.params['network'].node[k]['state'] == susceptible:
                             self.updated_list_of_exposed_agents.append(k)
-                    self.params['network'].nodes[i]['time_since_infection'] = 0
-                    self.params['network'].nodes[i]['time_since_activation'] = 0
+                    self.params['network'].node[i]['time_since_infection'] = 0
+                    self.params['network'].node[i]['time_since_activation'] = 0
                     self.number_of_active_infected_neighbors_is_updated = True
                     self.time_since_infection_is_updated = True
                     self.time_since_activation_is_updated = True
@@ -1927,8 +1927,8 @@ class LinearThreshold(Activation):
 
                 else:
 
-                    self.params['network'].nodes[i]['time_since_infection'] = 0
-                    self.params['network'].nodes[i]['time_since_activation'] = 0
+                    self.params['network'].node[i]['time_since_infection'] = 0
+                    self.params['network'].node[i]['time_since_activation'] = 0
                     self.time_since_infection_is_updated = True
                     self.time_since_activation_is_updated = True
                     self.number_of_active_infected_neighbors_is_updated = True
@@ -2065,20 +2065,20 @@ class SimpleOnlyAlongC1(ContagionModel):
         current_network = copy.deepcopy(self.params['network'])
         for i in current_network.nodes():
 
-            if current_network.nodes[i]['state'] == susceptible:
-                assert self.params['network'].nodes[i]['time_since_infection'] == 0 \
-                    and self.params['network'].nodes[i]['time_since_activation'] == 0, \
+            if current_network.node[i]['state'] == susceptible:
+                assert self.params['network'].node[i]['time_since_infection'] == 0 \
+                    and self.params['network'].node[i]['time_since_activation'] == 0, \
                     'error: time_since_infection or time_since_activation mishandle'
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
-                if (current_network.nodes[i]['threshold'] <=
-                        current_network.nodes[i]['number_of_active_infected_neighbors']):
+                if (current_network.node[i]['threshold'] <=
+                        current_network.node[i]['number_of_active_infected_neighbors']):
                     # print('we are here')
                     if RD.random() < self.params['fixed_prob_high']:
-                        self.params['network'].nodes[i]['state'] = infected*active
+                        self.params['network'].node[i]['state'] = infected*active
                         for k in self.params['network'].neighbors(i):
-                            self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                            self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                 else:  # if the node cannot be infected through complex contagion
                     # see if it can be infected through simple contagion along cycle edges
                     for j in current_network.neighbors(i):
@@ -2086,12 +2086,12 @@ class SimpleOnlyAlongC1(ContagionModel):
                         j_is_a_cycle_neighbor = ((abs(i - j) == 1) or
                                                  (abs(i - j) == (self.params['size'] - 1)))
 
-                        if (current_network.nodes[j]['state'] == infected*active
+                        if (current_network.node[j]['state'] == infected*active
                                 and j_is_a_cycle_neighbor):
                             if RD.random() < self.params['fixed_prob']:
-                                self.params['network'].nodes[i]['state'] = infected*active
+                                self.params['network'].node[i]['state'] = infected*active
                                 for k in self.params['network'].neighbors(i):
-                                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                                 break
 
                 self.number_of_active_infected_neighbors_is_updated = True
@@ -2101,48 +2101,48 @@ class SimpleOnlyAlongC1(ContagionModel):
             # if node i is already infected (infected active or infected inactive) but recovers
             elif RD.random() < self.params['delta']:
 
-                assert 2 * abs(current_network.nodes[i]['state']) == infected, \
+                assert 2 * abs(current_network.node[i]['state']) == infected, \
                     "error: node states are mishandled"
                 #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
 
-                self.params['network'].nodes[i]['state'] = susceptible
+                self.params['network'].node[i]['state'] = susceptible
 
-                if current_network.nodes[i]['state'] == infected * active:
+                if current_network.node[i]['state'] == infected * active:
                     for k in self.params['network'].neighbors(i):
-                        assert self.params['network'].nodes[k]['number_of_active_infected_neighbors'] > 0, \
+                        assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                             'error: number_of_active_infected_neighbors is mishandled'
                         # here number_of_active_infected_neighbors for neighbor k should be at least one
-                        self.params['network'].nodes[k]['number_of_active_infected_neighbors'] -= 1
+                        self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] = 0
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] = 0
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
             # transition from active infected to inactive infected:
 
-            elif current_network.nodes[i]['state'] == infected*active and RD.random() < self.params['gamma']:
-                self.params['network'].nodes[i]['state'] = infected*inactive
+            elif current_network.node[i]['state'] == infected*active and RD.random() < self.params['gamma']:
+                self.params['network'].node[i]['state'] = infected*inactive
                 for k in self.params['network'].neighbors(i):
-                    assert self.params['network'].nodes[k]['number_of_active_infected_neighbors'] > 0, \
+                    assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                         'error: number_of_active_infected_neighbors is mishandled'
                     # here number_of_active_infected_neighbors for neighbor k should be at least one
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] -= 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
             # transition from inactive infected to active infected:
 
-            elif current_network.nodes[i]['state'] == infected*inactive and RD.random() < self.params['alpha']:
-                self.params['network'].nodes[i]['state'] = infected * active
+            elif current_network.node[i]['state'] == infected*inactive and RD.random() < self.params['alpha']:
+                self.params['network'].node[i]['state'] = infected * active
                 for k in self.params['network'].neighbors(i):
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
@@ -2150,9 +2150,9 @@ class SimpleOnlyAlongC1(ContagionModel):
             # there are no state transitions, but we still need to update the time_since variables:
 
             else:
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                if current_network.nodes[i]['state'] == infected * active:
-                    self.params['network'].nodes[i]['time_since_activation'] += 1
+                self.params['network'].node[i]['time_since_infection'] += 1
+                if current_network.node[i]['state'] == infected * active:
+                    self.params['network'].node[i]['time_since_activation'] += 1
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
@@ -2180,22 +2180,22 @@ class SimpleOnlyAlongOriginalEdges(ContagionModel):
         current_network = copy.deepcopy(self.params['network'])
         for i in current_network.nodes():
 
-            if current_network.nodes[i]['state'] == susceptible:
-                assert self.params['network'].nodes[i]['time_since_infection'] == 0 \
-                       and self.params['network'].nodes[i]['time_since_activation'] == 0, 'error: ' \
+            if current_network.node[i]['state'] == susceptible:
+                assert self.params['network'].node[i]['time_since_infection'] == 0 \
+                       and self.params['network'].node[i]['time_since_activation'] == 0, 'error: ' \
                                                                                          'time_since_infection or ' \
                                                                                          'timr_since_activation ' \
                                                                                          'mishandle'
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
-                if (current_network.nodes[i]['threshold'] <=
-                        current_network.nodes[i]['number_of_active_infected_neighbors']):
+                if (current_network.node[i]['threshold'] <=
+                        current_network.node[i]['number_of_active_infected_neighbors']):
                     # print('we are here')
                     if RD.random() < self.params['fixed_prob_high']:
-                        self.params['network'].nodes[i]['state'] = infected*active
+                        self.params['network'].node[i]['state'] = infected*active
                         for k in self.params['network'].neighbors(i):
-                            self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                            self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
 
                 else:  # if the node cannot be infected through complex contagion
                     # see if it can be infected through simple contagion along the "original" edges
@@ -2203,12 +2203,12 @@ class SimpleOnlyAlongOriginalEdges(ContagionModel):
 
                         j_is_an_original_neighbor = self.params['original_network'].has_edge(i, j)
 
-                        if (current_network.nodes[j]['state'] == infected*active
+                        if (current_network.node[j]['state'] == infected*active
                                 and j_is_an_original_neighbor):
                             if RD.random() < self.params['fixed_prob']:
-                                self.params['network'].nodes[i]['state'] = infected*active
+                                self.params['network'].node[i]['state'] = infected*active
                                 for k in self.params['network'].neighbors(i):
-                                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                                 break
 
                 self.number_of_active_infected_neighbors_is_updated = True
@@ -2218,48 +2218,48 @@ class SimpleOnlyAlongOriginalEdges(ContagionModel):
             # if node i is already infected (infected active or infected inactive) but recovers
             elif RD.random() < self.params['delta']:
 
-                assert 2 * abs(current_network.nodes[i]['state']) == infected, \
+                assert 2 * abs(current_network.node[i]['state']) == infected, \
                     "error: node states are mishandled"
                 #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
 
-                self.params['network'].nodes[i]['state'] = susceptible
+                self.params['network'].node[i]['state'] = susceptible
 
-                if current_network.nodes[i]['state'] == infected * active:
+                if current_network.node[i]['state'] == infected * active:
                     for k in self.params['network'].neighbors(i):
-                        assert self.params['network'].nodes[k]['number_of_active_infected_neighbors'] > 0, \
+                        assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                             'error: number_of_active_infected_neighbors is mishandled'
                         # here number_of_active_infected_neighbors for neighbor k should be at least one
-                        self.params['network'].nodes[k]['number_of_active_infected_neighbors'] -= 1
+                        self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] = 0
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] = 0
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
             # transition from active infected to inactive infected:
 
-            elif current_network.nodes[i]['state'] == infected*active and RD.random() < self.params['gamma']:
-                self.params['network'].nodes[i]['state'] = infected*inactive
+            elif current_network.node[i]['state'] == infected*active and RD.random() < self.params['gamma']:
+                self.params['network'].node[i]['state'] = infected*inactive
                 for k in self.params['network'].neighbors(i):
-                    assert self.params['network'].nodes[k]['number_of_active_infected_neighbors'] > 0, \
+                    assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                         'error: number_of_active_infected_neighbors is mishandled'
                     # here number_of_active_infected_neighbors for neighbor k should be at least one
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] -= 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
             # transition from inactive infected to active infected:
 
-            elif current_network.nodes[i]['state'] == infected*inactive and RD.random() < self.params['alpha']:
-                self.params['network'].nodes[i]['state'] = infected * active
+            elif current_network.node[i]['state'] == infected*inactive and RD.random() < self.params['alpha']:
+                self.params['network'].node[i]['state'] = infected * active
                 for k in self.params['network'].neighbors(i):
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
@@ -2267,9 +2267,9 @@ class SimpleOnlyAlongOriginalEdges(ContagionModel):
             # there are no state transitions, but we still need to update the time_since variables:
 
             else:
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                if current_network.nodes[i]['state'] == infected * active:
-                    self.params['network'].nodes[i]['time_since_activation'] += 1
+                self.params['network'].node[i]['time_since_infection'] += 1
+                if current_network.node[i]['state'] == infected * active:
+                    self.params['network'].node[i]['time_since_activation'] += 1
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True
@@ -2295,26 +2295,26 @@ class IndependentCascade(ContagionModel):
 
         for i in current_network.nodes():
 
-            # current_network.nodes[i]['state'] can either be susceptible (0)
+            # current_network.node[i]['state'] can either be susceptible (0)
             # or active infected (0.5) or inactive infected (-0.5)
 
             # transition from susceptible to active infected:
 
-            if current_network.nodes[i]['state'] == susceptible:
-                assert self.params['network'].nodes[i]['time_since_infection'] == 0 and \
-                    self.params['network'].nodes[i]['time_since_activation'] == 0, \
+            if current_network.node[i]['state'] == susceptible:
+                assert self.params['network'].node[i]['time_since_infection'] == 0 and \
+                    self.params['network'].node[i]['time_since_activation'] == 0, \
                     'error: time_since_infection or time_since_activation mishandled!'
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
                 for j in current_network.neighbors(i):
-                    if current_network.nodes[j]['state'] == infected*active:
-                        assert current_network.nodes[j]['time_since_activation'] < self.memory, \
+                    if current_network.node[j]['state'] == infected*active:
+                        assert current_network.node[j]['time_since_activation'] < self.memory, \
                             "error: should not remain activation beyond mem times."
                         if RD.random() < self.params['beta']:
-                            self.params['network'].nodes[i]['state'] = infected*active
+                            self.params['network'].node[i]['state'] = infected*active
                             for k in self.params['network'].neighbors(i):
-                                self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                                self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                             break
                 self.number_of_active_infected_neighbors_is_updated = True
 
@@ -2323,53 +2323,53 @@ class IndependentCascade(ContagionModel):
             # transition from active or inactive infected to susceptible:
 
             elif RD.random() < self.params['delta']:
-                assert 2 * abs(current_network.nodes[i]['state']) == infected, \
+                assert 2 * abs(current_network.node[i]['state']) == infected, \
                     "error: node states are mishandled"
                 #  here the node should either be active infected (+0.5) or inactive infected (-0.5)
 
-                assert self.params['network'].nodes[i]['time_since_activation'] <= self.memory, \
+                assert self.params['network'].node[i]['time_since_activation'] <= self.memory, \
                     "error: time_since_activation should not get greater than mem"
-                self.params['network'].nodes[i]['state'] = susceptible
-                if current_network.nodes[i]['state'] == infected * active:
+                self.params['network'].node[i]['state'] = susceptible
+                if current_network.node[i]['state'] == infected * active:
                     for k in self.params['network'].neighbors(i):
-                        assert self.params['network'].nodes[k]['number_of_active_infected_neighbors'] > 0, \
+                        assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                             'error: number_of_active_infected_neighbors is mishandled'
                         # here number_of_active_infected_neighbors for neighbor k should be at least one
-                        self.params['network'].nodes[k]['number_of_active_infected_neighbors'] -= 1
+                        self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] = 0
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] = 0
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
             # transition from active infected to inactive infected:
 
-            elif (current_network.nodes[i]['state'] == infected*active
+            elif (current_network.node[i]['state'] == infected*active
                   and (RD.random() < self.params['gamma'] or
-                       current_network.nodes[i]['time_since_activation'] == self.memory)):
-                self.params['network'].nodes[i]['state'] = infected*inactive
+                       current_network.node[i]['time_since_activation'] == self.memory)):
+                self.params['network'].node[i]['state'] = infected*inactive
                 for k in self.params['network'].neighbors(i):
-                    assert self.params['network'].nodes[k]['number_of_active_infected_neighbors'] > 0, \
+                    assert self.params['network'].node[k]['number_of_active_infected_neighbors'] > 0, \
                         'error: number_of_active_infected_neighbors is mishandled'
                     # here number_of_active_infected_neighbors for neighbor k should be at least one
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] -= 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] -= 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
             # transition from inactive infected to active infected:
 
-            elif current_network.nodes[i]['state'] == infected * inactive and RD.random() < self.params['alpha']:
-                assert self.params['network'].nodes[i]['time_since_activation'] == 0, \
+            elif current_network.node[i]['state'] == infected * inactive and RD.random() < self.params['alpha']:
+                assert self.params['network'].node[i]['time_since_activation'] == 0, \
                     "error: time_since_activation should be zero for an inactive nodes"
-                self.params['network'].nodes[i]['state'] = infected * active
+                self.params['network'].node[i]['state'] = infected * active
                 for k in self.params['network'].neighbors(i):
-                    self.params['network'].nodes[k]['number_of_active_infected_neighbors'] += 1
+                    self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
                 self.number_of_active_infected_neighbors_is_updated = True
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                self.params['network'].nodes[i]['time_since_activation'] = 0
+                self.params['network'].node[i]['time_since_infection'] += 1
+                self.params['network'].node[i]['time_since_activation'] = 0
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
 
@@ -2377,14 +2377,14 @@ class IndependentCascade(ContagionModel):
             # there are no state transitions, but we still need to update the time_since variables:
 
             else:
-                assert self.params['network'].nodes[i]['time_since_activation'] < self.memory, \
+                assert self.params['network'].node[i]['time_since_activation'] < self.memory, \
                     "error: time_since_activation should be less than mem"
-                if current_network.nodes[i]['state'] == infected * inactive:
-                    assert self.params['network'].nodes[i]['time_since_activation'] == 0,\
+                if current_network.node[i]['state'] == infected * inactive:
+                    assert self.params['network'].node[i]['time_since_activation'] == 0,\
                         "error: time_since_activation should be zero for an inactive nodes"
-                self.params['network'].nodes[i]['time_since_infection'] += 1
-                if current_network.nodes[i]['state'] == infected * active:
-                    self.params['network'].nodes[i]['time_since_activation'] += 1
+                self.params['network'].node[i]['time_since_infection'] += 1
+                if current_network.node[i]['state'] == infected * active:
+                    self.params['network'].node[i]['time_since_activation'] += 1
                 self.time_since_infection_is_updated = True
                 self.time_since_activation_is_updated = True
                 self.number_of_active_infected_neighbors_is_updated = True

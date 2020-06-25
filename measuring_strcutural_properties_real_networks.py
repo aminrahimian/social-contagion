@@ -50,11 +50,11 @@ def generate_network_intervention_datasets(network_id, intervention_size):
         G = max(NX.connected_component_subgraphs(G), key=len)
         print('largest connected component extracted with size ', len(G.nodes()))
 
-    if len(list(NX.selfloop_edges(G))) > 0:
+    if len(list(G.selfloop_edges())) > 0:
         print(
-            'warning the graph has ' + str(len(list(NX.selfloop_edges(G)))) + ' self-loops that will be removed.')
+            'warning the graph has ' + str(len(list(G.selfloop_edges()))) + ' self-loops that will be removed.')
         print('number of edges before self loop removal: ', G.size())
-        G.remove_edges_from(NX.selfloop_edges(G))
+        G.remove_edges_from(G.selfloop_edges())
         print('number of edges before self loop removal: ', G.size())
 
     network_size = NX.number_of_nodes(G)
@@ -221,8 +221,8 @@ if __name__ == '__main__':
     # generate intervention network structures:
     if generate_network_intervention_dataset:
         if do_multiprocessing:
-            # with multiprocessing.Pool(processes = 3) as pool:
-            with multiprocessing.Pool(processes=number_CPU) as pool:
+            with multiprocessing.Pool(processes = 4) as pool:
+            # with multiprocessing.Pool(processes=number_CPU) as pool:
                 pool.starmap(generate_network_intervention_datasets, product(network_id_list, intervention_size_list))
         else:  # not multiprocessing, do for-loops
             for intervention_size in intervention_size_list:
@@ -232,8 +232,8 @@ if __name__ == '__main__':
     # compute the properties on the network intervention datasets:
 
     if do_multiprocessing:
-        with multiprocessing.Pool(processes=number_CPU) as pool:
-        # with multiprocessing.Pool(processes=3) as pool:
+        # with multiprocessing.Pool(processes=number_CPU) as pool:
+        with multiprocessing.Pool(processes=4) as pool:
             pool.starmap(measure_properties_of_network_intervention_datasets,
                          product(network_id_list, intervention_size_list))
             pool.close()
