@@ -15,5 +15,4 @@
 
 cd /home/clintonr/contagion/
 
-/home/clintonr/miniconda3/envs/py36/bin/python3.6
-measuring_spread_time_real_networks.py ${SLURM_ARRAY_TASK_ID}
+/home/clintonr/miniconda3/envs/py36/bin/python3.6 measuring_spread_time_real_networks.py ${SLURM_ARRAY_TASK_ID}
