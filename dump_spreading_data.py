@@ -114,7 +114,7 @@ if __name__ == "__main__":
 
                 # dump original:
 
-                df_common_part_original = pd.DataFrame(data=[[network_group, network_id, network_size, theta,
+                df_common_part_original = pd.DataFrame(data=[[network_group, network_id, network_size, str(theta),
                                                           'none', 0.0, MODEL]] * len(speed_samples_original),
                                                    columns=['network_group',
                                                             'network_id',
@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
                     # dump the loaded data:
 
-                    df_common_part_rewired = pd.DataFrame(data=[[network_group, network_id, network_size, theta,
+                    df_common_part_rewired = pd.DataFrame(data=[[network_group, network_id, network_size, str(theta),
                                                                  'rewired', rewiring_percentage, MODEL]]
                                                                *len(speed_samples_rewired),
                                                           columns=['network_group',
@@ -291,7 +291,7 @@ if __name__ == "__main__":
 
                     # dump edge addition networks spreading data (after loading):
 
-                    df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size, theta,
+                    df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size, str(theta),
                                                                     'random_addition', percent_more_edges,
                                                                     MODEL]] * len(speed_samples_add_random),
                                                              columns=['network_group', 'network_id', 'network_size',
@@ -313,7 +313,7 @@ if __name__ == "__main__":
                     df_common_part_add_triad = pd.DataFrame(data=[[network_group,
                                                                    network_id,
                                                                    network_size,
-                                                                   theta,
+                                                                   str(theta),
                                                                    'triad_addition',
                                                                    percent_more_edges,
                                                                    MODEL]] * len(speed_samples_add_triad),
@@ -386,7 +386,7 @@ if __name__ == "__main__":
 
                     # dump edge addition networks spreading data (after loading):
 
-                    df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size, theta,
+                    df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size, str(theta),
                                                                     'random_addition', percent_more_edges,
                                                                     MODEL]] * len(speed_samples_add_random),
                                                              columns=['network_group', 'network_id', 'network_size',
@@ -421,7 +421,7 @@ if __name__ == "__main__":
         df = pd.read_csv(output_directory_address + network_group + 'spreading_data_dump.csv')
 
         #Filter the desired rows from our original dump file
-        criterion = df['theta_distribution'] == theta
+        criterion = df['theta_distribution'] == str(theta)
 
         df_new = df[criterion]
 
