@@ -2011,8 +2011,10 @@ class DeterministicLinear(LinearThreshold):
 
 class ProbabilityDistributionLinear(LinearThreshold):
     """
-    Similar to the  linear threshold model except that thresholds are not ratios and are not homogeneous across the entire network. 'thresholds' are
-    chosen with a certain probability from a predetermined list of possible values. they can be set all the same equal to theta, by just choosing
+    Similar to the  linear threshold model except that thresholds are not ratios and are not homogeneous across the
+    entire network. 'thresholds' are
+    chosen with a certain probability from a predetermined list of possible values. they can be set all the same equal
+    to theta, by just choosing
     probability 1 of a certain value, so this also does what DeterministicLinear does.
     """
     def __init__(self, params):
@@ -2020,12 +2022,14 @@ class ProbabilityDistributionLinear(LinearThreshold):
         self.classification_label = COMPLEX
 
         # setting the thresholds for each individual node for the ProbabilityDistributionLinear Model
-        # inputted probabilities will correspond to the list [2, 3, 4, 5]. Can change the list by changing master_list variable.
+        # inputted probabilities will correspond to the list [2, 3, 4, 5]. Can change the list by changing
+        # master_list variable.
         # also easily expandable
 
         master_list = [2, 3, 4, 5]
         assert 'theta_distribution' in self.fixed_params, \
-            "Theta distribution (as decimals) corresponding to" + str(master_list) + " should be supplied for ProbabilityDistributionLinear contagion model."
+            "Theta distribution (as decimals) corresponding to" + str(master_list) \
+            + " should be supplied for ProbabilityDistributionLinear contagion model."
         assert all(i >= 0 for i in self.params['theta_distribution']), \
             "Probabilities must be greater than 0"
         assert sum(self.params['theta_distribution']) == 1, \
@@ -2041,9 +2045,13 @@ class ProbabilityDistributionLinear(LinearThreshold):
             choice = random.randint(0, 1000000)
             if choice * 1000000 < 1000000 * self.params['theta_distribution'][0]:
                 self.params['thresholds'][i] = master_list[0]
-            elif 1000000 * self.params['theta_distribution'][0] <= choice * 1000000 < 1000000 * (self.params['theta_distribution'][0] + self.params['theta_distribution'][1]):
+            elif 1000000 * self.params['theta_distribution'][0] <= \
+                    choice * 1000000 < 1000000 * (self.params['theta_distribution'][0]
+                                                  + self.params['theta_distribution'][1]):
                 self.params['thresholds'][i] = master_list[1]
-            elif 1000000 * (self.params['theta_distribution'][0] + self.params['theta_distribution'][1]) <= choice * 1000000 < 1000000 * (self.params['theta_distribution'][1] + self.params['theta_distribution'][2]):
+            elif 1000000 * (self.params['theta_distribution'][0] +
+                            self.params['theta_distribution'][1]) <= choice * 1000000 < 1000000 *\
+                    (self.params['theta_distribution'][1] + self.params['theta_distribution'][2]):
                 self.params['thresholds'][i] = master_list[2]
             else:
                 self.params['thresholds'][i] = master_list[3]
@@ -2058,8 +2066,8 @@ class SimpleOnlyAlongC1(ContagionModel):
     def __init__(self, params):
         super(SimpleOnlyAlongC1, self).__init__(params)
         self.classification_label = COMPLEX
-        assert self.params['network_model'] == 'c_1_c_2_interpolation', \
-            "this contagion model is only suitable for c_1_c_2_interpolation"
+        assert self.params['network_model'] in ['c_1_c_2_interpolation','c1_union_ER_with_delta'], \
+            "this contagion model is only suitable for c_1_c_2_interpolation or c1_union_ER_with_delta"
 
     def step(self):
         current_network = copy.deepcopy(self.params['network'])

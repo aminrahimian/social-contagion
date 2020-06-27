@@ -312,7 +312,8 @@ if 'SLURM_ARRAY_TASK_ID' in os.environ:
 
 # theory simulations settings:
 
-simulation_type = 'ck_union_ER_vs_size'
+simulation_type = 'c1_union_ER_with_delta'
+#    'ck_union_ER_vs_size'
 #  'c1_c2_interpolation'
 #  'ck_union_ER_vs_size'
 #  'ck_union_ER_vs_k'
