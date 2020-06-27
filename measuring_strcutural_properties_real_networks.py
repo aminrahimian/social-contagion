@@ -5,10 +5,9 @@
 from models import *
 from multiprocessing import Pool
 
-
 size_of_dataset = 500
 
-intervention_size_list = [5, 10, 15, 20, 25]
+intervention_size_list = [10] #[5, 10, 15, 20, 25]
 
 old_properties = ['avg_clustering','average_shortest_path_length', 'diameter', 'size_2_core']
 
@@ -21,6 +20,8 @@ new_properties = ['avg_degree','diam_2_core', 'max_degree', 'min_degree',
 all_properties = old_properties + new_properties
 
 included_properties = all_properties
+
+theta = random.choice([2, 3, 4, 5]) #none of the properties depend investigated depend on the value of theta
 
 generate_network_intervention_dataset = True
 # determines to whether generate networks (true) or
@@ -68,13 +69,15 @@ def generate_network_intervention_datasets(network_id, intervention_size):
         'initialization_mode': 'fixed_number_initial_infection',
         # 'initial_infection_number': number_initial_seeds,
         'delta': delta,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
-        'fixed_prob_high': 1.0,
-        'fixed_prob': 0.05,
-        'theta': 2,
+        'fixed_prob_high': fixed_prob_high,
+        'fixed_prob': fixed_prob_low,
+        # 'theta': theta,
+        'theta_distribution': theta,
         'rewire': False,
     }
 
-    dynamics_add_random = DeterministicLinear(params_add_random)
+    dynamics_add_random = ProbabilityDistributionLinear(params_add_random)
+    # dynamics_add_random = DeterministicLinear(params_add_random)
 
     params_add_triad = {
         'network': G,
@@ -86,14 +89,16 @@ def generate_network_intervention_datasets(network_id, intervention_size):
         'initialization_mode': 'fixed_number_initial_infection',
         # 'initial_infection_number': number_initial_seeds,
         'delta': delta,
-        'fixed_prob_high': 1.0,
-        'fixed_prob': 0.05,
-        'theta': 2,
+        'fixed_prob_high': fixed_prob_high,
+        'fixed_prob': fixed_prob_low,
+        # 'theta': theta,
+        'theta_distribution': theta,
         'rewire': False,
         # rewire 10% of edges
     }
 
-    dynamics_add_triad = DeterministicLinear(params_add_triad)
+    # dynamics_add_triad = DeterministicLinear(params_add_triad)
+    dynamics_add_triad = ProbabilityDistributionLinear(params_add_triad)
 
     params_rewired = {
         'network': G,
@@ -103,16 +108,18 @@ def generate_network_intervention_datasets(network_id, intervention_size):
         'initialization_mode': 'fixed_number_initial_infection',
         # 'initial_infection_number': number_initial_seeds,
         'delta': delta,
-        'fixed_prob_high': 1.0,
-        'fixed_prob': 0.05,
-        'theta': 2,
+        'fixed_prob_high': fixed_prob_high,
+        'fixed_prob': fixed_prob_low,
+        # 'theta': theta,
+        'theta_distribution': theta,
         'rewire': True,
         'rewiring_mode': 'random_random',
         'num_edges_for_random_random_rewiring': 0.01 * intervention_size * G.number_of_edges(),
         # rewire 15% of edges
     }
 
-    dynamics_rewired = DeterministicLinear(params_rewired)
+    dynamics_rewired = ProbabilityDistributionLinear(params_rewired)
+    # dynamics_rewired = DeterministicLinear(params_rewired)
 
     add_random_networks = \
         dynamics_add_random.generate_network_intervention_dataset(dataset_size=size_of_dataset)
@@ -148,7 +155,7 @@ def generate_network_intervention_datasets(network_id, intervention_size):
         print('picked networks in ' + networks_pickled_samples_directory_address)
 
 
-def measure_properties_of_network_inetrvention_datasets(network_id, intervention_size):
+def measure_properties_of_network_intervention_datasets(network_id, intervention_size):
     print('intervention size:', intervention_size, 'network id:', network_id)
 
     add_random_networks = pickle.load(open(networks_pickled_samples_directory_address + 'networks_'
@@ -214,7 +221,8 @@ if __name__ == '__main__':
     # generate intervention network structures:
     if generate_network_intervention_dataset:
         if do_multiprocessing:
-            with multiprocessing.Pool(processes=number_CPU) as pool:
+            with multiprocessing.Pool(processes = 4) as pool:
+            # with multiprocessing.Pool(processes=number_CPU) as pool:
                 pool.starmap(generate_network_intervention_datasets, product(network_id_list, intervention_size_list))
         else:  # not multiprocessing, do for-loops
             for intervention_size in intervention_size_list:
@@ -224,15 +232,16 @@ if __name__ == '__main__':
     # compute the properties on the network intervention datasets:
 
     if do_multiprocessing:
-        with multiprocessing.Pool(processes=number_CPU) as pool:
-            pool.starmap(measure_properties_of_network_inetrvention_datasets,
+        # with multiprocessing.Pool(processes=number_CPU) as pool:
+        with multiprocessing.Pool(processes=4) as pool:
+            pool.starmap(measure_properties_of_network_intervention_datasets,
                          product(network_id_list, intervention_size_list))
             pool.close()
             pool.join()
     else:  # not multiprocessing, do for-loops
         for intervention_size in intervention_size_list:
             for network_id in network_id_list:
-                measure_properties_of_network_inetrvention_datasets(network_id, intervention_size)
+                measure_properties_of_network_intervention_datasets(network_id, intervention_size)
 
     # pool.close()
     # pool.join()

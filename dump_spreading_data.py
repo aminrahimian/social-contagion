@@ -3,9 +3,9 @@
 from settings import *
 
 
-rewiring_percentage_list = [5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
+rewiring_percentage_list = [10] #[5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
 
-percent_more_edges_list = [5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
+percent_more_edges_list = [10] #[5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
 
 include_original_networks = True
 include_rewiring_networks = True
@@ -22,6 +22,8 @@ if not include_spread_size:
     tracked_properties = ['network_group',
                           'network_id',
                           'network_size',
+                          # 'theta',
+                          'theta_distribution',
                           'intervention_type',
                           'intervention_size',
                           'sample_id',
@@ -32,6 +34,8 @@ else:
     tracked_properties = ['network_group',
                           'network_id',
                           'network_size',
+                          # 'theta',
+                          'theta_distribution',
                           'intervention_type',
                           'intervention_size',
                           'sample_id',
@@ -53,7 +57,7 @@ if __name__ == "__main__":
 
     # check for the existing network_group + 'spreading_data_dump.csv' file
 
-    generating_new_dump = False
+    generating_new_dump = True
 
     try:
         df = pd.read_csv(output_directory_address + network_group + 'spreading_data_dump.csv')
@@ -86,317 +90,339 @@ if __name__ == "__main__":
 
         network_size = NX.number_of_nodes(G)
 
-        if include_original_networks:
+        for theta in theta_list:
 
-            speed_samples_original = pickle.load(open(spreading_pickled_samples_directory_address
+            if include_original_networks:
+
+                speed_samples_original = pickle.load(open(spreading_pickled_samples_directory_address
                                                       + 'speed_samples_original_'
                                                       + network_group + network_id
-                                                      + model_id + '.pkl', 'rb'))
+                                                      + model_id + '_' + str(theta) + '.pkl', 'rb'))
 
-            spread_samples_original = pickle.load(open(spreading_pickled_samples_directory_address
+                spread_samples_original = pickle.load(open(spreading_pickled_samples_directory_address
                                                        + 'infection_size_original_'
                                                        + network_group + network_id
-                                                       + model_id + '.pkl', 'rb'))
+                                                       + model_id + '_' + str(theta) + '.pkl', 'rb'))
 
-            speed_original = np.mean(speed_samples_original)
+                speed_original = np.mean(speed_samples_original)
 
-            spread_original = np.mean(spread_samples_original)
+                spread_original = np.mean(spread_samples_original)
 
-            std_original = np.std(speed_samples_original)
+                std_original = np.std(speed_samples_original)
 
-            spread_std_original = np.std(spread_samples_original)
+                spread_std_original = np.std(spread_samples_original)
 
-            # dump original:
+                # dump original:
 
-            df_common_part_original = pd.DataFrame(data=[[network_group, network_id, network_size,
+                df_common_part_original = pd.DataFrame(data=[[network_group, network_id, network_size, str(theta),
                                                           'none', 0.0, MODEL]] * len(speed_samples_original),
                                                    columns=['network_group',
                                                             'network_id',
                                                             'network_size',
+                                                            # 'theta',
+                                                            'theta_distribution',
                                                             'intervention_type',
                                                             'intervention_size',
                                                             'model'])
 
-            df_sample_ids_original = pd.Series(list(range(len(speed_samples_original))), name='sample_id')
+                df_sample_ids_original = pd.Series(list(range(len(speed_samples_original))), name='sample_id')
 
-            df_time_to_spreads_original = pd.Series(speed_samples_original, name='time_to_spread')
+                df_time_to_spreads_original = pd.Series(speed_samples_original, name='time_to_spread')
 
-            df_size_of_spreads_original = pd.Series(spread_samples_original, name='size_of_spread')
+                df_size_of_spreads_original = pd.Series(spread_samples_original, name='size_of_spread')
 
-            new_df_original = pd.concat([df_common_part_original,
-                                         df_sample_ids_original,
-                                         df_time_to_spreads_original,
-                                         df_size_of_spreads_original],
-                                        axis=1)
+                new_df_original = pd.concat([df_common_part_original,
+                                             df_sample_ids_original,
+                                             df_time_to_spreads_original,
+                                             df_size_of_spreads_original],
+                                            axis=1)
 
-            print(new_df_original)
+                print(new_df_original)
 
-            extended_frame = [df, new_df_original]
+                extended_frame = [df, new_df_original]
 
-            df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(
-                drop=True)
-
-            print(df)
-
-        if include_rewiring_networks:
-
-            # dump rewired network spreading times:
-
-            for rewiring_percentage in rewiring_percentage_list:
-
-                # load data:
-
-                print('load/dump' + str(rewiring_percentage) +
-                      '_percent_rewiring_' + network_group + network_id + model_id)
-
-                speed_samples_rewired = pickle.load(open(spreading_pickled_samples_directory_address
-                                                         + 'speed_samples_'
-                                                         + str(rewiring_percentage)
-                                                         + '_percent_rewiring_'
-                                                         + network_group
-                                                         + network_id
-                                                         + model_id
-                                                         + '.pkl', 'rb'))
-
-                spread_samples_rewired = pickle.load(open(spreading_pickled_samples_directory_address
-                                                          + 'infection_size_samples_'
-                                                          + str(rewiring_percentage)
-                                                          + '_percent_rewiring_'
-                                                          + network_group
-                                                          + network_id
-                                                          + model_id
-                                                          + '.pkl', 'rb'))
-
-                speed_rewired = np.mean(speed_samples_rewired)
-
-                spread_rewired = np.mean(spread_samples_rewired)
-
-                std_rewired = np.std(speed_samples_rewired)
-
-                spread_std_rewired = np.std(spread_samples_rewired)
-
-                # dump the loaded data:
-
-                df_common_part_rewired = pd.DataFrame(data=[[network_group, network_id, network_size,
-                                                             'rewired', rewiring_percentage, MODEL]]
-                                                           *len(speed_samples_rewired),
-                                                      columns=['network_group',
-                                                               'network_id',
-                                                               'network_size',
-                                                               'intervention_type',
-                                                               'intervention_size',
-                                                               'model'])
-
-                df_sample_ids_rewired = pd.Series(list(range(len(speed_samples_rewired))), name='sample_id')
-
-                df_time_to_spreads_rewired = pd.Series(speed_samples_rewired, name='time_to_spread')
-
-                df_size_of_spreads_rewired = pd.Series(spread_samples_rewired, name='size_of_spread')
-
-                new_df_rewired = pd.concat([df_common_part_rewired,
-                                            df_sample_ids_rewired,
-                                            df_time_to_spreads_rewired,
-                                            df_size_of_spreads_rewired],
-                                           axis=1)
-
-                print(new_df_rewired)
-
-                extended_frame = [df, new_df_rewired]
-
-                df = pd.concat(extended_frame,
-                               ignore_index=True,
-                               verify_integrity=False)  # .drop_duplicates().reset_index(drop=True)
+                df = pd.concat(extended_frame, ignore_index=True, verify_integrity=False).drop_duplicates().reset_index(
+                    drop=True)
 
                 print(df)
 
-        if include_addition_networks:
+            if include_rewiring_networks:
 
-            # dump the edge added network spreading times:
+                # dump rewired network spreading times:
 
-            for percent_more_edges in percent_more_edges_list:
+                for rewiring_percentage in rewiring_percentage_list:
 
-                # load data:
+                    # load data:
 
-                print('load/dump' + str(percent_more_edges) + '_percent_' + 'add_random_'
-                      + network_group + network_id + model_id)
+                    print('load/dump' + str(rewiring_percentage) +
+                          '_percent_rewiring_' + network_group + network_id + model_id + '_' + str(theta))
 
-                print('load/dump' + str(percent_more_edges) + '_percent_' + 'add_triad_'
-                      + network_group + network_id + model_id)
-
-                speed_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address
-                                                            + 'speed_samples_'
-                                                            + str(percent_more_edges)
-                                                            + '_percent_'
-                                                            + 'add_random_'
-                                                            + network_group
-                                                            + network_id
-                                                            + model_id
-                                                            + '.pkl', 'rb'))
-
-                speed_samples_add_triad = pickle.load(open(spreading_pickled_samples_directory_address
-                                                           + 'speed_samples_'
-                                                           + str(percent_more_edges)
-                                                           + '_percent_'
-                                                           + 'add_triad_'
-                                                           + network_group
-                                                           + network_id
-                                                           + model_id
-                                                           + '.pkl', 'rb'))
-
-                spread_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address
-                                                             + 'infection_size_samples_'
-                                                             + str(percent_more_edges)
-                                                             + '_percent_'
-                                                             + 'add_random_'
+                    speed_samples_rewired = pickle.load(open(spreading_pickled_samples_directory_address
+                                                             + 'speed_samples_'
+                                                             + str(rewiring_percentage)
+                                                             + '_percent_rewiring_'
                                                              + network_group
                                                              + network_id
-                                                             + model_id
+                                                             + model_id + '_' + str(theta)
                                                              + '.pkl', 'rb'))
 
-                spread_samples_add_triad = pickle.load(open(spreading_pickled_samples_directory_address
-                                                            + 'infection_size_samples_'
-                                                            + str(percent_more_edges)
-                                                            + '_percent_'
-                                                            + 'add_triad_'
-                                                            + network_group
-                                                            + network_id
-                                                            + model_id
-                                                            + '.pkl', 'rb'))
+                    spread_samples_rewired = pickle.load(open(spreading_pickled_samples_directory_address
+                                                              + 'infection_size_samples_'
+                                                              + str(rewiring_percentage)
+                                                              + '_percent_rewiring_'
+                                                              + network_group
+                                                              + network_id
+                                                              + model_id + '_' + str(theta)
+                                                              + '.pkl', 'rb'))
 
-                speed_add_triad = np.mean(speed_samples_add_triad)
+                    speed_rewired = np.mean(speed_samples_rewired)
 
-                speed_add_random = np.mean(speed_samples_add_random)
+                    spread_rewired = np.mean(spread_samples_rewired)
 
-                spread_add_triad = np.mean(spread_samples_add_triad)
+                    std_rewired = np.std(speed_samples_rewired)
 
-                spread_add_random = np.mean(spread_samples_add_random)
+                    spread_std_rewired = np.std(spread_samples_rewired)
 
-                std_add_triad = np.std(speed_samples_add_triad)
+                    # dump the loaded data:
 
-                std_add_random = np.std(speed_samples_add_random)
+                    df_common_part_rewired = pd.DataFrame(data=[[network_group, network_id, network_size, str(theta),
+                                                                 'rewired', rewiring_percentage, MODEL]]
+                                                               *len(speed_samples_rewired),
+                                                          columns=['network_group',
+                                                                   'network_id',
+                                                                   'network_size',
+                                                                   # 'theta',
+                                                                   'theta_distribution',
+                                                                   'intervention_type',
+                                                                   'intervention_size',
+                                                                   'model'])
 
-                spread_std_add_triad = np.std(spread_samples_add_triad)
+                    df_sample_ids_rewired = pd.Series(list(range(len(speed_samples_rewired))), name='sample_id')
 
-                spread_std_add_random = np.std(spread_samples_add_random)
+                    df_time_to_spreads_rewired = pd.Series(speed_samples_rewired, name='time_to_spread')
 
-                # dump edge addition networks spreading data (after loading):
+                    df_size_of_spreads_rewired = pd.Series(spread_samples_rewired, name='size_of_spread')
 
-                df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size,
-                                                                'random_addition', percent_more_edges,
-                                                                MODEL]] * len(speed_samples_add_random),
-                                                         columns=['network_group', 'network_id', 'network_size',
-                                                                  'intervention_type',
-                                                                  'intervention_size', 'model'])
+                    new_df_rewired = pd.concat([df_common_part_rewired,
+                                                df_sample_ids_rewired,
+                                                df_time_to_spreads_rewired,
+                                                df_size_of_spreads_rewired],
+                                               axis=1)
 
-                df_sample_ids_add_random = pd.Series(list(range(len(speed_samples_add_random))), name='sample_id')
+                    print(new_df_rewired)
 
-                df_time_to_spreads_add_random = pd.Series(speed_samples_add_random, name='time_to_spread')
+                    extended_frame = [df, new_df_rewired]
 
-                df_size_of_spreads_add_random = pd.Series(spread_samples_add_random, name='size_of_spread')
+                    df = pd.concat(extended_frame,
+                                   ignore_index=True,
+                                   verify_integrity=False)  # .drop_duplicates().reset_index(drop=True)
 
-                new_df_add_random = pd.concat([df_common_part_add_random,
-                                               df_sample_ids_add_random,
-                                               df_time_to_spreads_add_random,
-                                               df_size_of_spreads_add_random],
-                                              axis=1)
+                    print(df)
 
-                df_common_part_add_triad = pd.DataFrame(data=[[network_group,
-                                                               network_id,
-                                                               network_size,
-                                                               'triad_addition',
-                                                               percent_more_edges,
-                                                               MODEL]] * len(speed_samples_add_triad),
-                                                        columns=['network_group',
-                                                                 'network_id',
-                                                                 'network_size',
-                                                                 'intervention_type',
-                                                                 'intervention_size',
-                                                                 'model'])
+            if include_addition_networks:
 
-                df_sample_ids_add_triad = pd.Series(list(range(len(speed_samples_add_triad))), name='sample_id')
+                # dump the edge added network spreading times:
 
-                df_time_to_spreads_add_triad = pd.Series(speed_samples_add_triad, name='time_to_spread')
+                for percent_more_edges in percent_more_edges_list:
 
-                df_size_of_spreads_add_triad = pd.Series(spread_samples_add_triad, name='size_of_spread')
+                    # load data:
 
-                new_df_add_triad = pd.concat([df_common_part_add_triad,
-                                              df_sample_ids_add_triad,
-                                              df_time_to_spreads_add_triad,
-                                              df_size_of_spreads_add_triad],
-                                             axis=1)
+                    print('load/dump' + str(percent_more_edges) + '_percent_' + 'add_random_'
+                          + network_group + network_id + model_id + '_' + str(theta))
 
-                print(new_df_add_triad)
+                    print('load/dump' + str(percent_more_edges) + '_percent_' + 'add_triad_'
+                          + network_group + network_id + model_id + '_' + str(theta))
 
-                extended_frame = [df, new_df_add_random, new_df_add_triad]
+                    speed_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address
+                                                                + 'speed_samples_'
+                                                                + str(percent_more_edges)
+                                                                + '_percent_'
+                                                                + 'add_random_'
+                                                                + network_group
+                                                                + network_id
+                                                                + model_id + '_' + str(theta)
+                                                                + '.pkl', 'rb'))
 
-                df = pd.concat(extended_frame, ignore_index=True,
-                               verify_integrity=False)  # .drop_duplicates().reset_index(drop=True)
+                    speed_samples_add_triad = pickle.load(open(spreading_pickled_samples_directory_address
+                                                               + 'speed_samples_'
+                                                               + str(percent_more_edges)
+                                                               + '_percent_'
+                                                               + 'add_triad_'
+                                                               + network_group
+                                                               + network_id
+                                                               + model_id + '_' + str(theta)
+                                                               + '.pkl', 'rb'))
 
-        if include_add_rand_networks:
+                    spread_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address
+                                                                 + 'infection_size_samples_'
+                                                                 + str(percent_more_edges)
+                                                                 + '_percent_'
+                                                                 + 'add_random_'
+                                                                 + network_group
+                                                                 + network_id
+                                                                 + model_id + '_' + str(theta)
+                                                                 + '.pkl', 'rb'))
 
-            # dump the edge added network spreading times:
+                    spread_samples_add_triad = pickle.load(open(spreading_pickled_samples_directory_address
+                                                                + 'infection_size_samples_'
+                                                                + str(percent_more_edges)
+                                                                + '_percent_'
+                                                                + 'add_triad_'
+                                                                + network_group
+                                                                + network_id
+                                                                + model_id + '_' + str(theta)
+                                                                + '.pkl', 'rb'))
 
-            for percent_more_edges in percent_more_edges_list:
+                    speed_add_triad = np.mean(speed_samples_add_triad)
 
-                # load data:
+                    speed_add_random = np.mean(speed_samples_add_random)
 
-                print('load/dump' + str(percent_more_edges) + '_percent_' + 'add_random_'
-                      + network_group + network_id + model_id)
+                    spread_add_triad = np.mean(spread_samples_add_triad)
 
-                speed_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address
-                                                            + 'speed_samples_'
-                                                            + str(percent_more_edges)
-                                                            + '_percent_'
-                                                            + 'add_random_'
-                                                            + network_group
-                                                            + network_id
-                                                            + model_id
-                                                            + '.pkl', 'rb'))
+                    spread_add_random = np.mean(spread_samples_add_random)
 
-                spread_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address
-                                                             + 'infection_size_samples_'
-                                                             + str(percent_more_edges)
-                                                             + '_percent_'
-                                                             + 'add_random_'
-                                                             + network_group
-                                                             + network_id
-                                                             + model_id
-                                                             + '.pkl', 'rb'))
+                    std_add_triad = np.std(speed_samples_add_triad)
 
-                speed_add_random = np.mean(speed_samples_add_random)
+                    std_add_random = np.std(speed_samples_add_random)
 
-                spread_add_random = np.mean(spread_samples_add_random)
+                    spread_std_add_triad = np.std(spread_samples_add_triad)
 
-                std_add_random = np.std(speed_samples_add_random)
+                    spread_std_add_random = np.std(spread_samples_add_random)
 
-                spread_std_add_random = np.std(spread_samples_add_random)
+                    # dump edge addition networks spreading data (after loading):
 
-                # dump edge addition networks spreading data (after loading):
+                    df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size, str(theta),
+                                                                    'random_addition', percent_more_edges,
+                                                                    MODEL]] * len(speed_samples_add_random),
+                                                             columns=['network_group', 'network_id', 'network_size',
+                                                                      'theta_distribution', 'intervention_type',
+                                                                      'intervention_size', 'model'])
 
-                df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size,
-                                                                'random_addition', percent_more_edges,
-                                                                MODEL]] * len(speed_samples_add_random),
-                                                         columns=['network_group', 'network_id', 'network_size',
-                                                                  'intervention_type',
-                                                                  'intervention_size', 'model'])
+                    df_sample_ids_add_random = pd.Series(list(range(len(speed_samples_add_random))), name='sample_id')
 
-                df_sample_ids_add_random = pd.Series(list(range(len(speed_samples_add_random))), name='sample_id')
+                    df_time_to_spreads_add_random = pd.Series(speed_samples_add_random, name='time_to_spread')
 
-                df_time_to_spreads_add_random = pd.Series(speed_samples_add_random, name='time_to_spread')
+                    df_size_of_spreads_add_random = pd.Series(spread_samples_add_random, name='size_of_spread')
 
-                df_size_of_spreads_add_random = pd.Series(spread_samples_add_random, name='size_of_spread')
+                    new_df_add_random = pd.concat([df_common_part_add_random,
+                                                   df_sample_ids_add_random,
+                                                   df_time_to_spreads_add_random,
+                                                   df_size_of_spreads_add_random],
+                                                  axis=1)
 
-                new_df_add_random = pd.concat([df_common_part_add_random,
-                                               df_sample_ids_add_random,
-                                               df_time_to_spreads_add_random,
-                                               df_size_of_spreads_add_random],
-                                              axis=1)
+                    df_common_part_add_triad = pd.DataFrame(data=[[network_group,
+                                                                   network_id,
+                                                                   network_size,
+                                                                   str(theta),
+                                                                   'triad_addition',
+                                                                   percent_more_edges,
+                                                                   MODEL]] * len(speed_samples_add_triad),
+                                                            columns=['network_group',
+                                                                     'network_id',
+                                                                     'network_size',
+                                                                     # 'theta',
+                                                                     'theta_distribution',
+                                                                     'intervention_type',
+                                                                     'intervention_size',
+                                                                     'model'])
 
-                print(new_df_add_random)
+                    df_sample_ids_add_triad = pd.Series(list(range(len(speed_samples_add_triad))), name='sample_id')
 
-                extended_frame = [df, new_df_add_random]
+                    df_time_to_spreads_add_triad = pd.Series(speed_samples_add_triad, name='time_to_spread')
 
-                df = pd.concat(extended_frame, ignore_index=True,
-                               verify_integrity=False)  # .drop_duplicates().reset_index(drop=True)
+                    df_size_of_spreads_add_triad = pd.Series(spread_samples_add_triad, name='size_of_spread')
 
-        df.to_csv(output_directory_address + network_group + 'spreading_data_dump.csv', index=False)  # , index=False
+                    new_df_add_triad = pd.concat([df_common_part_add_triad,
+                                                  df_sample_ids_add_triad,
+                                                  df_time_to_spreads_add_triad,
+                                                  df_size_of_spreads_add_triad],
+                                                 axis=1)
+
+                    print(new_df_add_triad)
+
+                    extended_frame = [df, new_df_add_random, new_df_add_triad]
+
+                    df = pd.concat(extended_frame, ignore_index=True,
+                                   verify_integrity=False)  # .drop_duplicates().reset_index(drop=True)
+
+            if include_add_rand_networks:
+
+                # dump the edge added network spreading times:
+
+                for percent_more_edges in percent_more_edges_list:
+
+                    # load data:
+
+                    print('load/dump' + str(percent_more_edges) + '_percent_' + 'add_random_'
+                          + network_group + network_id + model_id + '_' + str(theta))
+
+                    speed_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address
+                                                                + 'speed_samples_'
+                                                                + str(percent_more_edges)
+                                                                + '_percent_'
+                                                                + 'add_random_'
+                                                                + network_group
+                                                                + network_id
+                                                                + model_id + '_' + str(theta)
+                                                                + '.pkl', 'rb'))
+
+                    spread_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address
+                                                                 + 'infection_size_samples_'
+                                                                 + str(percent_more_edges)
+                                                                 + '_percent_'
+                                                                 + 'add_random_'
+                                                                 + network_group
+                                                                 + network_id
+                                                                 + model_id + '_' + str(theta)
+                                                                 + '.pkl', 'rb'))
+
+                    speed_add_random = np.mean(speed_samples_add_random)
+
+                    spread_add_random = np.mean(spread_samples_add_random)
+
+                    std_add_random = np.std(speed_samples_add_random)
+
+                    spread_std_add_random = np.std(spread_samples_add_random)
+
+                    # dump edge addition networks spreading data (after loading):
+
+                    df_common_part_add_random = pd.DataFrame(data=[[network_group, network_id, network_size, str(theta),
+                                                                    'random_addition', percent_more_edges,
+                                                                    MODEL]] * len(speed_samples_add_random),
+                                                             columns=['network_group', 'network_id', 'network_size',
+                                                                      # 'theta',
+                                                                      'theta_distribution',
+                                                                      'intervention_type',
+                                                                      'intervention_size', 'model'])
+
+                    df_sample_ids_add_random = pd.Series(list(range(len(speed_samples_add_random))), name='sample_id')
+
+                    df_time_to_spreads_add_random = pd.Series(speed_samples_add_random, name='time_to_spread')
+
+                    df_size_of_spreads_add_random = pd.Series(spread_samples_add_random, name='size_of_spread')
+
+                    new_df_add_random = pd.concat([df_common_part_add_random,
+                                                   df_sample_ids_add_random,
+                                                   df_time_to_spreads_add_random,
+                                                   df_size_of_spreads_add_random],
+                                                  axis=1)
+
+                    print(new_df_add_random)
+
+                    extended_frame = [df, new_df_add_random]
+
+                    df = pd.concat(extended_frame, ignore_index=True,
+                                   verify_integrity=False)  # .drop_duplicates().reset_index(drop=True)
+
+            df.to_csv(output_directory_address + network_group + 'spreading_data_dump.csv', index=False)  # , index=False
+
+    for theta in theta_list:
+    #splitting the original dump file (which included all thetas) into separate files for each theta
+        df = pd.read_csv(output_directory_address + network_group + 'spreading_data_dump.csv')
+
+        #Filter the desired rows from our original dump file
+        criterion = df['theta_distribution'] == str(theta)
+
+        df_new = df[criterion]
+
+        df_new.to_csv(output_directory_address + network_group + 'spreading_data_dump' + '_' + str(theta) + '.csv')

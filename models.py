@@ -510,7 +510,7 @@ class NetworkModel(object):
             elif self.params['network'].node[i]['state'] == susceptible:
                 self.list_of_susceptible_agents.append(i)
             else:
-                print('node', i)
+                print('nodes', i)
                 print('state', self.params['network'].node[i]['state'])
                 print('state initialization miss-handled')
                 exit()
@@ -700,6 +700,8 @@ class NetworkModel(object):
         # complex contagion threshold
         if 'theta' not in self.fixed_params:  # complex contagion threshold parameter
             self.params['theta'] = RD.choice([1, 2, 3, 4])  # np.random.randint(1, 4)
+        if 'theta_distribution' not in self.fixed_params: # complex contagion probability distribution of thresholds parameter
+            self.params['threshold'] = [0.25, 0.25, 0.25, 0.25] #default to equally likely to choose each number
         #  The default values gamma = 0 and alpha = 1 ensure that all infected nodes always remain active
         if 'gamma' not in self.fixed_params:  # rate of transition from active to inactive
             self.params['gamma'] = 0.0  # RD.choice([0.2,0.3,0.4,0.5])
@@ -1017,9 +1019,9 @@ class Activation(ContagionModel):
 
         if self.externally_set_activation_function != SENTINEL:
             assert self.externally_set_classification_label != SENTINEL, 'classification_label not provided'
-            for node_counter in range(self.params['size']):
+            for nodes_counter in range(self.params['size']):
                 self.activation_functions.append(
-                    lambda number_of_active_infected_neighbors, i=node_counter:
+                    lambda number_of_active_infected_neighbors, i=nodes_counter:
                     self.externally_set_activation_function[i][number_of_active_infected_neighbors])
             self.activation_functions_is_set = True
         else:
@@ -1556,9 +1558,9 @@ class SIS(Activation):
 
 class SIS_threshold(Activation):
     """
-    threshold SIS model, threshold is theta if all nodes have the same thershold. If number of infected neighbors is
+    threshold SIS model, threshold is theta if all nodes have the same threshold. If number of infected neighbors is
     strictly greater than theta then the node would get infected with independent infection probability beta (SIS).
-    Below the threshold the nodes gets infected with a fixed probability (fixed_prob) as long as it has at least one
+    Below the threshold the node gets infected with a fixed probability (fixed_prob) as long as it has at least one
     infected neighbor.
     """
     def __init__(self, params):
@@ -2007,6 +2009,45 @@ class DeterministicLinear(LinearThreshold):
         self.params['thresholds'] = [self.params['theta']] * self.params['size']
 
 
+class ProbabilityDistributionLinear(LinearThreshold):
+    """
+    Similar to the  linear threshold model except that thresholds are not ratios and are not homogeneous across the entire network. 'thresholds' are
+    chosen with a certain probability from a predetermined list of possible values. they can be set all the same equal to theta, by just choosing
+    probability 1 of a certain value, so this also does what DeterministicLinear does.
+    """
+    def __init__(self, params):
+        super(ProbabilityDistributionLinear, self).__init__(params)
+        self.classification_label = COMPLEX
+
+        # setting the thresholds for each individual node for the ProbabilityDistributionLinear Model
+        # inputted probabilities will correspond to the list [2, 3, 4, 5]. Can change the list by changing master_list variable.
+        # also easily expandable
+
+        master_list = [2, 3, 4, 5]
+        assert 'theta_distribution' in self.fixed_params, \
+            "Theta distribution (as decimals) corresponding to" + str(master_list) + " should be supplied for ProbabilityDistributionLinear contagion model."
+        assert all(i >= 0 for i in self.params['theta_distribution']), \
+            "Probabilities must be greater than 0"
+        assert sum(self.params['theta_distribution']) == 1, \
+            "The probability of the entire sample space must be 1"
+
+        self.params['thresholds'] = [] * self.params['size']
+
+        for i in range(len(master_list)):
+            if self.params['theta_distribution'][i] == 1:
+                self.params['thresholds'] = [master_list[i]] * self.params['size']
+
+        for i in range(self.params['size']):
+            choice = random.randint(0, 1000000)
+            if choice * 1000000 < 1000000 * self.params['theta_distribution'][0]:
+                self.params['thresholds'][i] = master_list[0]
+            elif 1000000 * self.params['theta_distribution'][0] <= choice * 1000000 < 1000000 * (self.params['theta_distribution'][0] + self.params['theta_distribution'][1]):
+                self.params['thresholds'][i] = master_list[1]
+            elif 1000000 * (self.params['theta_distribution'][0] + self.params['theta_distribution'][1]) <= choice * 1000000 < 1000000 * (self.params['theta_distribution'][1] + self.params['theta_distribution'][2]):
+                self.params['thresholds'][i] = master_list[2]
+            else:
+                self.params['thresholds'][i] = master_list[3]
+
 class SimpleOnlyAlongC1(ContagionModel):
     """
     Implements an a special contagion model that is useful for interpolating C_1 and C_2 when studying the effect
@@ -2322,7 +2363,7 @@ class IndependentCascade(ContagionModel):
 
             elif current_network.node[i]['state'] == infected * inactive and RD.random() < self.params['alpha']:
                 assert self.params['network'].node[i]['time_since_activation'] == 0, \
-                    "error: time_since_activation should be zero for an inactive node"
+                    "error: time_since_activation should be zero for an inactive nodes"
                 self.params['network'].node[i]['state'] = infected * active
                 for k in self.params['network'].neighbors(i):
                     self.params['network'].node[k]['number_of_active_infected_neighbors'] += 1
@@ -2340,7 +2381,7 @@ class IndependentCascade(ContagionModel):
                     "error: time_since_activation should be less than mem"
                 if current_network.node[i]['state'] == infected * inactive:
                     assert self.params['network'].node[i]['time_since_activation'] == 0,\
-                        "error: time_since_activation should be zero for an inactive node"
+                        "error: time_since_activation should be zero for an inactive nodes"
                 self.params['network'].node[i]['time_since_infection'] += 1
                 if current_network.node[i]['state'] == infected * active:
                     self.params['network'].node[i]['time_since_activation'] += 1
