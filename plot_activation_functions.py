@@ -69,14 +69,14 @@ if __name__ == '__main__':
 
     activation_probabilities_si_6_int = dynamics_6.get_activation_probabilities(degree_range_int)
 
-    plt.figure(1)
+    plt.figure(1,(7, 6))
 
     plt.plot(degree_range, activation_probabilities_si_4, linewidth=2,
              label='$\\beta  =  0.4$')
     plt.scatter(degree_range_int, activation_probabilities_si_4_int)
-    plt.plot(degree_range, activation_probabilities_si_5, linewidth=2,
-             label='$\\beta  =  0.5$')
-    plt.scatter(degree_range_int, activation_probabilities_si_5_int)
+    # plt.plot(degree_range, activation_probabilities_si_5, linewidth=2,
+    #          label='$\\beta  =  0.5$')
+    # plt.scatter(degree_range_int, activation_probabilities_si_5_int)
     plt.plot(degree_range, activation_probabilities_si_6, linewidth=2,
              label='$\\beta  =  0.6$')
     plt.scatter(degree_range_int, activation_probabilities_si_6_int)
@@ -85,8 +85,15 @@ if __name__ == '__main__':
     plt.xlabel('number of neighboring adopters', fontsize=20)
     # plt.title('Simple Activation Functions', fontsize=20)
     plt.legend(loc='lower right', prop={'size': 20})
-    plt.show()
+    # plt.show()
+    plt.savefig("./figures/figure1A.pdf")
 
+    plt.close(1)
+
+    ########################
+    ########################
+
+    plt.figure(2,(7, 6))
 
     dynamics_probit = Probit(params_probit_5)
     dynamics_logit = Logit(params_logit_5)
@@ -135,17 +142,17 @@ if __name__ == '__main__':
 
     print(degree_range)
 
-    plt.plot(degree_range, activation_probabilities_probit, linewidth=3, linestyle='--',
-             label='probit $(\\sigma = 0.3)$')
-    plt.scatter(degree_range_int, activation_probabilities_probit_int)
-    plt.plot(degree_range, activation_probabilities_logit, linewidth=2,
-             label='logit $(\\sigma = 0.18)$')
-    plt.scatter(degree_range_int, activation_probabilities_logit_int)
+    # plt.plot(degree_range, activation_probabilities_probit, linewidth=3, linestyle='--',
+    #          label='probit $(\\sigma = 0.3)$')
+    # plt.scatter(degree_range_int, activation_probabilities_probit_int)
+    # plt.plot(degree_range, activation_probabilities_logit, linewidth=2,
+    #          label='logit $(\\sigma = 0.18)$')
+    # plt.scatter(degree_range_int, activation_probabilities_logit_int)
     plt.plot(degree_range, activation_probabilities_linear, 'r--', linewidth=1.5,
-             label='deterministic 2-complex')
+             label='deterministic\n 2-complex')
     plt.scatter(degree_range_int, activation_probabilities_linear_int)
     plt.plot(degree_range, activation_probabilities_sub_threshold, linewidth=4,
-             label='realistic threshold')
+             label='realistic\n threshold')
     plt.scatter(degree_range_int, activation_probabilities_sub_threshold_int)
     # plt.plot(degree_range, activation_probabilities_si_threshold,
     # label='Threshold SI',alpha = 0.4, linewidth = 4)
@@ -160,9 +167,38 @@ if __name__ == '__main__':
     plt.text(1.5, 0.1, '$q$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
     plt.legend(loc='lower right', prop={'size': 20})
-    plt.show()
+    # plt.show()
+    plt.savefig("./figures/figure1B.pdf")
 
-    plt.figure(3)
+    plt.close(2)
+
+    plt.figure(3, (7.5, 6))
+
+    plt.plot(degree_range, activation_probabilities_probit, linewidth=3, linestyle='--',
+             label='probit \n$(\\sigma = 0.3)$')
+    plt.scatter(degree_range_int, activation_probabilities_probit_int)
+    plt.plot(degree_range, activation_probabilities_logit, linewidth=2,
+             label='logit \n$(\\sigma = 0.18)$')
+    plt.scatter(degree_range_int, activation_probabilities_logit_int)
+    plt.plot(degree_range, activation_probabilities_linear, 'r--', linewidth=1.5,
+             label='deterministic\n 2-complex')
+    plt.scatter(degree_range_int, activation_probabilities_linear_int)
+    plt.plot(degree_range, activation_probabilities_sub_threshold, linewidth=4,
+             label='realistic\n threshold')
+    plt.scatter(degree_range_int, activation_probabilities_sub_threshold_int)
+
+    plt.ylabel('adoption probability', fontsize=20)
+    plt.xlabel('number of neighboring adopters', fontsize=20)
+    # plt.title('Complex Activation Functions', fontsize=20)
+    plt.text(1.5, 0.1, '$q$', fontsize=30,
+             fontweight='bold', fontdict=None, withdash=False)
+    plt.legend(loc='lower right', prop={'size': 20})
+    # plt.show()
+    plt.savefig("./figures/figureS6A.pdf")
+
+    plt.close(3)
+
+    plt.figure(4,(7, 6))
 
     plt.plot(degree_range[0:180], activation_probabilities_sub_threshold[0:180], linewidth=4)
     plt.scatter(degree_range_int[0:3], activation_probabilities_sub_threshold_int[0:3])
@@ -178,4 +214,7 @@ if __name__ == '__main__':
              fontweight='bold', fontdict=None, withdash=False)
     plt.title('A Realistic Complex Activation Function',fontsize=20)
     plt.xticks([0,1,2,3])
-    plt.show()
+    # plt.show()
+    plt.savefig("./figures/figureS9B.pdf")
+
+    plt.close(4)
