@@ -119,7 +119,9 @@ if __name__ == '__main__':
             for alpha in alphas[models_list.index(model)]:
                 compute_spread_time(model, alpha)
 
-    if save_computations:
+    if data_dump:
+        # load individual avg and std pkl files, organize them in a list and save them in a pair of pkl files
+        # one for all the avg's and the other for all the std's.
         qs = [[] for model in models_list]
         spread_time_avgs = [[] for model in models_list]
         spread_time_stds = [[] for model in models_list]

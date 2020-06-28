@@ -96,7 +96,9 @@ if __name__ == '__main__':
                                             number_of_cycle_neighbors,
                                             network_size)
 
-    if save_computations:
+    if data_dump:
+        # load individual avg and std pkl files, organize them in a list and save them in a pair of pkl files
+        # one for all the avg's and the other for all the std's.
         avg_spread_times = []
         std_spread_times = []
         if simulation_type == 'ck_union_ER_vs_size':
