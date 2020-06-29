@@ -104,7 +104,7 @@ def compute_spread_time(model,alpha):
 
 if __name__ == '__main__':
 
-    assert do_computations, "we should be in do_computations mode!"
+    assert do_computations or data_dump, "we should be in do_computations or data_dump mode!"
     assert simulation_type == 'c1_union_ER', "simulation type is: " + simulation_type
 
     input_list = [(model, alpha) for model in models_list for alpha in alphas[models_list.index(model)]]

@@ -99,7 +99,7 @@ def compute_spread_time_for_q_eta(q, eta):
 
 if __name__ == '__main__':
 
-    assert do_computations, "we should be in do_computations mode!"
+    assert do_computations or data_dump, "we should be in do_computations or data_dump mode!"
 
     assert (simulation_type == 'c1_c2_interpolation_SimpleOnlyAlongC1') or \
            (simulation_type == 'c1_c2_interpolation'), \

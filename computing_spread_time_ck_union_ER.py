@@ -76,7 +76,7 @@ def compute_spread_time_for_c_k(expected_degree, number_of_cycle_neighbors, netw
 
 if __name__ == '__main__':
 
-    assert do_computations, "we should be in do_computations mode!"
+    assert do_computations or data_dump, "we should be in do_computations or data_dump mode!"
 
     assert (simulation_type == 'ck_union_ER_vs_size') or \
            (simulation_type == 'ck_union_ER_vs_k'), \
