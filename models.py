@@ -796,9 +796,9 @@ class ContagionModel(NetworkModel):
                 print('time is', time)
                 print('total_number_of_infected is', total_number_of_infected)
                 print('total size is', self.params['size'])
-            if time > self.params['size']*10:
+            if time > self.params['size']*20:
                 time = float('Inf')
-                print('It is taking too long (10x size) to spread totally.')
+                print('It is taking too long (20x size) to spread totally.')
                 break
         del dummy_network
         if get_time_series:
@@ -2066,8 +2066,8 @@ class SimpleOnlyAlongC1(ContagionModel):
     def __init__(self, params):
         super(SimpleOnlyAlongC1, self).__init__(params)
         self.classification_label = COMPLEX
-        assert self.params['network_model'] in ['c_1_c_2_interpolation','c1_union_ER_with_delta'], \
-            "this contagion model is only suitable for c_1_c_2_interpolation or c1_union_ER_with_delta"
+        assert self.params['network_model'] in ['c_1_c_2_interpolation', 'cycle_union_Erdos_Renyi'], \
+            "this contagion model is only suitable for c_1_c_2_interpolation or cycle_union_Erdos_Renyi"
 
     def step(self):
         current_network = copy.deepcopy(self.params['network'])
