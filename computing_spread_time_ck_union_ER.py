@@ -82,21 +82,21 @@ if __name__ == '__main__':
            (simulation_type == 'ck_union_ER_vs_k'), \
         "simulation_type not set properly: " + simulation_type
 
-    if do_multiprocessing:
-        with multiprocessing.Pool(processes=number_CPU) as pool:
-            pool.starmap(compute_spread_time_for_c_k, product([expected_degree],
-                                                              number_of_cycle_neighbors_list,
-                                                              network_sizes))
-            pool.close()
-            pool.join()
-    else:  # no multi-processing:
-        for network_size in network_sizes:
-            for number_of_cycle_neighbors in number_of_cycle_neighbors_list:
-                compute_spread_time_for_c_k(expected_degree,
-                                            number_of_cycle_neighbors,
-                                            network_size)
-
-    if data_dump:
+    if not data_dump:
+        if do_multiprocessing:
+            with multiprocessing.Pool(processes=number_CPU) as pool:
+                pool.starmap(compute_spread_time_for_c_k, product([expected_degree],
+                                                                  number_of_cycle_neighbors_list,
+                                                                  network_sizes))
+                pool.close()
+                pool.join()
+        else:  # no multi-processing:
+            for network_size in network_sizes:
+                for number_of_cycle_neighbors in number_of_cycle_neighbors_list:
+                    compute_spread_time_for_c_k(expected_degree,
+                                                number_of_cycle_neighbors,
+                                                network_size)
+    elif data_dump:
         # load individual avg and std pkl files, organize them in a list and save them in a pair of pkl files
         # one for all the avg's and the other for all the std's.
         avg_spread_times = []

@@ -109,17 +109,17 @@ if __name__ == '__main__':
 
     input_list = [(model, alpha) for model in models_list for alpha in alphas[models_list.index(model)]]
 
-    if do_multiprocessing:
-        with multiprocessing.Pool(processes=number_CPU) as pool:
-            pool.starmap(compute_spread_time, input_list)
-        pool.close()
-        pool.join()
-    else:
-        for model in models_list:
-            for alpha in alphas[models_list.index(model)]:
-                compute_spread_time(model, alpha)
-
-    if data_dump:
+    if not data_dump:
+        if do_multiprocessing:
+            with multiprocessing.Pool(processes=number_CPU) as pool:
+                pool.starmap(compute_spread_time, input_list)
+            pool.close()
+            pool.join()
+        else:
+            for model in models_list:
+                for alpha in alphas[models_list.index(model)]:
+                    compute_spread_time(model, alpha)
+    elif data_dump:
         # load individual avg and std pkl files, organize them in a list and save them in a pair of pkl files
         # one for all the avg's and the other for all the std's.
         qs = [[] for model in models_list]

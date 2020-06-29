@@ -105,17 +105,17 @@ if __name__ == '__main__':
            (simulation_type == 'c1_c2_interpolation'), \
         "simulation_type not set properly: " + simulation_type
 
-    if do_multiprocessing:
-        with multiprocessing.Pool(processes=number_CPU) as pool:
-            pool.starmap(compute_spread_time_for_q_eta, product(qs_new_new, etas))
-            pool.close()
-            pool.join()
-    else:  # no multi-processing:
-        for q in qs_new_new:
-            for eta in etas:
-                compute_spread_time_for_q_eta(q, eta)
-
-    if data_dump:
+    if not data_dump:
+        if do_multiprocessing:
+            with multiprocessing.Pool(processes=number_CPU) as pool:
+                pool.starmap(compute_spread_time_for_q_eta, product(qs_new_new, etas))
+                pool.close()
+                pool.join()
+        else:  # no multi-processing:
+            for q in qs_new_new:
+                for eta in etas:
+                    compute_spread_time_for_q_eta(q, eta)
+    elif data_dump:
         # load individual avg and std pkl files, organize them in a list and save them in a pair of pkl files
         # one for all the avg's and the other for all the std's.
         avg_spread_times = []
