@@ -586,3 +586,81 @@ ggplot(
   #scale_y_log10() +
   geom_path(alpha = .5) +
   geom_point(alpha = .5)
+
+
+
+# load data for different theta:
+
+THETA_2 = "[1, 0, 0, 0]"
+THETA_3 = "[0, 1, 0, 0]"
+THETA_4 = "[0, 0, 1, 0]"
+THETA_5 = "[0, 0, 0, 1]"
+
+# load data
+st_thetas <- read.csv(
+  "data/cai-data/output/cai_edgelist_spreading_data_dump-thetas.csv",
+  stringsAsFactors = FALSE
+)
+
+table(table(st_thetas$network_id))
+table(st_thetas$model)
+
+
+st_thetas <- st_thetas %>%  
+  mutate(network_id = as.character(network_id))
+
+st_thetas <- st_thetas %>%
+  mutate(
+    intervention = intervention_name_map[intervention_type]
+  )
+
+# plot ECDF averaging over networks for each theta
+overall_ecdf_plot <- ggplot(
+  aes(x = time_to_spread,
+      color = intervention
+  ),
+  data = st_thetas %>% filter(
+    theta_distribution == THETA_2,
+    intervention_size %in% c(0, default_intervention_size)
+  )
+) +
+  scale_color_manual(values = intervention_colors) +
+  scale_x_log10() +
+  stat_ecdf(lwd = .3) +
+  ylab("ECDF") +
+  xlab("time to spread") +
+  theme(legend.position = "topleft") +
+  annotation_logticks(
+    sides = "b", size = .3,
+    short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
+  )
+overall_ecdf_plot
+
+ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_2.pdf',
+       overall_ecdf_plot, width = 4.5, height = 3.5)
+
+overall_ecdf_plot %+% (
+  st_thetas %>% filter(
+    theta_distribution == THETA_3,
+    intervention_size %in% c(0, default_intervention_size)
+  ))
+ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_3.pdf',
+       width = 4.5, height = 3.5)
+
+overall_ecdf_plot %+% (
+  st_thetas %>% filter(
+    theta_distribution == THETA_4,
+    intervention_size %in% c(0, default_intervention_size)
+  )) +
+  theme(legend.position = c(0.22, 0.75))
+ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_4.pdf',
+       width = 4.5, height = 3.5)
+
+overall_ecdf_plot %+% (
+  st_thetas %>% filter(
+    theta_distribution == THETA_5,
+    intervention_size %in% c(0, default_intervention_size)
+  ))
+ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_5.pdf',
+       width = 4.5, height = 3.5)
+
