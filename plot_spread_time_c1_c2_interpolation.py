@@ -23,7 +23,7 @@ if __name__ == '__main__':
                                         + simulation_type
                                         + '.pkl', 'rb'))
 
-    plt.figure()
+    plt.figure(1,(9.2, 8))
 
     for q_label in all_q_labels:
         print(q_label)
@@ -52,17 +52,22 @@ if __name__ == '__main__':
                                                   + str(
                         Decimal(all_qs[all_q_labels.index(q_label)]).quantize(FOURPLACES))
                                                   + '$')
-
-    plt.ylabel('time to spread')
-    plt.xlabel('edges rewired ($\\eta$)')
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.ylabel('time to spread', fontsize=20)
+    plt.xlabel('edges rewired ($\\eta$)', fontsize=20)
     # plt.title('\centering Complex Contagion over $\mathcal{C}_2^{\eta}, n = ' + str(network_size) + '$'
     #           '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions $(q)$ '
     #           'and Rewiring $(\eta)$   \\end{center}')
     if simulation_type == 'c1_c2_interpolation_SimpleOnlyAlongC1':
-        plt.legend(loc='upper left', fontsize=13)#bbox_to_anchor=(1, 0.065),
+        plt.legend(loc='upper left', prop={'size': 20})#bbox_to_anchor=(1, 0.065),
     elif simulation_type == 'c1_c2_interpolation':
-        plt.legend(loc='lower right', bbox_to_anchor=(1, 0.065), fontsize=11)  #
+        plt.legend(loc='lower right', bbox_to_anchor=(1, 0.065), prop={'size': 18})  #
     if show_plots:
         plt.show()
     if save_plots:
-        plt.savefig(theory_simulation_output_address + simulation_type + '.png')
+        # plt.savefig(theory_simulation_output_address + simulation_type + '.png')
+        if simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1':
+            plt.savefig('./figures/' + 'figure3A.pdf')
+        elif simulation_type == 'c1_c2_interpolation':
+            plt.savefig('./figures/' + 'figureS7.pdf')
