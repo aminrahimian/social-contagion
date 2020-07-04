@@ -23,7 +23,7 @@ if __name__ == '__main__':
                           + simulation_type
                           + '_qs.pkl', 'rb'))
 
-    plt.figure()
+    plt.figure(1,(7, 6))
 
     for model in models_list:
         model_index = models_list.index(model)
@@ -39,12 +39,12 @@ if __name__ == '__main__':
              label='$\mathcal{C}_2$ benchmark')
 
     plt.xscale("log")
-    plt.ylabel('time to spread', fontsize=15)
-    plt.xlabel('probability of adoptions below threshold $(q)$', fontsize=15)
+    plt.ylabel('time to spread', fontsize=20)
+    plt.xlabel('probability of adoptions below threshold $(q)$', fontsize=20)
     # plt.title('\centering Complex Contagion over $\mathcal{C}_{1} \\cup \mathcal{G}_{n,2/n},n = '
     #           + str(NET_SIZE) + '$'
     #           '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions \\end{center}', fontsize=18)
-    plt.legend()
+    plt.legend(loc='upper right', prop={'size': 20})
     plt.arrow(0.0074, 500, 0, -500, width=0.0001, head_width=0.0006,
               head_length=50, capstyle='projecting',
               length_includes_head=True, shape='full', joinstyle='round', fc='k', ec='k')
@@ -53,4 +53,5 @@ if __name__ == '__main__':
     if show_plots:
         plt.show()
     if save_plots:
-        plt.savefig(theory_simulation_output_address + simulation_type + '.png')
+        # plt.savefig(theory_simulation_output_address + simulation_type + '.png')
+        plt.savefig('./figures/' + 'figureS6B.pdf')
