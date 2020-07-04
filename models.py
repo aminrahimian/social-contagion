@@ -796,9 +796,9 @@ class ContagionModel(NetworkModel):
                 print('time is', time)
                 print('total_number_of_infected is', total_number_of_infected)
                 print('total size is', self.params['size'])
-            if time > self.params['size']*20:
+            if time > self.params['size']*10:
                 time = float('Inf')
-                print('It is taking too long (20x size) to spread totally.')
+                print('It is taking too long (10x size) to spread totally.')
                 break
         del dummy_network
         if get_time_series:
@@ -2012,21 +2012,22 @@ class DeterministicLinear(LinearThreshold):
 class ProbabilityDistributionLinear(LinearThreshold):
     """
     Similar to the  linear threshold model except that thresholds are not ratios and are not homogeneous across the
-    entire network. 'thresholds' are
-    chosen with a certain probability from a predetermined list of possible values. they can be set all the same equal
-    to theta, by just choosing
-    probability 1 of a certain value, so this also does what DeterministicLinear does.
+    entire network. 'thresholds' are chosen with a certain probability from a predetermined list of possible values.
+    they can be set all the same equal to theta, by just choosing probability 1 of a certain value, so this also does
+    what DeterministicLinear does.
     """
     def __init__(self, params):
-        super(ProbabilityDistributionLinear, self).__init__(params)
-        self.classification_label = COMPLEX
-
-        # setting the thresholds for each individual node for the ProbabilityDistributionLinear Model
-        # inputted probabilities will correspond to the list [2, 3, 4, 5]. Can change the list by changing
-        # master_list variable.
-        # also easily expandable
 
         master_list = [2, 3, 4, 5]
+        super(ProbabilityDistributionLinear, self).__init__(params)
+        self.classification_label = COMPLEX
+        self.node_list = list(self.params['network'])
+
+        # setting the thresholds for each individual node for the ProbabilityDistributionLinear Model
+        # inputted probabilities will correspond to the list [2, 3, 4, 5].
+        # Can change the list by changing master_list variable.
+        # also easily expandable
+
         assert 'theta_distribution' in self.fixed_params, \
             "Theta distribution (as decimals) corresponding to" + str(master_list) \
             + " should be supplied for ProbabilityDistributionLinear contagion model."
@@ -2036,25 +2037,12 @@ class ProbabilityDistributionLinear(LinearThreshold):
             "The probability of the entire sample space must be 1"
 
         self.params['thresholds'] = [] * self.params['size']
-
-        for i in range(len(master_list)):
-            if self.params['theta_distribution'][i] == 1:
-                self.params['thresholds'] = [master_list[i]] * self.params['size']
-
+        thetas = RD.choices(master_list, weights=self.params['theta_distribution'], k=self.params['size'])
         for i in range(self.params['size']):
-            choice = random.randint(0, 1000000)
-            if choice * 1000000 < 1000000 * self.params['theta_distribution'][0]:
-                self.params['thresholds'][i] = master_list[0]
-            elif 1000000 * self.params['theta_distribution'][0] <= \
-                    choice * 1000000 < 1000000 * (self.params['theta_distribution'][0]
-                                                  + self.params['theta_distribution'][1]):
-                self.params['thresholds'][i] = master_list[1]
-            elif 1000000 * (self.params['theta_distribution'][0] +
-                            self.params['theta_distribution'][1]) <= choice * 1000000 < 1000000 *\
-                    (self.params['theta_distribution'][1] + self.params['theta_distribution'][2]):
-                self.params['thresholds'][i] = master_list[2]
-            else:
-                self.params['thresholds'][i] = master_list[3]
+            self.params['thresholds'].append(thetas[i])
+        for i in self.params['network'].nodes():
+            self.params['network'].node[i]['threshold'] = self.params['thresholds'][self.node_list.index(i)]
+
 
 class SimpleOnlyAlongC1(ContagionModel):
     """

@@ -12,6 +12,7 @@ import errno
 import networkx as NX
 import re
 import sys
+from random import choices
 
 susceptible = 0.0
 infected = 1.0
@@ -26,6 +27,7 @@ SENTINEL = object()
 
 # theta_list = [2, 3, 4, 5]
 theta_list = [[1, 0, 0, 0] , [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+# theta_list = [[0.2, 0.6, 0.15, 0.05], [0.03, 0.07, 0.2, 0.7], [0.05, 0.15, 0.6, 0.2], [0.7, 0.2, 0.07, 0.03]]
 
 assert (sys.version_info >= (3, 6) and sys.version_info <= (3,7)), 'please use python 3.6'
 # print(sys.version_info)
@@ -73,7 +75,7 @@ if network_group == 'cai_edgelist_':
 
     GENERATE_NET_LIST_FROM_AVAILABLE_SAMPLES = False
 
-    TAKE_SMALLEST_N = True
+    TAKE_SMALLEST_N = False
 
     if TAKE_SMALLEST_N:
         SMALLEST_N = 2
@@ -348,15 +350,15 @@ except OSError as e:
 # commonly used settings:
 #
 # # for computations:
-do_computations = True
-do_multiprocessing = True
-save_computations = True
-load_computations = False
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = False
-simulator_mode = False
+# do_computations = True
+# do_multiprocessing = True
+# save_computations = True
+# load_computations = False
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = False
+# simulator_mode = False
 #
 # # # for plotting:
 # do_computations = False
@@ -369,16 +371,16 @@ simulator_mode = False
 # data_dump = False
 # simulator_mode = False
 
-# # # # for data_dump:
-# do_computations = False
-# do_multiprocessing = False
-# save_computations = False
-# load_computations = True
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = True
-# simulator_mode = False
+# # # for data_dump:
+do_computations = False
+do_multiprocessing = False
+save_computations = False
+load_computations = True
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = True
+simulator_mode = False
 
 # #for simulator:
 # do_computations = True
