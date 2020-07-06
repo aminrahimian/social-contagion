@@ -34,6 +34,7 @@ assert (sys.version_info >= (3, 6) and sys.version_info <= (3,7)), 'please use p
 # print(type(NX.__version__))
 assert((NX.__version__ == '1.11' or '1.10')), 'please use networkx 1.11 or 1.10'
 
+
 def get_n_smallest_key_values(dictionary, n):
     smallest_entries = sorted(
         dictionary.keys(), key=lambda t: dictionary[t], reverse=False)[:n]
@@ -315,7 +316,11 @@ if 'SLURM_ARRAY_TASK_ID' in os.environ:
 # theory simulations settings:
 
 simulation_type = 'c1_union_ER_with_delta'
-#   'ck_union_ER_vs_size'
+#  'c1_c2_interpolation'
+#  'c1_c2_interpolation_SimpleOnlyAlongC1'
+#  'c1_union_ER'
+#  'c1_union_ER_with_delta'
+#  'ck_union_ER_vs_size'
 #  'c1_c2_interpolation'
 #  'ck_union_ER_vs_size'
 #  'ck_union_ER_vs_k'
@@ -349,16 +354,16 @@ except OSError as e:
 
 # commonly used settings:
 #
-# # for computations:
-# do_computations = True
-# do_multiprocessing = True
-# save_computations = True
-# load_computations = False
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = False
-# simulator_mode = False
+# for computations:
+do_computations = True
+do_multiprocessing = True
+save_computations = True
+load_computations = False
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = False
+simulator_mode = False
 #
 # # # for plotting:
 # do_computations = False
@@ -366,23 +371,23 @@ except OSError as e:
 # save_computations = False
 # load_computations = True
 # do_plots = True
-# save_plots = True
+# save_plots = False
 # show_plots = True
 # data_dump = False
 # simulator_mode = False
 
-# # # for data_dump:
-do_computations = False
-do_multiprocessing = False
-save_computations = False
-load_computations = True
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = True
-simulator_mode = False
+# # # # for data_dump:
+# do_computations = False
+# do_multiprocessing = False
+# save_computations = False
+# load_computations = True
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = True
+# simulator_mode = False
 
-# #for simulator:
+# #for simulator: # only used for visualizing_spread.py
 # do_computations = True
 # do_multiprocessing = False
 # save_computations = True
@@ -519,7 +524,6 @@ if simulator_mode:
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
-
     try:
         os.makedirs(output_directory_address)
     except OSError as e:
@@ -542,7 +546,7 @@ if do_multiprocessing:
     if 'SLURM_ARRAY_TASK_ID' in os.environ:
         number_CPU = 4
     else:
-        number_CPU = 40
+        number_CPU = 28
 
 
 def combine(list_of_names,output_name):
