@@ -18,46 +18,55 @@ q_labels = [str(x) for x in range(len(qs))]
 print(qs)
 print(q_labels)
 
+
 def compute_spread_time_for_q_delta(q, delta):
-    params = {
-        'zero_at_zero': True,
-        'network_model': 'cycle_union_Erdos_Renyi',
-        'size': network_size,
-        'initial_states': [infected*active] + [infected*active] + [susceptible] * (network_size - 2),  # two initial seeds, next to each other
-        'delta': delta,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
-        'fixed_prob_high': 1.0,
-        'fixed_prob': q,
-        'theta': 2,
-        'c': 2,
-        'nearest_neighbors': 2,
-        'rewire': False,
-    }
+    path_of_file = theory_simulation_pickle_address +\
+                   'spreading_time_avg' + '_delta_' + delta_labels[deltas.index(delta)] +\
+                   '_q_' + '_q_' + q_labels[qs.index(q)] + '.pkl'
+    if os.path.isfile(path_of_file):
+        print('already_exists_delta_' + delta_labels[deltas.index(delta)] + '_q_' + q_labels[qs.index(q)])
+        return
+    else:
+        print('computing_delta_' + delta_labels[deltas.index(delta)] + '_q_' + q_labels[qs.index(q)])
+        params = {
+            'zero_at_zero': True,
+            'network_model': 'cycle_union_Erdos_Renyi',
+            'size': network_size,
+            'initial_states': [infected*active] + [infected*active] + [susceptible] * (network_size - 2),  # two initial seeds, next to each other
+            'delta': delta,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
+            'fixed_prob_high': 1.0,
+            'fixed_prob': q,
+            'theta': 2,
+            'c': 2,
+            'nearest_neighbors': 2,
+            'rewire': False,
+        }
 
-    print('delta: ', params['delta'], 'q: ', params['fixed_prob'])
+        print('delta: ', params['delta'], 'q: ', params['fixed_prob'])
 
-    if simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1' or 'c1_union_ER_with_delta':
-        dynamics = SimpleOnlyAlongC1(params)
-    elif simulation_type is 'c1_union_ER':
-        dynamics = DeterministicLinear(params)
+        if simulation_type is 'c1_c2_interpolation_SimpleOnlyAlongC1' or 'c1_union_ER_with_delta':
+            dynamics = SimpleOnlyAlongC1(params)
+        elif simulation_type is 'c1_union_ER':
+            dynamics = DeterministicLinear(params)
 
-    spread_time_avg, spread_time_std, _, _, samples, _, _, _, _, _ = \
-        dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
+        spread_time_avg, spread_time_std, _, _, samples, _, _, _, _, _ = \
+            dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
 
-    print('spread_time_avg: ', spread_time_avg)
-    print('spread_time_std: ', spread_time_std)
+        print('spread_time_avg: ', spread_time_avg)
+        print('spread_time_std: ', spread_time_std)
 
-    if save_computations:
-        pickle.dump(spread_time_avg, open(theory_simulation_pickle_address
-                                          + 'spreading_time_avg'
-                                          + '_delta_' + delta_labels[deltas.index(delta)] + '_q_'
-                                          + '_q_' + q_labels[qs.index(q)]
-                                          + '.pkl', 'wb'))
-        pickle.dump(spread_time_std, open(theory_simulation_pickle_address
-                                          + 'spreading_time_std'
-                                          + '_delta_' + delta_labels[deltas.index(delta)]
-                                          + '_q_' + q_labels[qs.index(q)]
-                                          + '.pkl', 'wb'))
-    return spread_time_avg, spread_time_std
+        if save_computations:
+            pickle.dump(spread_time_avg, open(theory_simulation_pickle_address
+                                              + 'spreading_time_avg'
+                                              + '_delta_' + delta_labels[deltas.index(delta)] + '_q_'
+                                              + '_q_' + q_labels[qs.index(q)]
+                                              + '.pkl', 'wb'))
+            pickle.dump(spread_time_std, open(theory_simulation_pickle_address
+                                              + 'spreading_time_std'
+                                              + '_delta_' + delta_labels[deltas.index(delta)]
+                                              + '_q_' + q_labels[qs.index(q)]
+                                              + '.pkl', 'wb'))
+        return spread_time_avg, spread_time_std
 
 
 if __name__ == '__main__':
