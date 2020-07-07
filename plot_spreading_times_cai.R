@@ -595,7 +595,6 @@ ggplot(
   THETA_3 = "[0, 1, 0, 0]"
   THETA_4 = "[0, 0, 1, 0]"
   THETA_5 = "[0, 0, 0, 1]"
-  
   THETA_DIST_2 = "[0.7, 0.2, 0.07, 0.03]"
   THETA_DIST_3 = "[0.2, 0.6, 0.15, 0.05]"
   THETA_DIST_4 = "[0.05, 0.15, 0.6, 0.2]"
@@ -635,39 +634,38 @@ ggplot(
     )
   
   # plot ECDF averaging over networks for each theta
-  overall_ecdf_plot <- ggplot(
+  overall_ecdf_plot_thetas <- ggplot(
     aes(x = time_to_spread,
-        color = intervention
-    ),
+        color = intervention),
     data = st_thetas %>% filter(
+      model == MODEL_1,
       theta_distribution == THETA_2,
-      intervention_size %in% c(0, default_intervention_size)
-    )
-  ) +
+      intervention_size %in% c(0, default_intervention_size))) +
     scale_color_manual(values = intervention_colors) +
     scale_x_log10() +
     stat_ecdf(lwd = .3) +
     ylab("ECDF") +
     xlab("time to spread") +
-    theme(legend.position = "topleft") +
+    theme(legend.position = c(0.8, 0.3)) + #
     annotation_logticks(
       sides = "b", size = .3,
       short = unit(0.05, "cm"), mid = unit(0.1, "cm"), long = unit(0.2, "cm")
     )
-  overall_ecdf_plot
+  overall_ecdf_plot_thetas
   
   ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_2.pdf',
-         overall_ecdf_plot, width = 4.5, height = 3.5)
+         overall_ecdf_plot_thetas, width = 4.5, height = 3.5)
   
-  overall_ecdf_plot %+% (
+  overall_ecdf_plot_thetas %+% (
     st_thetas %>% filter(
       theta_distribution == THETA_3,
       intervention_size %in% c(0, default_intervention_size)
-    ))
+    ))+
+    theme(legend.position = c(0.22, 0.75))
   ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_3.pdf',
          width = 4.5, height = 3.5)
   
-  overall_ecdf_plot %+% (
+  overall_ecdf_plot_thetas %+% (
     st_thetas %>% filter(
       theta_distribution == THETA_4,
       intervention_size %in% c(0, default_intervention_size)
@@ -676,15 +674,16 @@ ggplot(
   ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_4.pdf',
          width = 4.5, height = 3.5)
   
-  overall_ecdf_plot %+% (
+  overall_ecdf_plot_thetas %+% (
     st_thetas %>% filter(
       theta_distribution == THETA_5,
       intervention_size %in% c(0, default_intervention_size)
-    ))
+    )) +
+    theme(legend.position = c(0.22, 0.75))
   ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_5.pdf',
          width = 4.5, height = 3.5)
   
-  overall_ecdf_plot %+% (
+  overall_ecdf_plot_thetas %+% (
     st_thetas_dist %>% filter(
       theta_distribution == THETA_DIST_2,
       intervention_size %in% c(0, default_intervention_size)
@@ -692,26 +691,29 @@ ggplot(
   ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_dist_2.pdf',
          width = 4.5, height = 3.5)
   
-  overall_ecdf_plot %+% (
+  overall_ecdf_plot_thetas %+% (
     st_thetas_dist %>% filter(
       theta_distribution == THETA_DIST_3,
       intervention_size %in% c(0, default_intervention_size)
-    ))
+    ))  +
+    theme(legend.position = c(0.22, 0.75))
   ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_dist_3.pdf',
          width = 4.5, height = 3.5)
   
-  overall_ecdf_plot %+% (
+  overall_ecdf_plot_thetas %+% (
     st_thetas_dist %>% filter(
       theta_distribution == THETA_DIST_4,
       intervention_size %in% c(0, default_intervention_size)
-    ))
+    ))  +
+    theme(legend.position = c(0.22, 0.75))
   ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_dist_4.pdf',
          width = 4.5, height = 3.5)
   
-  overall_ecdf_plot %+% (
+  overall_ecdf_plot_thetas %+% (
     st_thetas_dist %>% filter(
       theta_distribution == THETA_DIST_5,
       intervention_size %in% c(0, default_intervention_size)
-    ))
+    ))  +
+    theme(legend.position = c(0.22, 0.75))
   ggsave('figures/cai/cai_time_to_spread_ecdf_overall_theta_dist_5.pdf',
          width = 4.5, height = 3.5)
