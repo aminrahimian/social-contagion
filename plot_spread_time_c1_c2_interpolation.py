@@ -52,6 +52,9 @@ if __name__ == '__main__':
                                                   + str(
                         Decimal(all_qs[all_q_labels.index(q_label)]).quantize(FOURPLACES))
                                                   + '$')
+    plt.plot(etas,
+             [250] * len(etas),
+             color='c', linewidth=1.5, linestyle='dashed')
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.ylabel('time to spread', fontsize=20)
