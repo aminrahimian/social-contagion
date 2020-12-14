@@ -32,7 +32,8 @@ theta_list = [[1, 0, 0, 0] , [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 assert (sys.version_info >= (3, 6) and sys.version_info <= (3,7)), 'please use python 3.6'
 # print(sys.version_info)
 # print(type(NX.__version__))
-assert((NX.__version__ == '1.11' or '1.10')), 'please use networkx 1.11 or 1.10'
+assert(NX.__version__ == '2.3'), 'please use networkx 2.3'
+#assert(matplotlib.__version__ == '2.3'), 'please use networkx 2.3'
 
 
 def get_n_smallest_key_values(dictionary, n):
@@ -355,15 +356,15 @@ except OSError as e:
 # commonly used settings:
 #
 # for computations:
-do_computations = True
-do_multiprocessing = True
-save_computations = True
-load_computations = False
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = False
-simulator_mode = False
+#do_computations = True
+#do_multiprocessing = True
+#save_computations = True
+#load_computations = False
+#do_plots = False
+#save_plots = False
+#show_plots = False
+#data_dump = False
+#simulator_mode = False
 #
 # # # for plotting:
 # do_computations = False
@@ -388,16 +389,16 @@ simulator_mode = False
 # simulator_mode = False
 
 # #for simulator: # only used for visualizing_spread.py
-# do_computations = True
-# do_multiprocessing = False
-# save_computations = True
-# load_computations = False
+do_computations = True
+do_multiprocessing = False
+save_computations = True
+load_computations = False
 # #simulator uses a different mathplotlib setting for plotting
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = False
-# simulator_mode = True
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = False
+simulator_mode = True
 
 
 #  check that different modes are set consistently
