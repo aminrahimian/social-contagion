@@ -842,10 +842,11 @@ class ContagionModel(NetworkModel):
             sum_of_cap_times = 0
             infection_sizes = []
             sum_of_infection_sizes = 0
+            fraction_evolution=[]
 
             for i in range(dataset_size):
                 print('dataset_counter_index is:', i)
-                time, infection_size = self.time_the_total_spread(cap=cap, get_time_series=False)
+                time, infection_size,l1,l2 = self.time_the_total_spread(cap=cap, get_time_series=True)
                 cap_time = time
                 if cap_time == float('Inf'):
                     dataset_size += -1
@@ -855,6 +856,8 @@ class ContagionModel(NetworkModel):
                 cap_times += [cap_time]
                 sum_of_infection_sizes += infection_size
                 infection_sizes += [infection_size]
+                fraction_evolution += [l2]
+
 
                 gc.collect()
 
@@ -893,7 +896,7 @@ class ContagionModel(NetworkModel):
             sum_of_infection_sizes = 0
             count = 1
             while count <= dataset_size:
-                total_spread_time, infection_size = self.time_the_total_spread(cap=0.99999, get_time_series=False)
+                total_spread_time, infection_size,l1,l2 = self.time_the_total_spread(cap=0.99999, get_time_series=True)
                 if total_spread_time == float('Inf'):
                     dataset_size += -1
                     total_spread_times += [float('Inf')]
@@ -903,7 +906,9 @@ class ContagionModel(NetworkModel):
                 total_spread_times += [total_spread_time]
                 sum_of_total_spread_times += total_spread_time
                 sum_of_infection_sizes += infection_size
+
                 infection_sizes += [infection_size]
+                fraction_evolution += [l2]
                 count += 1
 
             if dataset_size == 0:
@@ -936,7 +941,8 @@ class ContagionModel(NetworkModel):
             assert False, 'undefined mode for avg_speed_of_spread'
 
         return avg_speed, speed_std, speed_max, speed_min, speed_samples, \
-            avg_infection_size, infection_size_std, infection_size_max, infection_size_min, infection_size_samples
+            avg_infection_size, infection_size_std, infection_size_max, infection_size_min,\
+               infection_size_samples, fraction_evolution
 
     def outer_step(self):
         assert hasattr(self, 'classification_label'), 'classification_label not set'

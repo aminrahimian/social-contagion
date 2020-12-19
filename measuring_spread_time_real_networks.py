@@ -9,7 +9,7 @@ VERBOSE = True
 
 CHECK_FOR_EXISTING_PKL_SAMPLES = False
 
-size_of_dataset = 500
+size_of_dataset = 10
 
 rewiring_percentage_list = [10]
 
@@ -88,7 +88,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
             print('model_id is not valid')
             exit()
         speed_original, std_original, _, _, speed_samples_original, \
-            infection_size_original, infection_size_std_original, _, _, infection_size_samples_original = \
+            infection_size_original, infection_size_std_original, _, _, infection_size_samples_original, fractional_evolution_original = \
             dynamics_original.avg_speed_of_spread(
                 dataset_size=size_of_dataset,
                 cap=CAP,
@@ -98,6 +98,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
             print('mean infection_size:', infection_size_original, infection_size_std_original)
             print('spread time samples:', speed_samples_original)
             print('infection size samples:', infection_size_samples_original)
+            print('Fractional serie:',fractional_evolution_original)
 
         if save_computations:
 
@@ -110,6 +111,12 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
                                                               + 'infection_size_original_'
                                                               + network_group + network_id
                                                               + model_id + '_' + str(theta) + '.pkl', 'wb'))
+
+            pickle.dump(fractional_evolution_original, open(spreading_pickled_samples_directory_address
+                                                              + 'fractional_evolution_original_'
+                                                              + network_group + network_id
+                                                              + model_id + '_' + str(theta) + '.pkl', 'wb'))
+
     else:  # rewiring
 
         print('network id', network_id, 'rewiring: ', rewiring_percentage)
@@ -157,7 +164,7 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
             exit()
 
         speed_rewired, std_rewired, _, _, speed_samples_rewired, \
-            infection_size_rewired, infection_size_std_rewired, _, _, infection_size_samples_rewired = \
+            infection_size_rewired, infection_size_std_rewired, _, _, infection_size_samples_rewired, fraction_evolution_rewired = \
             dynamics_rewired.avg_speed_of_spread(dataset_size=size_of_dataset,
                                                  cap=CAP,
                                                  mode='max')
@@ -167,6 +174,8 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
             print('spreading time samples in the rewired network:', speed_samples_rewired)
             print('mean infection size in the rewired network:', infection_size_rewired, std_rewired)
             print('infection size samples in the rewired network:', infection_size_samples_rewired)
+            print('fractional evolution in the rewired network:', fraction_evolution_rewired)
+
 
         if save_computations:
             pickle.dump(speed_samples_rewired,
@@ -176,6 +185,12 @@ def measure_rewiring_spread_time(network_id, rewiring_percentage, theta):
                              + model_id + '_' + str(theta) + '.pkl', 'wb'))
             pickle.dump(infection_size_samples_rewired,
                         open(spreading_pickled_samples_directory_address + 'infection_size_samples_'
+                             + str(rewiring_percentage) +
+                             '_percent_rewiring_' + network_group + network_id
+                             + model_id + '_' + str(theta) + '.pkl', 'wb'))
+
+            pickle.dump(fraction_evolution_rewired,
+                        open(spreading_pickled_samples_directory_address + 'fractional_evolution_samples_'
                              + str(rewiring_percentage) +
                              '_percent_rewiring_' + network_group + network_id
                              + model_id + '_' + str(theta) + '.pkl', 'wb'))
@@ -245,7 +260,7 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges, theta):
         exit()
 
     speed_add_triad, std_add_triad, _, _, speed_samples_add_triad, \
-        infection_size_add_triad, infection_size_std_add_triad, _, _, infection_size_samples_add_triad = \
+        infection_size_add_triad, infection_size_std_add_triad, _, _, infection_size_samples_add_triad,fractional_evolution_add_triad = \
         dynamics_add_triad.avg_speed_of_spread(
             dataset_size=size_of_dataset,
             cap=CAP,
@@ -257,6 +272,7 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges, theta):
         print('spread time samples in triad addition network:', speed_samples_add_triad)
         print('mean infection size in triad addition network:', infection_size_add_triad, infection_size_std_add_triad)
         print('infection size samples in triad addition network:', infection_size_samples_add_triad)
+        print('fractional series in triad addition network:', fractional_evolution_add_triad)
         print(NX.is_connected(G))
 
     if save_computations:
@@ -269,6 +285,12 @@ def measure_triad_addition_spread_time(network_id, percent_more_edges, theta):
                                                            + str(percent_more_edges) + '_percent_' + 'add_triad_'
                                                            + network_group + network_id
                                                            + model_id + '_' + str(theta) + '.pkl', 'wb'))
+        pickle.dump(fractional_evolution_add_triad, open(spreading_pickled_samples_directory_address
+                                                           + 'fractional_evolution_samples_'
+                                                           + str(percent_more_edges) + '_percent_' + 'add_triad_'
+                                                           + network_group + network_id
+                                                           + model_id + '_' + str(theta) + '.pkl', 'wb'))
+
     return
 
 
@@ -337,7 +359,7 @@ def measure_random_addition_spread_time(network_id, percent_more_edges, theta):
         exit()
 
     speed_add_random, std_add_random, _, _, speed_samples_add_random, \
-        infection_size_add_random, infection_size_std_add_random, _, _, infection_size_samples_add_random = \
+        infection_size_add_random, infection_size_std_add_random, _, _, infection_size_samples_add_random, fractional_evolution_random = \
         dynamics_add_random.avg_speed_of_spread(
             dataset_size=size_of_dataset,
             cap=CAP,
@@ -348,6 +370,7 @@ def measure_random_addition_spread_time(network_id, percent_more_edges, theta):
         print('spread time samples in add random networks: ', speed_samples_add_random)
         print('mean infection size in add random networks: ', infection_size_add_random, std_add_random)
         print('infection size samples in add random networks: ', infection_size_samples_add_random)
+        print('fractional evolution in add random networks: ', fractional_evolution_random)
 
     if save_computations:
         pickle.dump(speed_samples_add_random,
@@ -360,6 +383,15 @@ def measure_random_addition_spread_time(network_id, percent_more_edges, theta):
                          + str(percent_more_edges) + '_percent_' + 'add_random_'
                          + network_group + network_id
                          + model_id + '_' + str(theta) + '.pkl', 'wb'))
+
+        pickle.dump(fractional_evolution_random,
+                    open(spreading_pickled_samples_directory_address + 'fractional_evolution_samples_'
+                         + str(percent_more_edges) + '_percent_' + 'add_random_'
+                         + network_group + network_id
+                         + model_id + '_' + str(theta) + '.pkl', 'wb'))
+
+
+
     return
 
 

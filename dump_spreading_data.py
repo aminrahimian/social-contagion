@@ -7,6 +7,7 @@ rewiring_percentage_list = [10] #[5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
 
 percent_more_edges_list = [10] #[5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
 
+
 include_original_networks = True
 include_rewiring_networks = True
 include_addition_networks = True
