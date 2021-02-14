@@ -2555,4 +2555,3 @@ class NewModel(ContagionModel):
 
 
 
-

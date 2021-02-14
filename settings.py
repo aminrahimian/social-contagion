@@ -317,7 +317,9 @@ if 'SLURM_ARRAY_TASK_ID' in os.environ:
 
 # theory simulations settings:
 
-simulation_type = 'c1_union_ER_with_delta'
+simulation_type = 'c1_union_ER_with_rho'
+#   'c1_union_ER_with_delta'
+#  'c1_union_ER'
 #  'c1_c2_interpolation'
 #  'c1_c2_interpolation_SimpleOnlyAlongC1'
 #  'c1_union_ER'
@@ -357,16 +359,16 @@ except OSError as e:
 # commonly used settings:
 #
 # for computations:
-#do_computations = True
-#do_multiprocessing = True
-#save_computations = True
-#load_computations = False
-#do_plots = False
-#save_plots = False
-#show_plots = False
-#data_dump = False
-#simulator_mode = False
-#
+# do_computations = True
+# do_multiprocessing = True
+# save_computations = True
+# load_computations = False
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = False
+# simulator_mode = False
+
 # # # for plotting:
 do_computations = False
 do_multiprocessing = False
