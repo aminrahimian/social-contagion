@@ -483,7 +483,7 @@ if __name__ == "__main__":
 
                     df_sample_ids_add_random = pd.Series(list(range(len(speed_samples_add_random))), name='sample_id')
 
-                    df_time_to_spreads_add_random = pd.Series(speed_samples_add_random, name='time_to_spread')
+                    df_time_to_spreads_add_random = pd.Series(speed_samples_dadd_random, name='time_to_spread')
 
                     df_size_of_spreads_add_random = pd.Series(spread_samples_add_random, name='size_of_spread')
 

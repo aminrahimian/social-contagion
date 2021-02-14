@@ -9,10 +9,10 @@ VERBOSE = True
 
 CHECK_FOR_EXISTING_PKL_SAMPLES = False
 
-size_of_dataset = 10
+size_of_dataset =100
 
 rewiring_percentage_list = [10]
-
+    
 percent_more_edges_list = [10]
 
 do_computations_for_original_network = True

@@ -367,28 +367,28 @@ except OSError as e:
 # simulator_mode = False
 # #
 # # # for plotting:
-# do_computations = False
-# do_multiprocessing = False
-# save_computations = False
-# load_computations = True
-# do_plots = True
-# save_plots = False
-# show_plots = True
-# data_dump = False
-# simulator_mode = False
-
-# # # # for data_dump:
 do_computations = False
 do_multiprocessing = False
 save_computations = False
 load_computations = True
-do_plots = False
+do_plots = True
 save_plots = False
-show_plots = False
-data_dump = True
+show_plots = True
+data_dump = False
 simulator_mode = False
 
-# #for simulator: # only used for visualizing_spread.py
+# # # # for data_dump:
+# do_computations = False
+# do_multiprocessing = False
+# save_computations = False
+# load_computations = True
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = True
+# simulator_mode = False
+
+# # #for simulator: # only used for visualizing_spread.py
 # do_computations = True
 # do_multiprocessing = False
 # save_computations = True
