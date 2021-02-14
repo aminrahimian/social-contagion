@@ -1911,7 +1911,7 @@ class LinearThreshold(Activation):
             self.loop_over_inactive_infected_nodes(current_network)
 
         if self.params['rho'] > 0:
-            self.loop_over_active_infected_nodes_v2(current_network)
+            self.loop_over_inactive_infected_nodes_reevaluation(current_network)
 
 
         del self.list_of_susceptible_agents[:]
