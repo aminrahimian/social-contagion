@@ -16,4 +16,5 @@
 
 module load python/anaconda3.6-5.2.0
 #module load sloan/python/modules/3.6
-python3 /ihome/arahimian/cah259/contagion/measuring_spread_time_real_networks.py ${SLURM_ARRAY_TASK_ID}
+python3 /ihome/arahimian/cah259/contagion/dump_spreading_data.py ${SLURM_ARRAY_TASK_ID}
+
