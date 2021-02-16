@@ -1533,27 +1533,21 @@ class Activation(ContagionModel):
 
         return
 
-    def loop_over_inactive_infected_nodes_reevaluation(self, current_network):
+    def loop_over_active_infected_nodes_reevaluation(self, current_network):
 
         assert (self.params['rho'] > 0), \
             "error:  this loop is not necessary!"
 
-        for i in self.list_of_inactive_infected_agents:
+        for i in self.list_of_active_infected_agents:
 
-            # initial check on lists and states:
-
-            assert current_network.node[i]['state'] == infected * inactive, \
-                "list_of_inactive_infected_agents is mishandled"
-            assert self.params['network'].node[i]['time_since_activation'] == 0, \
-                "time_since_activation is mishandled"
+            assert current_network.node[i]['state'] == infected * active, \
+                "list_of_active_infected_agents is mishandled"
             assert i not in self.list_of_exposed_agents, \
                 "list_of_exposed_agents is mishandled"
-            assert i not in self.list_of_active_infected_agents, \
-                "list_of_active_infected_agents is mishandled"
+            assert i not in self.list_of_inactive_infected_agents, \
+                "list_of_inactive_infected_agents is mishandled"
             assert i not in self.list_of_susceptible_agents, \
                 "list_of_susceptible_agents is mishandled"
-            assert i not in self.list_of_most_recent_activations, \
-                "list_of_most_recent_activations is mishandled"
 
             # perform state transitions:
 
@@ -1567,6 +1561,7 @@ class Activation(ContagionModel):
             self.number_of_active_infected_neighbors_is_updated = False
             self.time_since_activation_is_updated = False
             self.time_since_infection_is_updated = False
+
 
             i_random_draw_reevaluation = RD.random()
 
@@ -1630,8 +1625,6 @@ class Activation(ContagionModel):
                 self.list_of_exposed_agents_is_updated = True
                 self.list_of_most_recent_activations_is_updated = True
 
-
-
         assert self.time_since_infection_is_updated \
                and self.time_since_activation_is_updated \
                and self.number_of_active_infected_neighbors_is_updated \
@@ -1641,6 +1634,7 @@ class Activation(ContagionModel):
                and self.list_of_exposed_agents_is_updated \
                and self.list_of_most_recent_activations_is_updated, \
             "error states or list mishandled"
+
 
         return
 
@@ -1911,7 +1905,7 @@ class LinearThreshold(Activation):
             self.loop_over_inactive_infected_nodes(current_network)
 
         if self.params['rho'] > 0:
-            self.loop_over_inactive_infected_nodes_reevaluation(current_network)
+            self.loop_over_active_infected_nodes_reevaluation(current_network)
 
 
         del self.list_of_susceptible_agents[:]
