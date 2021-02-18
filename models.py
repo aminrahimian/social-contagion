@@ -1611,6 +1611,18 @@ class Activation(ContagionModel):
                     self.list_of_exposed_agents_is_updated = True
                     self.list_of_most_recent_activations_is_updated = True
 
+                else:
+                    self.params['network'].node[i]['time_since_infection'] += 1
+                    self.params['network'].node[i]['time_since_activation'] += 1
+                    self.time_since_infection_is_updated = True
+                    self.time_since_activation_is_updated = True
+                    self.number_of_active_infected_neighbors_is_updated = True
+                    self.list_of_inactive_infected_agents_is_updated = True
+                    self.list_of_active_infected_agents_is_updated = True
+                    self.list_of_susceptible_agents_is_updated = True
+                    self.list_of_exposed_agents_is_updated = True
+                    self.list_of_most_recent_activations_is_updated = True
+
 
 
             else:
