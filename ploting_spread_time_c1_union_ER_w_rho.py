@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     # overlay the plots for each q
     for q_label in q_labels:
-        print("aqui pues" + str(q_label))
+
         print(rhos[:CUT])
         print(avg_spread_times[q_labels.index(q_label)][:CUT])
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.ylabel('time to spread', fontsize=20)
-    plt.xlabel('reinfection probability ($\\rho$)', fontsize=20)
+    plt.xlabel('Reevaluation probability ($\\rho$)', fontsize=20)
     # plt.title('\centering Complex Contagion over $\mathcal{C}_2^{\eta}, n = ' + str(network_size) + '$'
     #           '\\vspace{-10pt}  \\begin{center}  with Sub-threshold Adoptions $(q)$ '
     #           'and Rewiring $(\eta)$   \\end{center}')
@@ -65,4 +65,4 @@ if __name__ == '__main__':
         plt.show()
     if save_plots:
         plt.savefig(theory_simulation_output_address + simulation_type + '.pdf')
-        plt.savefig('./figures/' + 'figure3B.pdf')
+        plt.savefig('./figures/' + 'figure3C.pdf')
