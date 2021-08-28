@@ -1,4 +1,4 @@
-# plots simple, complex and realistic threshold activation functions
+# plots simple, complex and noisy threshold activation functions
 
 
 from models import *
@@ -152,7 +152,7 @@ if __name__ == '__main__':
              label='deterministic\n 2-complex')
     plt.scatter(degree_range_int, activation_probabilities_linear_int)
     plt.plot(degree_range, activation_probabilities_sub_threshold, linewidth=4,
-             label='realistic\n threshold')
+             label='noisy\n 2-complex')
     plt.scatter(degree_range_int, activation_probabilities_sub_threshold_int)
     # plt.plot(degree_range, activation_probabilities_si_threshold,
     # label='Threshold SI',alpha = 0.4, linewidth = 4)
@@ -184,7 +184,7 @@ if __name__ == '__main__':
              label='deterministic\n 2-complex')
     plt.scatter(degree_range_int, activation_probabilities_linear_int)
     plt.plot(degree_range, activation_probabilities_sub_threshold, linewidth=4,
-             label='realistic\n threshold')
+             label='noisy\n 2-complex')
     plt.scatter(degree_range_int, activation_probabilities_sub_threshold_int)
 
     plt.ylabel('adoption probability', fontsize=20)
@@ -212,7 +212,7 @@ if __name__ == '__main__':
              fontweight='bold', fontdict=None, withdash=False)
     plt.text(2.05, 0.55, '$\\theta$', fontsize=30,
              fontweight='bold', fontdict=None, withdash=False)
-    plt.title('A Realistic Complex Activation Function',fontsize=20)
+    plt.title('A Noisy Complex Activation Function',fontsize=20)
     plt.xticks([0,1,2,3])
     # plt.show()
     plt.savefig("./figures/figureS9B.pdf")
