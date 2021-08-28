@@ -7,6 +7,7 @@ rewiring_percentage_list = [10] #[5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
 
 percent_more_edges_list = [10] #[5, 10, 15, 20, 25]  # [5, 10, 15, 20, 25]
 
+
 include_original_networks = True
 include_rewiring_networks = True
 include_addition_networks = True
@@ -102,9 +103,17 @@ if __name__ == "__main__":
                                                        + network_group + network_id
                                                        + model_id + '_' + str(theta) + '.pkl', 'rb'))
 
+                ##Load Fractional series
+
+                fractional_evolution_original = pickle.load(open(spreading_pickled_samples_directory_address
+                                                           + 'fractional_evolution_original_'
+                                                           + network_group + network_id
+                                                           + model_id + '_' + str(theta) + '.pkl', 'rb'))
+
+
                 speed_original = np.mean(speed_samples_original)
 
-                spread_original = np.mean(spread_samples_original)
+                #Duplicate: spread_original = np.mean(spread_samples_original)
 
                 std_original = np.std(speed_samples_original)
 
@@ -112,8 +121,10 @@ if __name__ == "__main__":
 
                 # dump original:
 
+
+
                 df_common_part_original = pd.DataFrame(data=[[network_group, network_id, network_size, str(theta),
-                                                          'none', 0.0, MODEL]] * len(speed_samples_original),
+                                                          'none', 0.0, MODEL]] *len(speed_samples_original),
                                                    columns=['network_group',
                                                             'network_id',
                                                             'network_size',
@@ -128,10 +139,17 @@ if __name__ == "__main__":
 
                 df_size_of_spreads_original = pd.Series(spread_samples_original, name='size_of_spread')
 
+                data_fractional_evolution_original = pd.Series(fractional_evolution_original, name='fractional_evolution')
+
+                tuples_fractional = list(tuple(sub) for sub in data_fractional_evolution_original)
+
+                df_fractional_evolution_original = pd.Series(tuples_fractional, name='fractional_evolution')
+
                 new_df_original = pd.concat([df_common_part_original,
                                              df_sample_ids_original,
                                              df_time_to_spreads_original,
-                                             df_size_of_spreads_original],
+                                             df_size_of_spreads_original,
+                                             df_fractional_evolution_original],
                                             axis=1)
 
                 print(new_df_original)
@@ -172,6 +190,19 @@ if __name__ == "__main__":
                                                               + model_id + '_' + str(theta)
                                                               + '.pkl', 'rb'))
 
+                    #Load Fractional series:
+
+                    fractional_evolution_rewired = pickle.load(open(spreading_pickled_samples_directory_address
+                                                              + 'fractional_evolution_samples_'
+                                                              + str(rewiring_percentage)
+                                                              + '_percent_rewiring_'
+                                                              + network_group
+                                                              + network_id
+                                                              + model_id + '_' + str(theta)
+                                                              + '.pkl', 'rb'))
+
+
+
                     speed_rewired = np.mean(speed_samples_rewired)
 
                     spread_rewired = np.mean(spread_samples_rewired)
@@ -179,6 +210,8 @@ if __name__ == "__main__":
                     std_rewired = np.std(speed_samples_rewired)
 
                     spread_std_rewired = np.std(spread_samples_rewired)
+
+
 
                     # dump the loaded data:
 
@@ -199,10 +232,18 @@ if __name__ == "__main__":
 
                     df_size_of_spreads_rewired = pd.Series(spread_samples_rewired, name='size_of_spread')
 
+                    data_fractional_evolution_rewired = pd.Series(fractional_evolution_rewired)
+
+                    tuples_fractional = list(tuple(sub) for sub in data_fractional_evolution_rewired)
+
+                    df_fractional_evolution_rewired = pd.Series(tuples_fractional, name='fractional_evolution')
+
+
                     new_df_rewired = pd.concat([df_common_part_rewired,
                                                 df_sample_ids_rewired,
                                                 df_time_to_spreads_rewired,
-                                                df_size_of_spreads_rewired],
+                                                df_size_of_spreads_rewired,
+                                                df_fractional_evolution_rewired],
                                                axis=1)
 
                     print(new_df_rewired)
@@ -269,6 +310,29 @@ if __name__ == "__main__":
                                                                 + model_id + '_' + str(theta)
                                                                 + '.pkl', 'rb'))
 
+                    fractional_evolution_add_triad = pickle.load(open(spreading_pickled_samples_directory_address
+                                                                + 'fractional_evolution_samples_'
+                                                                + str(percent_more_edges)
+                                                                + '_percent_'
+                                                                + 'add_triad_'
+                                                                + network_group
+                                                                + network_id
+                                                                + model_id + '_' + str(theta)
+                                                                + '.pkl', 'rb'))
+
+                    fractional_evolution_add_random = pickle.load(open(spreading_pickled_samples_directory_address
+                                                                      + 'fractional_evolution_samples_'
+                                                                      + str(percent_more_edges)
+                                                                      + '_percent_'
+                                                                      + 'add_random_'
+                                                                      + network_group
+                                                                      + network_id
+                                                                      + model_id + '_' + str(theta)
+                                                                      + '.pkl', 'rb'))
+
+
+
+
                     speed_add_triad = np.mean(speed_samples_add_triad)
 
                     speed_add_random = np.mean(speed_samples_add_random)
@@ -300,10 +364,21 @@ if __name__ == "__main__":
 
                     df_size_of_spreads_add_random = pd.Series(spread_samples_add_random, name='size_of_spread')
 
+                    data_fractional_evolution_add_random = pd.Series(fractional_evolution_add_random)
+
+                    tuples_fractional = list(tuple(sub) for sub in data_fractional_evolution_add_random)
+
+                    df_fractional_evolution_add_random= pd.Series(tuples_fractional, name='fractional_evolution')
+
+                    #Transform list of list in fractional series to pass correctly to dataframe
+
+
+
                     new_df_add_random = pd.concat([df_common_part_add_random,
                                                    df_sample_ids_add_random,
                                                    df_time_to_spreads_add_random,
-                                                   df_size_of_spreads_add_random],
+                                                   df_size_of_spreads_add_random,
+                                                   df_fractional_evolution_add_random],
                                                   axis=1)
 
                     df_common_part_add_triad = pd.DataFrame(data=[[network_group,
@@ -327,10 +402,17 @@ if __name__ == "__main__":
 
                     df_size_of_spreads_add_triad = pd.Series(spread_samples_add_triad, name='size_of_spread')
 
+                    data_fractional_evolution_add_triad = pd.Series(fractional_evolution_add_triad)
+
+                    tuples_fractional = list(tuple(sub) for sub in data_fractional_evolution_add_triad)
+
+                    df_fractional_evolution_add_triad = pd.Series(tuples_fractional, name='fractional_evolution')
+
                     new_df_add_triad = pd.concat([df_common_part_add_triad,
                                                   df_sample_ids_add_triad,
                                                   df_time_to_spreads_add_triad,
-                                                  df_size_of_spreads_add_triad],
+                                                  df_size_of_spreads_add_triad,
+                                                  df_fractional_evolution_add_triad],
                                                  axis=1)
 
                     print(new_df_add_triad)
@@ -371,6 +453,16 @@ if __name__ == "__main__":
                                                                  + model_id + '_' + str(theta)
                                                                  + '.pkl', 'rb'))
 
+                    fractional_evolution_samples_add_random = pickle.load(open(spreading_pickled_samples_directory_address
+                                                                 + 'fractional_evolution_samples_'
+                                                                 + str(percent_more_edges)
+                                                                 + '_percent_'
+                                                                 + 'add_random_'
+                                                                 + network_group
+                                                                 + network_id
+                                                                 + model_id + '_' + str(theta)
+                                                                 + '.pkl', 'rb'))
+
                     speed_add_random = np.mean(speed_samples_add_random)
 
                     spread_add_random = np.mean(spread_samples_add_random)
@@ -391,14 +483,22 @@ if __name__ == "__main__":
 
                     df_sample_ids_add_random = pd.Series(list(range(len(speed_samples_add_random))), name='sample_id')
 
-                    df_time_to_spreads_add_random = pd.Series(speed_samples_add_random, name='time_to_spread')
+                    df_time_to_spreads_add_random = pd.Series(speed_samples_dadd_random, name='time_to_spread')
 
                     df_size_of_spreads_add_random = pd.Series(spread_samples_add_random, name='size_of_spread')
+
+                    data_fractional_evolution_add_random = pd.Series(fractional_evolution_samples_add_random)
+
+                    tuples_fractional = list(tuple(sub) for sub in data_fractional_evolution_add_random)
+
+                    df_fractional_evolution_add_random = pd.Series(tuples_fractional, name='fractional_evolution')
+
 
                     new_df_add_random = pd.concat([df_common_part_add_random,
                                                    df_sample_ids_add_random,
                                                    df_time_to_spreads_add_random,
-                                                   df_size_of_spreads_add_random],
+                                                   df_size_of_spreads_add_random,
+                                                   df_fractional_evolution_add_random],
                                                   axis=1)
 
                     print(new_df_add_random)
