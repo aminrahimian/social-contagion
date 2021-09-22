@@ -317,7 +317,7 @@ if 'SLURM_ARRAY_TASK_ID' in os.environ:
 
 # theory simulations settings:
 
-simulation_type = 'c1_union_ER_with_rho'
+simulation_type = 'c1_union_ER'#'c1_union_ER_with_rho'
 #   'c1_union_ER_with_delta'
 #  'c1_union_ER'
 #  'c1_c2_interpolation'
@@ -375,8 +375,8 @@ do_multiprocessing = False
 save_computations = False
 load_computations = True
 do_plots = True
-save_plots = False
-show_plots = True
+save_plots = True # False
+show_plots = False # True
 data_dump = False
 simulator_mode = False
 

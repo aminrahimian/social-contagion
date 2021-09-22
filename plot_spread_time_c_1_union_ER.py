@@ -3,6 +3,7 @@
 from settings import *
 from computing_spread_time_c_1_union_ER import models_list, size_of_dataset, NET_SIZE
 
+models_list = ['logit', 'probit', 'noisy 2-complex'] # renaming labels
 
 if __name__ == '__main__':
 
@@ -33,10 +34,11 @@ if __name__ == '__main__':
                      linewidth=1.5,
                      label=model)  # $\\sigma_n = 1/2\log(n^{\\alpha})$
 
-    plt.plot(qs[models_list.index('Threshold')],
-             [500]*len(qs[models_list.index('Threshold')]),
-             color='c', linewidth=1,
+    plt.plot(qs[models_list.index('noisy 2-complex')],
+             [500]*len(qs[models_list.index('noisy 2-complex')]),
+             color='r', linewidth=1, linestyle='--',
              label='$\mathcal{C}_2$ benchmark')
+
 
     plt.xscale("log")
     plt.ylabel('time to spread', fontsize=20)

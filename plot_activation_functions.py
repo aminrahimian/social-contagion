@@ -174,15 +174,17 @@ if __name__ == '__main__':
 
     plt.figure(3, (7.5, 6))
 
-    plt.plot(degree_range, activation_probabilities_probit, linewidth=3, linestyle='--',
-             label='probit \n$(\\sigma = 0.3)$')
-    plt.scatter(degree_range_int, activation_probabilities_probit_int)
-    plt.plot(degree_range, activation_probabilities_logit, linewidth=2,
-             label='logit \n$(\\sigma = 0.18)$')
-    plt.scatter(degree_range_int, activation_probabilities_logit_int)
     plt.plot(degree_range, activation_probabilities_linear, 'r--', linewidth=1.5,
              label='deterministic\n 2-complex')
     plt.scatter(degree_range_int, activation_probabilities_linear_int)
+
+    plt.plot(degree_range, activation_probabilities_logit, linewidth=2,
+             label='logit \n$(\\sigma = 0.18)$')
+    plt.scatter(degree_range_int, activation_probabilities_logit_int)
+    plt.plot(degree_range, activation_probabilities_probit, linewidth=3, linestyle='--',
+             label='probit \n$(\\sigma = 0.3)$')
+    plt.scatter(degree_range_int, activation_probabilities_probit_int)
+
     plt.plot(degree_range, activation_probabilities_sub_threshold, linewidth=4,
              label='noisy\n 2-complex')
     plt.scatter(degree_range_int, activation_probabilities_sub_threshold_int)
