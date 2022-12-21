@@ -6,12 +6,6 @@ library(RColorBrewer)
 library(Hmisc)
 library(plotrix)
 
-# load spreading data
-
-# each dataset will have a column called k for the number of reinforcing signals
-# and another column called ratio_k for the ratio of adoptions at k to adoptions at k-1
-# any additional column is dropped
-
 MODEL_1 = "(0.05,1)"
 MODEL_2 = "(0.025,0.5)"
 MODEL_3 = "(0.05,1(0.05,0.5))"
@@ -164,112 +158,83 @@ intervention_shapes <- c(
 
 
 # Use 95% confidence interval instead of SEM
-all_summaries_plot_line_error_bar <- ggplot(
-  aes(x = intervention_size, 
-      y=time_to_spread_mean, 
-      color=intervention, 
-      shape=intervention,
-      fill=intervention),
-  data = all_summaries_group_by_id_intervention_size%>%filter(network_group=="Cai et al. (2015)")) +
-  scale_color_manual(name = "Cai et al. (2015)", values = intervention_colors) + 
-  scale_fill_manual(name = "Cai et al. (2015)", values = intervention_colors) +
-  scale_shape_manual(name = "Cai et al. (2015)", values = intervention_shapes) +
-  geom_errorbar(aes(ymin=time_to_spread_lb_diff, ymax=time_to_spread_ub_diff), 
-                width=.1, position=position_dodge(width=0.75)) +
-  geom_line(position=position_dodge(width=0.75)) +
-  geom_point(position=position_dodge(width=0.75),size=2) +
+
+all_properties_summaries_plot <- ggplot(
+  aes(x = avg_clustering_mean, y=network_group, color=intervention),
+  data = all_properties_summaries)+
+  xlab("average clustering")+ylab('')+
+  scale_color_manual(values = intervention_colors) + 
+  scale_fill_manual(values = intervention_colors) +
+  scale_shape_manual(values = intervention_shapes) +
+  geom_pointrange(aes(xmin=avg_clustering_lb, xmax=avg_clustering_ub,shape=intervention),
+                  position=position_dodge(width=0.75))+
+  theme(legend.justification=c(1,1), legend.position=c(0.97,0.9)) + 
+  scale_x_log10(breaks = c(0.1,0.16,0.2,0.23,0.26))
+
+all_properties_summaries_plot
+
+ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_plot.pdf",sep=""),
+       all_properties_summaries_plot,
+       width = 10, height = 5)
+
+all_properties_summaries_plot_diff_ci <- all_properties_summaries_group_by_id %>%
+  ungroup() %>%
+  mutate(
+    network_group = factor(network_group, levels = sort(levels(network_group), T)),
+  ) %>%
+  ggplot(
+    aes(
+      x = network_group,
+      y = avg_clustering_mean,
+      ymin = avg_clustering_lb_diff,
+      ymax = avg_clustering_ub_diff,
+      color = intervention, shape = intervention, fill = intervention
+    )
+  ) +
+  ylab("average clustering") +xlab('')+
+  scale_color_manual(values = intervention_colors) + 
+  scale_fill_manual(values = intervention_colors) +
+  scale_shape_manual(values = intervention_shapes) +
+  geom_point(
+    position=position_dodge2(width=0.7, reverse = TRUE),
+    size = 2
+  ) +
+  geom_linerange(
+    position=position_dodge2(width=0.7, reverse = TRUE),
+    show.legend = F
+  ) +
+  coord_cartesian(xlim = c(1,30)) + 
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.99, 0.98),
+    legend.position=c(0.4, 0.9),
+    legend.title = element_blank(),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(.9, 'lines')
-  ) + xlab("intervention size") + ylab("time to spread")
+  ) + 
+  scale_y_log10(breaks = 2^(2:5)) +
+  coord_flip()
+all_properties_summaries_plot_diff_ci
 
-all_summaries_plot_line_error_bar
-
-ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_plot_line_error_bar_cai.pdf',sep=""),
-       all_summaries_plot_line_error_bar,
+ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_plot_diff_ci.pdf",sep=""),
+       all_properties_summaries_plot_diff_ci,
        width = 5, height = 3.5)
 
-all_summaries_plot_line_error_bar <- ggplot(
-  aes(x = intervention_size, 
-      y=time_to_spread_mean, 
-      color=intervention, 
-      shape=intervention,
-      fill=intervention),
-  data = all_summaries_group_by_id_intervention_size%>%filter(network_group=="Banerjee et al.\n (2013)")) +
-  scale_color_manual(name = "Banerjee et al. (2013)", values = intervention_colors) + 
-  scale_fill_manual(name = "Banerjee et al. (2013)", values = intervention_colors) +
-  scale_shape_manual(name = "Banerjee et al. (2013)", values = intervention_shapes) +
-  geom_errorbar(aes(ymin=time_to_spread_lb_diff, ymax=time_to_spread_ub_diff), 
-                width=.1, position=position_dodge(width=0.75)) +
-  geom_line(position=position_dodge(width=0.75)) +
-  geom_point(position=position_dodge(width=0.75),size=2) + 
-  theme(
-    legend.justification=c(1, 1),
-    legend.position=c(0.99, 0.98),
-    legend.key = element_rect(size = 1),
-    legend.key.size = unit(.9, 'lines')
-  )   + xlab("intervention size") + ylab("time to spread")
+all_properties_summaries_group_by_id_plot <- ggplot(
+  aes(x = network_group, y=avg_clustering_mean, color=intervention),
+  data = all_properties_summaries_group_by_id,
+  xlab='',ylim = c(1,40))+ 
+  ylab("average clustering")+xlab('')+
+  scale_color_manual(values = intervention_colors) + 
+  scale_fill_manual(values = intervention_colors) +
+  scale_shape_manual(values = intervention_shapes) +
+  geom_pointrange(aes(ymin=avg_clustering_lb, ymax=avg_clustering_ub,shape=intervention),
+                  position=position_dodge(width=0.75))+
+  coord_cartesian(xlim = c(1,30)) + 
+  theme(legend.justification=c(1,1), legend.position=c(0.4,0.4)) + 
+  coord_flip(ylim = c(0,0.3))
 
-all_summaries_plot_line_error_bar
+all_properties_summaries_group_by_id_plot
 
-ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_plot_line_error_bar_banerjee.pdf',sep=""),
-       all_summaries_plot_line_error_bar,
-       width = 5, height = 3.5)
-
-all_summaries_plot_line_error_bar <- ggplot(
-  aes(x = intervention_size, 
-      y=time_to_spread_mean, 
-      color=intervention, 
-      shape=intervention,
-      fill=intervention),
-  data = all_summaries_group_by_id_intervention_size
-  %>%filter(network_group=="Chami et al. (2017) \n advice network")) +
-  scale_color_manual(name = "Chami et al. (2017) \n advice network", values = intervention_colors) + 
-  scale_fill_manual(name = "Chami et al. (2017) \n advice network",values = intervention_colors) +
-  scale_shape_manual(name = "Chami et al. (2017) \n advice network",values = intervention_shapes) +
-  geom_errorbar(aes(ymin=time_to_spread_lb_diff, ymax=time_to_spread_ub_diff), 
-                width=.1, position=position_dodge(width=0.75)) +
-  geom_line(position=position_dodge(width=0.75)) +
-  geom_point(position=position_dodge(width=0.75),size=2) + 
-  theme(
-    legend.justification=c(1, 1),
-    legend.position=c(0.35, 0.35),
-    legend.key = element_rect(size = 1),
-    legend.key.size = unit(.9, 'lines')
-  )   + xlab("intervention size") + ylab("time to spread")
-
-all_summaries_plot_line_error_bar
-
-ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_plot_line_error_bar_chami_advice.pdf',sep=""),
-       all_summaries_plot_line_error_bar,
-       width = 5, height = 3.5)
-
-all_summaries_plot_line_error_bar <- ggplot(
-  aes(x = intervention_size, 
-      y=time_to_spread_mean, 
-      color=intervention, 
-      shape=intervention,
-      fill=intervention),
-  data = all_summaries_group_by_id_intervention_size%>%filter(network_group=="Chami et al. (2017) \n friendship network")) +
-  scale_color_manual(name = "Chami et al. (2017) \n friendship network", values = intervention_colors) + 
-  scale_fill_manual(name = "Chami et al. (2017) \n friendship network", values = intervention_colors) +
-  scale_shape_manual(name = "Chami et al. (2017) \n friendship network", values = intervention_shapes) +
-  geom_errorbar(aes(ymin=time_to_spread_lb_diff, ymax=time_to_spread_ub_diff), 
-                width=.1, position=position_dodge(width=0.75)) +
-  geom_line(position=position_dodge(width=0.75)) +
-  geom_point(position=position_dodge(width=0.75),size=2) +
-  theme(
-    legend.justification=c(1, 1),
-    legend.position=c(0.95, 0.95),
-    legend.key = element_rect(size = 1),
-    legend.key.size = unit(.9, 'lines')
-  )  + xlab("intervention size") + ylab("time to spread")   
-
-all_summaries_plot_line_error_bar
-
-ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_plot_line_error_bar_chami_friendship.pdf',sep=""),
-       all_summaries_plot_line_error_bar,
-       width = 5, height = 3.5)
-
+ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_group_by_id_plot.pdf",sep=""),
+       all_properties_summaries_group_by_id_plot
+       , width = 5, height = 4)
