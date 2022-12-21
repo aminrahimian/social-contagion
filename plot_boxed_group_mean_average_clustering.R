@@ -5,13 +5,6 @@ library(RColorBrewer)
 library(Hmisc)
 library(plotrix)
 
-# load spreading data
-
-# each dataset will have a column called k for the number of reinforcing signals
-# and another column called ratio_k for the ratio of adoptions at k to adoptions at k-1
-# any additional column is dropped
-
-
 MODEL_1 = "(0.05,1)"
 MODEL_2 = "(0.025,0.5)"
 MODEL_3 = "(0.05,1(0.05,0.5))"
@@ -210,7 +203,7 @@ intervention_shapes <- c(
 all_properties_summaries_plot <- ggplot(
   aes(x = avg_clustering_mean, y=network_group, color=intervention),
   data = all_properties_summaries)+
-  xlab("average clustering")+
+  xlab("average clustering")+ylab('')+
   scale_color_manual(values = intervention_colors) + 
   scale_fill_manual(values = intervention_colors) +
   scale_shape_manual(values = intervention_shapes) +
@@ -221,7 +214,7 @@ all_properties_summaries_plot <- ggplot(
 
 all_properties_summaries_plot
 
-ggsave('figures/spreading_time_summaries/all_properties_summaries_plot.pdf',
+ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_plot.pdf",sep=""),
        all_properties_summaries_plot,
        width = 10, height = 5)
 
@@ -239,7 +232,7 @@ all_properties_summaries_plot_diff_ci <- all_properties_summaries_group_by_id %>
       color = intervention, shape = intervention, fill = intervention
     )
   ) +
-  ylab("average clustering") +
+  ylab("average clustering") +xlab('')+
   scale_color_manual(values = intervention_colors) + 
   scale_fill_manual(values = intervention_colors) +
   scale_shape_manual(values = intervention_shapes) +
@@ -254,7 +247,7 @@ all_properties_summaries_plot_diff_ci <- all_properties_summaries_group_by_id %>
   coord_cartesian(xlim = c(1,30)) + 
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.95, 0.3),
+    legend.position=c(0.4, 0.9),
     legend.title = element_blank(),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(.9, 'lines')
@@ -263,22 +256,22 @@ all_properties_summaries_plot_diff_ci <- all_properties_summaries_group_by_id %>
   coord_flip()
 all_properties_summaries_plot_diff_ci
 
-ggsave('figures/spreading_time_summaries/all_properties_summaries_plot_diff_ci.pdf',
+ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_plot_diff_ci.pdf",sep=""),
        all_properties_summaries_plot_diff_ci,
        width = 5, height = 3.5)
 
 all_properties_summaries_group_by_id_plot <- ggplot(
   aes(x = network_group, y=avg_clustering_mean, color=intervention),
-  data = all_properties_summaries_group_by_id, #%>%filter(group != "bakshy_role_no_feed"),
+  data = all_properties_summaries_group_by_id,
   xlab='',ylim = c(1,40))+ 
-  ylab("average clustering")+
+  ylab("average clustering")+xlab('')+
   scale_color_manual(values = intervention_colors) + 
   scale_fill_manual(values = intervention_colors) +
   scale_shape_manual(values = intervention_shapes) +
   geom_pointrange(aes(ymin=avg_clustering_lb, ymax=avg_clustering_ub,shape=intervention),
                   position=position_dodge(width=0.75))+
   coord_cartesian(xlim = c(1,30)) + 
-  theme(legend.justification=c(1,1), legend.position=c(0.97,0.9)) + 
+  theme(legend.justification=c(1,1), legend.position=c(0.4,0.4)) + 
   coord_flip(ylim = c(0,0.3))
 
 all_properties_summaries_group_by_id_plot
@@ -286,4 +279,3 @@ all_properties_summaries_group_by_id_plot
 ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_group_by_id_plot.pdf",sep=""),
        all_properties_summaries_group_by_id_plot
        , width = 5, height = 4)
-
