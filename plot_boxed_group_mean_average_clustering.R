@@ -251,7 +251,7 @@ all_properties_summaries_plot_diff_ci <- all_properties_summaries_group_by_id %>
     legend.title = element_blank(),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(.9, 'lines')
-  ) + coord_flip(ylim = c(0,0.3))
+  ) + coord_flip(ylim = c(0.1,0.3))
 all_properties_summaries_plot_diff_ci
 
 ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_plot_diff_ci.pdf",sep=""),
