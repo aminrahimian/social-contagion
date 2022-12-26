@@ -209,7 +209,7 @@ all_properties_summaries_plot <- ggplot(
   scale_shape_manual(values = intervention_shapes) +
   geom_pointrange(aes(xmin=avg_clustering_lb, xmax=avg_clustering_ub,shape=intervention),
                   position=position_dodge(width=0.75))+
-  theme(legend.justification=c(1,1), legend.position=c(0.97,0.9)) + 
+  theme(legend.justification=c(1,1), legend.position=c(0.97,0.9)) +   
   scale_x_log10(breaks = c(0.1,0.16,0.2,0.23,0.26))
 
 all_properties_summaries_plot
@@ -251,9 +251,7 @@ all_properties_summaries_plot_diff_ci <- all_properties_summaries_group_by_id %>
     legend.title = element_blank(),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(.9, 'lines')
-  ) + 
-  scale_y_log10(breaks = 2^(2:5)) +
-  coord_flip()
+  ) + coord_flip(ylim = c(0,0.3))
 all_properties_summaries_plot_diff_ci
 
 ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_plot_diff_ci.pdf",sep=""),
