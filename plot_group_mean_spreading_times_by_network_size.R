@@ -192,16 +192,16 @@ all_summaries_network_size_plot_line_error_bar <- ggplot(
   geom_point(position=position_dodge(width=0.75),size=2) +
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.87, 0.98),
+    legend.position=c(0.95, 0.98),
     legend.key = element_rect(size = 1),
-    legend.key.size = unit(2, 'lines')
+    legend.key.size = unit(0.3, 'lines')
   ) + xlab("network size") + ylab("mean time to spread")
 
 all_summaries_network_size_plot_line_error_bar
 
 ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_cai.pdf',sep=""),
        all_summaries_network_size_plot_line_error_bar,
-       width = 16, height = 8)
+       width = 7, height = 4)
 
 all_summaries_network_size_plot_line_error_bar <- ggplot(
   aes(x = network_size, 
@@ -228,7 +228,7 @@ all_summaries_network_size_plot_line_error_bar
 
 ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_banerjee.pdf',sep=""),
        all_summaries_network_size_plot_line_error_bar,
-       width = 12, height = 6)
+       width = 7, height = 4)
 
 all_summaries_network_size_plot_line_error_bar <- ggplot(
   aes(x = network_size, 
@@ -256,7 +256,7 @@ all_summaries_network_size_plot_line_error_bar
 
 ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_chami_advice.pdf',sep=""),
        all_summaries_network_size_plot_line_error_bar,
-       width = 10, height = 5)
+       width = 7, height = 4)
 
 all_summaries_network_size_plot_line_error_bar <- ggplot(
   aes(x = network_size, 
@@ -274,7 +274,7 @@ all_summaries_network_size_plot_line_error_bar <- ggplot(
   geom_point(position=position_dodge(width=0.75),size=2) +
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.95, 0.95),
+    legend.position=c(0.9, 0.98),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(2, 'lines')
   )  + xlab("network size") + ylab("mean time to spread")   
@@ -283,7 +283,7 @@ all_summaries_network_size_plot_line_error_bar
 
 ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_chami_friendship.pdf',sep=""),
        all_summaries_network_size_plot_line_error_bar,
-       width = 10, height = 5)
+       width = 7, height = 4)
 
 all_summaries_network_size_plot_line_error_bar <- ggplot(
   aes(x = network_size, 
@@ -310,7 +310,7 @@ all_summaries_network_size_plot_line_error_bar
 
 ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_chami_union.pdf',sep=""),
        all_summaries_network_size_plot_line_error_bar,
-       width = 10, height = 5)
+       width = 7, height = 4)
 
 all_summaries_network_size_plot_line_error_bar <- ggplot(
   aes(x = network_size, 
@@ -328,13 +328,13 @@ all_summaries_network_size_plot_line_error_bar <- ggplot(
   geom_point(position=position_dodge(width=0.75),size=2) +
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.35, 0.95),
+    legend.position=c(0.3, 0.99),
     legend.key = element_rect(size = 1),
-    legend.key.size = unit(2, 'lines')
+    legend.key.size = unit(1,2, 'lines')
   )  + xlab("network size") + ylab("mean time to spread") + xlim(c(500,7900))   
 
 all_summaries_network_size_plot_line_error_bar
 
 ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_fb100.pdf',sep=""),
        all_summaries_network_size_plot_line_error_bar,
-       width = 10, height = 5)
+       width = 7, height = 4)
