@@ -1,4 +1,4 @@
-
+## produces figure S17 in https://arxiv.org/abs/1810.03579v4
 library(latex2exp)
 library(dplyr)
 library(ggplot2)
@@ -34,6 +34,7 @@ network_group_name_map <- c(
   "cai_edgelist_" = "Cai et al. (2015)",
   "chami_advice_edgelist_" = "Chami et al. (2017) \n advice network",
   "chami_friendship_edgelist_" = "Chami et al. (2017) \n friendship network",
+  "chami_union_edgelist_" = "Chami et al. (2017)",
   "fb100_edgelist_" = "Traud et al. (2012)"
 )
 
@@ -60,6 +61,18 @@ chami_friendship_data <- read.csv(
   stringsAsFactors = FALSE
 )
 
+# chami union:
+
+chami_union_data <- read.csv(
+  paste(cwd,"/data/chami-union-data/output/chami_union_edgelist_spreading_data_dump.csv",sep=""),  
+  stringsAsFactors = FALSE
+)
+
+if("size_of_spread" %in% colnames(chami_union_data))
+{
+  chami_union_data = subset(chami_union_data, select = -c(size_of_spread) )
+}
+
 # banerjee combined:
 
 banerjee_combined_data <- read.csv(
@@ -71,6 +84,7 @@ all_data <-rbind(
     cai_data,
     chami_advice_data ,
     chami_friendship_data,
+    chami_union_data,
     banerjee_combined_data
   )
 
@@ -273,3 +287,29 @@ ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_plot_line_erro
        all_summaries_plot_line_error_bar,
        width = 5, height = 3.5)
 
+all_summaries_plot_line_error_bar <- ggplot(
+  aes(x = intervention_size, 
+      y=time_to_spread_mean, 
+      color=intervention, 
+      shape=intervention,
+      fill=intervention),
+  data = all_summaries_group_by_id_intervention_size%>%filter(network_group=="Chami et al. (2017)")) +
+  scale_color_manual(name = "Chami et al. (2017)", values = intervention_colors) + 
+  scale_fill_manual(name = "Chami et al. (2017)", values = intervention_colors) +
+  scale_shape_manual(name = "Chami et al. (2017)", values = intervention_shapes) +
+  geom_errorbar(aes(ymin=time_to_spread_lb_diff, ymax=time_to_spread_ub_diff), 
+                width=.1, position=position_dodge(width=0.75)) +
+  geom_line(position=position_dodge(width=0.75)) +
+  geom_point(position=position_dodge(width=0.75),size=2) +
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.95, 0.95),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(.9, 'lines')
+  )  + xlab("intervention size") + ylab("time to spread")   
+
+all_summaries_plot_line_error_bar
+
+ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_plot_line_error_bar_chami_union.pdf',sep=""),
+       all_summaries_plot_line_error_bar,
+       width = 5, height = 3.5)
