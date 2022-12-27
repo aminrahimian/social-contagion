@@ -515,7 +515,7 @@ overall_ecdf_plot
 
 ggsave(paste(cwd,
              '/figures/chami_union/chami_union_time_to_spread_ecdf_overall_model_1.pdf',
-             sep="")
+             sep=""),
        overall_ecdf_plot, width = 4.5, height = 3.5)
 
 overall_ecdf_plot_facet_by_size = ggplot(
