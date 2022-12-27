@@ -61,11 +61,24 @@ banerjee_combined_data <- read.csv(
   stringsAsFactors = FALSE
 )
 
+# Fb100:
+
+fb_100_data <- read.csv(
+  paste(cwd,"/data/fb100-data/output/fb100_edgelist_spreading_data_dump.csv",sep=""),
+  stringsAsFactors = FALSE
+)
+
+if("size_of_spread" %in% colnames(fb_100_data))
+{
+  fb_100_data = subset(fb_100_data, select = -c(size_of_spread) )
+}
+
 all_data <-rbind(
   cai_data,
   chami_advice_data ,
   chami_friendship_data,
-  banerjee_combined_data
+  banerjee_combined_data,
+  fb_100_data
 )
 
 q <- qnorm(1 - .05/2)
@@ -259,3 +272,29 @@ ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_p
        all_summaries_network_size_plot_line_error_bar,
        width = 10, height = 5)
 
+all_summaries_network_size_plot_line_error_bar <- ggplot(
+  aes(x = network_size, 
+      y=time_to_spread_mean, 
+      color=intervention, 
+      shape=intervention,
+      fill=intervention),
+  data = all_summaries_group_by_id_network_size%>%filter(network_group=="Traud et al. (2012)")) +
+  scale_color_manual(name = "Traud et al. (2012)", values = intervention_colors) + 
+  scale_fill_manual(name = "Traud et al. (2012)", values = intervention_colors) +
+  scale_shape_manual(name = "Traud et al. (2012)", values = intervention_shapes) +
+  geom_errorbar(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub), 
+                width=.1, position=position_dodge(width=0.75)) +
+  geom_line(position=position_dodge(width=0.75)) +
+  geom_point(position=position_dodge(width=0.75),size=2) +
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.35, 0.95),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(.9, 'lines')
+  )  + xlab("network size") + ylab("mean time to spread") + xlim(c(500,7900))   
+
+all_summaries_network_size_plot_line_error_bar
+
+ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_fb100.pdf',sep=""),
+       all_summaries_network_size_plot_line_error_bar,
+       width = 10, height = 5)
