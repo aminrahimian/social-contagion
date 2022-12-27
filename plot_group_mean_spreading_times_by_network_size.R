@@ -1,4 +1,4 @@
-
+# plotting spread times versus network size for the empirical networks
 library(latex2exp)
 library(dplyr)
 library(ggplot2)
@@ -28,6 +28,7 @@ network_group_name_map <- c(
   "cai_edgelist_" = "Cai et al. (2015)",
   "chami_advice_edgelist_" = "Chami et al. (2017) \n advice network",
   "chami_friendship_edgelist_" = "Chami et al. (2017) \n friendship network",
+  "chami_union_edgelist_" = "Chami et al. (2017)",
   "fb100_edgelist_" = "Traud et al. (2012)"
 )
 
@@ -53,6 +54,18 @@ chami_friendship_data <- read.csv(
   paste(cwd,"/data/chami-friendship-data/output/chami_friendship_edgelist_spreading_data_dump.csv",sep=""),  
   stringsAsFactors = FALSE
 )
+
+# chami union:
+
+chami_union_data <- read.csv(
+  paste(cwd,"/data/chami-union-data/output/chami_union_edgelist_spreading_data_dump.csv",sep=""),  
+  stringsAsFactors = FALSE
+)
+
+if("size_of_spread" %in% colnames(chami_union_data))
+{
+  chami_union_data = subset(chami_union_data, select = -c(size_of_spread) )
+}
 
 # banerjee combined:
 
@@ -181,8 +194,8 @@ all_summaries_network_size_plot_line_error_bar <- ggplot(
     legend.justification=c(1, 1),
     legend.position=c(0.87, 0.98),
     legend.key = element_rect(size = 1),
-    legend.key.size = unit(.9, 'lines')
-  ) + xlab("network_size") + ylab("mean time to spread")
+    legend.key.size = unit(2, 'lines')
+  ) + xlab("network size") + ylab("mean time to spread")
 
 all_summaries_network_size_plot_line_error_bar
 
@@ -208,7 +221,7 @@ all_summaries_network_size_plot_line_error_bar <- ggplot(
     legend.justification=c(1, 1),
     legend.position=c(0.99, 0.98),
     legend.key = element_rect(size = 1),
-    legend.key.size = unit(.9, 'lines')
+    legend.key.size = unit(2, 'lines')
   )   + xlab("network size") + ylab("mean time to spread")
 
 all_summaries_network_size_plot_line_error_bar
@@ -236,7 +249,7 @@ all_summaries_network_size_plot_line_error_bar <- ggplot(
     legend.justification=c(1, 1),
     legend.position=c(0.98, 0.98),
     legend.key = element_rect(size = 1),
-    legend.key.size = unit(.9, 'lines')
+    legend.key.size = unit(2, 'lines')
   )   + xlab("network size") + ylab("mean time to spread")
 
 all_summaries_network_size_plot_line_error_bar
@@ -263,12 +276,39 @@ all_summaries_network_size_plot_line_error_bar <- ggplot(
     legend.justification=c(1, 1),
     legend.position=c(0.95, 0.95),
     legend.key = element_rect(size = 1),
-    legend.key.size = unit(.9, 'lines')
+    legend.key.size = unit(2, 'lines')
   )  + xlab("network size") + ylab("mean time to spread")   
 
 all_summaries_network_size_plot_line_error_bar
 
 ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_chami_friendship.pdf',sep=""),
+       all_summaries_network_size_plot_line_error_bar,
+       width = 10, height = 5)
+
+all_summaries_network_size_plot_line_error_bar <- ggplot(
+  aes(x = network_size, 
+      y=time_to_spread_mean, 
+      color=intervention, 
+      shape=intervention,
+      fill=intervention),
+  data = all_summaries_group_by_id_network_size%>%filter(network_group=="Chami et al. (2017) \n friendship network")) +
+  scale_color_manual(name = "Chami et al. (2017)", values = intervention_colors) + 
+  scale_fill_manual(name = "Chami et al. (2017)", values = intervention_colors) +
+  scale_shape_manual(name = "Chami et al. (2017)", values = intervention_shapes) +
+  geom_errorbar(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub), 
+                width=.1, position=position_dodge(width=0.75)) +
+  geom_line(position=position_dodge(width=0.75)) +
+  geom_point(position=position_dodge(width=0.75),size=2) +
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.95, 0.95),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(2, 'lines')
+  )  + xlab("network size") + ylab("mean time to spread")   
+
+all_summaries_network_size_plot_line_error_bar
+
+ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_chami_union.pdf',sep=""),
        all_summaries_network_size_plot_line_error_bar,
        width = 10, height = 5)
 
@@ -290,7 +330,7 @@ all_summaries_network_size_plot_line_error_bar <- ggplot(
     legend.justification=c(1, 1),
     legend.position=c(0.35, 0.95),
     legend.key = element_rect(size = 1),
-    legend.key.size = unit(.9, 'lines')
+    legend.key.size = unit(2, 'lines')
   )  + xlab("network size") + ylab("mean time to spread") + xlim(c(500,7900))   
 
 all_summaries_network_size_plot_line_error_bar
