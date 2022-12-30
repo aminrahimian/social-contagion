@@ -13,6 +13,7 @@ import networkx as NX
 import re
 import sys
 from random import choices
+import pandas as pd
 
 susceptible = 0.0
 infected = 1.0
