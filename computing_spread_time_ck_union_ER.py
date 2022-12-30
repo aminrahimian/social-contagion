@@ -4,6 +4,9 @@
 # The expected degree is fixed and the number of cycle edges (k)
 # and expected number of random edges per node (c) is varied.
 
+# note all computations for Figure S4 of https://arxiv.org/abs/1810.03579v4 are
+# done in simulation_type = 'ck_union_ER_vs_k' mode.
+# simulation_type = 'ck_union_ER_vs_size' is not used anymore
 
 from models import *
 
@@ -26,7 +29,7 @@ elif simulation_type == 'ck_union_ER_vs_k':
 
     number_of_cycle_neighbors_list = [14, 12, 10, 8, 6]
 
-    network_sizes = [1000, 3000, 5000]
+    network_sizes = [250, 1000, 3000, 5000, 7000]
 
 else:
     print("simulation_type not set properly: " + simulation_type)
