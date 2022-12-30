@@ -52,7 +52,7 @@ def compute_spread_time_for_c_k(expected_degree, number_of_cycle_neighbors, netw
 
     dynamics = DeterministicLinear(params)
 
-    spread_time_avg, spread_time_std, _, _, _, _, _, _, _, _ = \
+    spread_time_avg, spread_time_std, _, _, _, _, _, _, _, _, _ = \
         dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
 
     print('network_size ', network_size, 'expected_degree ', expected_degree,
