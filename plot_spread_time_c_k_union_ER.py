@@ -12,7 +12,41 @@ if __name__ == '__main__':
     assert (simulation_type == 'ck_union_ER_vs_size') or \
            (simulation_type == 'ck_union_ER_vs_k'), \
         "we are not in the right simulation_type:" + simulation_type
+    
+    spread_time_avgs = []
+    spread_time_stds = []
+    for network_size in network_sizes:
+        spread_time_avg = []
+        for k in number_of_cycle_neighbors_list:
+            temp = pickle.load(open(theory_simulation_pickle_address
+                                      + 'spreading_time_avg'
+                                      + '_D_' + str(expected_degree) + '_k_'
+                                      + str(k) + '_net_size_'
+                                      + str(network_size)
+                                      + '.pkl', 'rb'))
+            spread_time_avg.append(temp)
+        spread_time_avgs.append(spread_time_avg)
 
+    for network_size in network_sizes:
+        spread_time_std = []
+        for k in number_of_cycle_neighbors_list:
+            temp = pickle.load(open(theory_simulation_pickle_address
+                                      + 'spreading_time_std'
+                                      + '_D_' + str(expected_degree) + '_k_'
+                                      + str(k) + '_net_size_'
+                                      + str(network_size)
+                                      + '.pkl', 'rb'))
+            spread_time_std.append(temp)
+        spread_time_stds.append(spread_time_std)
+
+    pickle.dump(spread_time_avgs, open(theory_simulation_pickle_address
+                                      + 'spreading_time_avg_ck_union_ER_vs_k'
+                                      + '.pkl', 'wb'))
+
+    pickle.dump(spread_time_stds, open(theory_simulation_pickle_address
+                                      + 'spreading_time_std_ck_union_ER_vs_k'
+                                      + '.pkl', 'wb'))
+    
     spread_time_avgs = pickle.load(open(theory_simulation_pickle_address
                                         + 'spreading_time_avg_'
                                         + simulation_type
@@ -22,6 +56,23 @@ if __name__ == '__main__':
                                         + 'spreading_time_std_'
                                         + simulation_type
                                         + '.pkl', 'rb'))
+    
+    df = pd.DataFrame(columns=['network_size', 'time_to_spread', 'std_in_spread', 'k'])
+    for network_size in network_sizes:
+        network_size_index = network_sizes.index(network_size)
+        for k in number_of_cycle_neighbors_list:
+            k_index = number_of_cycle_neighbors_list.index(k)
+            time_to_spread = spread_time_avgs[network_size_index]
+            std_in_spread = spread_time_stds[network_size_index]
+            temp = {'network_size': network_size,
+                    'time_to_spread': time_to_spread[k_index],
+                    'std_in_spread': 1.96 * std_in_spread[k_index] / np.sqrt(size_of_dataset),
+                    'k': k // 2}
+            df = df.append(temp, ignore_index=True)
+
+    pd.DataFrame(df).to_csv(
+        theory_simulation_output_address + simulation_type + 'spreading_data_dump.csv',
+        index=False)
 
 
     if simulation_type == 'ck_union_ER_vs_size':
