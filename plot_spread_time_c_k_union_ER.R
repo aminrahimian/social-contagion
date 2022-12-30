@@ -12,7 +12,7 @@ library(plotrix)
 cwd <- dirname(rstudioapi::getSourceEditorContext()$path)
 
 ck_union_ER_vs_kspreading_data <- read.csv(
-  paste(cwd,"/data/theory-simulations/ck_union_ER_vs_k/output/ck_union_ER_vs_kspreading_data_dump.csv",sep=""),
+  paste(cwd,"/data/theory-simulations/ck_union_ER_vs_k/output/ck_union_ER_vs_k_spreading_data_dump.csv",sep=""),
   stringsAsFactors = FALSE
 )
 
