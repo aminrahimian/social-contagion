@@ -1,4 +1,9 @@
-# plotting the computed spread times in computing_spread_time_c_k_union_ER
+# dumps the pickle file outputs of
+# https://github.com/aminrahimian/social-contagion/blob/master/computing_spread_time_ck_union_ER.py
+# into a CSV file that is used by
+# https://github.com/aminrahimian/social-contagion/blob/master/plot_spread_time_c_k_union_ER.R
+# to plot the computed spread times in computing_spread_time_c_k_union_ER.py
+# Note: the plotting codes in this file are not used in the long ties paper.
 
 from settings import *
 from computing_spread_time_ck_union_ER import network_sizes, \
@@ -71,7 +76,7 @@ if __name__ == '__main__':
             df = df.append(temp, ignore_index=True)
 
     pd.DataFrame(df).to_csv(
-        theory_simulation_output_address + simulation_type + 'spreading_data_dump.csv',
+        theory_simulation_output_address + simulation_type + '_spreading_data_dump.csv',
         index=False)
 
 
