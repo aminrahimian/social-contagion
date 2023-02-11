@@ -7,6 +7,8 @@ size_of_dataset = 500
 NET_SIZE = 1000
 
 models_list = ['Logit', 'Probit', 'Threshold']
+# models_list = ['Threshold']
+# model = 'Threshold'
 
 alphas_logit = [2 / 17, 2 / 16, 3 / 16, 4 / 16, 5 / 16, 6 / 16, 7 / 16, 8 / 16, 9 / 16, 10 / 16, 11/16, 12/16]#, 8/16, 9/16,10/16]  # 7/8
 alphas_logit_labels = [str(x) for x in range(len(alphas_logit))]
@@ -20,6 +22,7 @@ alphas_mix_labels = [str(x) for x in range(len(alphas_mix))]
 
 
 alphas = [alphas_logit, alphas_probit, alphas_mix]
+# alphas = [0.025, 0.05, 0.075]
 alphas_labels = [alphas_logit_labels, alphas_probit_labels, alphas_mix_labels]
 
 
@@ -108,6 +111,7 @@ if __name__ == '__main__':
     assert simulation_type == 'c1_union_ER', "simulation type is: " + simulation_type
 
     input_list = [(model, alpha) for model in models_list for alpha in alphas[models_list.index(model)]]
+    # input_list = [(model, alpha) for model in models_list for alpha in alphas]
 
     if not data_dump:
         if do_multiprocessing:
@@ -163,3 +167,75 @@ if __name__ == '__main__':
         pickle.dump(qs, open(theory_simulation_pickle_address
                              + simulation_type
                              + '_qs.pkl', 'wb'))
+
+        # using for plot the spread time vs network size
+        # elif plotting:
+        # qs = []
+        # spread_time_avgs = []
+        # spread_time_stds = []
+        #
+        # for alpha in alphas:
+        #     spread_time_avg = pickle.load(open(theory_simulation_pickle_address
+        #                                        + model + '_alpha_'
+        #                                        + str(alphas.index(alpha))
+        #                                        + '_spread_time_avg.pkl', 'rb'))
+        #
+        #     spread_time_std = pickle.load(open(theory_simulation_pickle_address
+        #                                        + model + '_alpha_'
+        #                                        + str(alphas.index(alpha))
+        #                                        + '_spread_time_std.pkl', 'rb'))
+        #
+        #     q = pickle.load(open(theory_simulation_pickle_address
+        #                          + model + '_alpha_'
+        #                          + str(alphas.index(alpha))
+        #                          + '_q.pkl', 'rb'))
+        #
+        #     qs.append(q)
+        #
+        #     spread_time_avgs.append(spread_time_avg)
+        #
+        #     spread_time_stds.append(spread_time_avg)
+        #
+        # pickle.dump(spread_time_stds, open(theory_simulation_pickle_address
+        #                                    + simulation_type
+        #                                    + '_spread_times_std.pkl', 'wb'))
+        #
+        # pickle.dump(spread_time_avgs, open(theory_simulation_pickle_address
+        #                                    + simulation_type
+        #                                    + '_spread_time_avgs.pkl', 'wb'))
+        #
+        # pickle.dump(qs, open(theory_simulation_pickle_address
+        #                      + simulation_type
+        #                      + '_qs.pkl', 'wb'))
+        # assert do_plots and load_computations, "we should be in load_computations and do_plots mode!"
+        #
+        # assert simulation_type == 'c1_union_ER', \
+        #     "we are not in the right simulation_type:" + simulation_type
+
+        # network_size = [250, 500, 750, 1000, 1250]
+        # k = [1, 2, 3]
+        # df = pd.DataFrame(columns=['network_size', 'time_to_spread', 'std_in_spread', 'q'])
+        # for size in network_size:
+        #     address = theory_simulation_pickle_address + '/' + str(size) + '/'
+        #     spread_time_stds = pickle.load(open(address
+        #                                         + simulation_type
+        #                                         + '_spread_times_std.pkl', 'rb'))
+        #     print(spread_time_stds)
+        #     spread_time_avgs = pickle.load(open(address
+        #                                         + simulation_type
+        #                                         + '_spread_time_avgs.pkl', 'rb'))
+        #     print(spread_time_avgs)
+        #     qs = pickle.load(open(address
+        #                           + simulation_type
+        #                           + '_qs.pkl', 'rb'))
+        #     print(qs)
+        #     for k1 in k:
+        #         index = k.index(k1)
+        #         temp = {'network_size': size,
+        #                 'time_to_spread': spread_time_avgs[index],
+        #                 'std_in_spread': 1.96 * spread_time_stds[index] / np.sqrt(size),
+        #                 'q': qs[index]}
+        #         df = df.append(temp, ignore_index=True)
+        # pd.DataFrame(df).to_csv(
+        #     theory_simulation_output_address + simulation_type + 'spreading_data_dump.csv',
+        #     index=False)
