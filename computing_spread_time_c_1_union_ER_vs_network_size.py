@@ -8,7 +8,6 @@ model = 'Threshold'
 
 fixed_prob_low = [0.025, 0.05, 0.075]
 network_size = [250, 500, 750, 1000, 1250]
-k = [1, 2, 3]
 
 def compute_spread_time(NET_size, Q):
 
@@ -104,8 +103,8 @@ if __name__ == '__main__':
                 spread_time_avgs.append(spread_time_avg)
 
                 spread_time_stds.append(spread_time_avg)
-            for k1 in k:
-                index = k.index(k1)
+            for Q in fixed_prob_low:
+                index = fixed_prob_low.index(Q)
                 temp = {'network_size': size,
                         'time_to_spread': spread_time_avgs[index],
                         'std_in_spread': 1.96 * spread_time_stds[index] / np.sqrt(size),
@@ -114,3 +113,4 @@ if __name__ == '__main__':
         pd.DataFrame(df).to_csv(theory_simulation_output_address
                                 + simulation_type + 'spreading_data_dump.csv',
                                 index=False)
+
