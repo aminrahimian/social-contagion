@@ -9,6 +9,8 @@ import pandas as pd
 intervention_size_list = [10] #[5, 10, 15, 20, 25]
 
 old_properties = ['avg_clustering', 'average_shortest_path_length', 'diameter', 'size_2_core']
+# if for dumping the fb100 data, it should be:
+# old_properties = ['avg_clustering']
 
 new_properties = ['avg_degree', 'diam_2_core', 'max_degree', 'min_degree',
                   'max_degree_2_core', 'min_degree_2_core',
@@ -17,6 +19,8 @@ new_properties = ['avg_degree', 'diam_2_core', 'max_degree', 'min_degree',
                   'num_leaves']
 
 all_properties = old_properties + new_properties
+# if for dumping the fb100 data, it should be:
+# all_properties = old_properties
 
 included_properties = all_properties
 

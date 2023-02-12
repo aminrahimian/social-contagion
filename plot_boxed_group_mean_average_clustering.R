@@ -114,15 +114,35 @@ banerjee_combined_filtered_properties_data <- banerjee_combined_properties_data 
   mutate(intervention = as.factor(intervention))%>%
   mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
 
+# fb-40 combined:
+
+fb40_combined_properties_data <- read.csv(
+  paste(cwd,"/data/fb100-data/output/fb100_edgelist_properties_data_dump.csv",sep=""),
+  stringsAsFactors = FALSE
+)
+
+fb40_combined_filtered_properties_data <- fb40_combined_properties_data %>%
+  filter(network_size > 10) %>%
+  filter(intervention_size %in% c(0, default_intervention_size)) %>% 
+  select(network_group,intervention_type,avg_clustering,network_id)%>%
+  mutate(
+    intervention = intervention_name_map[intervention_type]
+  )%>%
+  mutate(
+    network_group = network_group_name_map[network_group]
+  ) %>%  
+  mutate(intervention = as.factor(intervention))%>%
+  mutate(intervention = factor(intervention,levels(intervention)[c(1,3,4,2)]))
 
 all_filtered_properties_data = rbind(
   cai_filtered_properties_data,
   chami_advice_filtered_properties_data ,
   chami_friendship_filtered_properties_data,
-  banerjee_combined_filtered_properties_data
+  banerjee_combined_filtered_properties_data,
+  fb40_combined_filtered_properties_data
 ) %>% 
   mutate(network_group = as.factor(network_group))%>%
-  mutate(network_group = factor(network_group, levels(network_group)[c(2,1,4,3)]))
+  mutate(network_group = factor(network_group, levels(network_group)[c(5,2,1,4,3)]))
 
 
 
@@ -209,7 +229,7 @@ all_properties_summaries_plot <- ggplot(
   scale_shape_manual(values = intervention_shapes) +
   geom_pointrange(aes(xmin=avg_clustering_lb, xmax=avg_clustering_ub,shape=intervention),
                   position=position_dodge(width=0.75))+
-  theme(legend.justification=c(1,1), legend.position=c(0.97,0.9)) +   
+  theme(legend.justification=c(1,1), legend.position=c(0.97,0.9)) + 
   scale_x_log10(breaks = c(0.1,0.16,0.2,0.23,0.26))
 
 all_properties_summaries_plot
@@ -247,11 +267,12 @@ all_properties_summaries_plot_diff_ci <- all_properties_summaries_group_by_id %>
   coord_cartesian(xlim = c(1,30)) + 
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.4, 0.9),
+    legend.position=c(0.3, 0.95),
     legend.title = element_blank(),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(.9, 'lines')
-  ) + coord_flip(ylim = c(0.1,0.3))
+  ) + 
+  coord_flip(ylim=c(0.1,0.3))
 all_properties_summaries_plot_diff_ci
 
 ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_plot_diff_ci.pdf",sep=""),
