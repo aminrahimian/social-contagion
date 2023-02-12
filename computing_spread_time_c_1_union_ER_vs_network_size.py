@@ -2,24 +2,22 @@
 
 from models import *
 
-size_of_dataset = 2
+size_of_dataset = 500
 
-NET_SIZE = 10
-
-models_list = ['Threshold']
 model = 'Threshold'
 
 fixed_prob_low = [0.025, 0.05, 0.075]
+network_size = [250, 500, 750, 1000, 1250]
+k = [1, 2, 3]
 
-
-def compute_spread_time(model, Q):
+def compute_spread_time(NET_size, Q):
 
     if model == 'Threshold':
-        params_1000_mix = {
+        params_mix = {
             'zero_at_zero': True,
             'network_model': 'cycle_union_Erdos_Renyi',
-            'size': NET_SIZE,  # populationSize,
-            'initial_states': [infected*active] + [infected*active] + [susceptible] * (NET_SIZE - 2),
+            'size': NET_size,  # populationSize,
+            'initial_states': [infected*active] + [infected*active] + [susceptible] * (NET_size - 2),
             # two initial seeds, next to each other
             'delta': 0.0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 2,
@@ -30,7 +28,7 @@ def compute_spread_time(model, Q):
             'rewire': False,
         }
 
-        dynamics = DeterministicLinear(params_1000_mix)
+        dynamics = DeterministicLinear(params_mix)
 
     else:
         assert False, "model is not supported for C_1 union random graph simulations"
@@ -43,18 +41,20 @@ def compute_spread_time(model, Q):
     q = adoption_probabilities[1]
 
     if save_computations:
-        pickle.dump(spread_time_std, open(theory_simulation_pickle_address
-                                          + model + '_Q_'
-                                          + str(fixed_prob_low.index(Q))
-                                          + '_spread_time_std.pkl', 'wb'))
-        pickle.dump(spread_time_avg, open(theory_simulation_pickle_address
-                                          + model + '_Q_'
-                                          + str(fixed_prob_low.index(Q))
-                                          + '_spread_time_avg.pkl', 'wb'))
-        pickle.dump(q, open(theory_simulation_pickle_address
-                                          + model + '_Q_'
-                                          + str(fixed_prob_low.index(Q))
-                                          + '_q.pkl', 'wb'))
+        for size in network_size:
+            address = theory_simulation_pickle_address + str(size) + '/'
+            pickle.dump(spread_time_std, open(address
+                                              + model + '_Q_'
+                                              + str(fixed_prob_low.index(Q))
+                                              + '_spread_time_std.pkl', 'wb'))
+            pickle.dump(spread_time_avg, open(address
+                                              + model + '_Q_'
+                                              + str(fixed_prob_low.index(Q))
+                                              + '_spread_time_avg.pkl', 'wb'))
+            pickle.dump(q, open(address
+                                + model + '_Q_'
+                                + str(fixed_prob_low.index(Q))
+                                + '_q.pkl', 'wb'))
 
 
 if __name__ == '__main__':
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     assert do_computations or data_dump, "we should be in do_computations or data_dump mode!"
     assert simulation_type == 'c1_union_ER', "simulation type is: " + simulation_type
 
-    input_list = [(model, Q) for model in models_list for Q in fixed_prob_low]
+    input_list = [(net_size, Q)for net_size in network_size for Q in fixed_prob_low]
 
     if not data_dump:
         if do_multiprocessing:
@@ -71,60 +71,46 @@ if __name__ == '__main__':
             pool.close()
             pool.join()
         else:
-            for model in models_list:
-                for Q in fixed_prob_low[models_list.index(model)]:
-                    compute_spread_time(model, Q)
+            for net_size in network_size:
+                for Q in fixed_prob_low:
+                    compute_spread_time(model, Q, net_size)
     elif data_dump:
         # load individual avg and std pkl files, organize them in a list and save them in a pair of pkl files
         # one for all the avg's and the other for all the std's.
         qs = []
         spread_time_avgs = []
         spread_time_stds = []
+        df = pd.DataFrame(columns=['network_size', 'time_to_spread', 'std_in_spread', 'q'])
 
-
-        for Q in fixed_prob_low:
-            spread_time_avg = pickle.load(open(theory_simulation_pickle_address
+        for size in network_size:
+            address = theory_simulation_pickle_address + str(size) + '/'
+            for Q in fixed_prob_low:
+                spread_time_avg = pickle.load(open(address
                                                    + model + '_Q_'
                                                    + str(fixed_prob_low.index(Q))
                                                    + '_spread_time_avg.pkl', 'rb'))
 
-            spread_time_std = pickle.load(open(theory_simulation_pickle_address
+                spread_time_std = pickle.load(open(address
                                                    + model + '_Q_'
                                                    + str(fixed_prob_low.index(Q))
                                                    + '_spread_time_std.pkl', 'rb'))
-            q = pickle.load(open(theory_simulation_pickle_address
+                q = pickle.load(open(address
                                      + model + '_Q_'
                                      + str(fixed_prob_low.index(Q))
                                      + '_q.pkl', 'rb'))
 
-            qs.append(q)
+                qs.append(q)
 
-            spread_time_avgs.append(spread_time_avg)
+                spread_time_avgs.append(spread_time_avg)
 
-            spread_time_stds.append(spread_time_avg)
-
-        pickle.dump(spread_time_stds, open(theory_simulation_pickle_address
-                                           + simulation_type
-                                           + '_spread_times_std.pkl', 'wb'))
-
-        pickle.dump(spread_time_avgs, open(theory_simulation_pickle_address
-                                           + simulation_type
-                                           + '_spread_time_avgs.pkl', 'wb'))
-
-        pickle.dump(qs, open(theory_simulation_pickle_address
-                             + simulation_type
-                             + '_qs.pkl', 'wb'))
-
-        spread_time_avg = pickle.load(open(theory_simulation_pickle_address
-                                           + simulation_type
-                                           + '_spread_times_std.pkl', 'rb'))
-        print(spread_time_avg)
-        spread_time_std = pickle.load(open(theory_simulation_pickle_address
-                                           + simulation_type
-                                           + '_spread_time_avgs.pkl', 'rb'))
-        print(spread_time_std)
-        qs = pickle.load(open(theory_simulation_pickle_address
-                             + simulation_type
-                             + '_qs.pkl', 'rb'))
-        print(qs)
-
+                spread_time_stds.append(spread_time_avg)
+            for k1 in k:
+                index = k.index(k1)
+                temp = {'network_size': size,
+                        'time_to_spread': spread_time_avgs[index],
+                        'std_in_spread': 1.96 * spread_time_stds[index] / np.sqrt(size),
+                        'q': qs[index]}
+                df = df.append(temp, ignore_index=True)
+        pd.DataFrame(df).to_csv(theory_simulation_output_address
+                                + simulation_type + 'spreading_data_dump.csv',
+                                index=False)
