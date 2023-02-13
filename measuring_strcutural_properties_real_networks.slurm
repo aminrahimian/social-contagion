@@ -16,5 +16,5 @@
 module load python/intel-3.6
 
 #module load sloan/python/modules/3.6
-python3 /ihome/arahimian/yil305/contagion/measuring_strcutural_properties_real_networks.py ${SLURM_ARRAY_TASK_ID}
+python3 /ihome/arahimian/yil305/social-contagion/measuring_strcutural_properties_real_networks.py ${SLURM_ARRAY_TASK_ID}
 
