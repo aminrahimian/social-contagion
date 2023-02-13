@@ -10,6 +10,8 @@ size_of_dataset = 500
 intervention_size_list = [10] #[5, 10, 15, 20, 25]
 
 old_properties = ['avg_clustering','average_shortest_path_length', 'diameter', 'size_2_core']
+# when only need to calculate the fb100 avg_clustering:
+# old_properties = ['avg_clustering']
 
 new_properties = ['avg_degree','diam_2_core', 'max_degree', 'min_degree',
                   'max_degree_2_core', 'min_degree_2_core',
@@ -18,10 +20,13 @@ new_properties = ['avg_degree','diam_2_core', 'max_degree', 'min_degree',
                   'num_leaves']
 
 all_properties = old_properties + new_properties
+# when only need to calculate the fb100 avg_clustering:
+# all_properties = old_properties
 
 included_properties = all_properties
 
 theta = random.choice([2, 3, 4, 5]) #none of the properties depend investigated depend on the value of theta
+# when calculate the fb100 avg_clustering: theta = [0.25, 0.25, 0.25, 0.25]
 
 generate_network_intervention_dataset = True
 # determines to whether generate networks (true) or
