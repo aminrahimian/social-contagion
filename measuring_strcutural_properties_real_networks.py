@@ -9,11 +9,11 @@ size_of_dataset = 500
 
 intervention_size_list = [10] #[5, 10, 15, 20, 25]
 
-old_properties = ['avg_clustering','average_shortest_path_length', 'diameter', 'size_2_core']
+old_properties = ['avg_clustering', 'average_shortest_path_length', 'diameter', 'size_2_core']
 # when only need to calculate the fb100 avg_clustering:
 # old_properties = ['avg_clustering']
 
-new_properties = ['avg_degree','diam_2_core', 'max_degree', 'min_degree',
+new_properties = ['avg_degree', 'diam_2_core', 'max_degree', 'min_degree',
                   'max_degree_2_core', 'min_degree_2_core',
                   'avg_degree_2_core', 'number_edges', 'number_edges_2_core',
                   'avg_clustering_2_core', 'transitivity', 'transitivity_2_core',
