@@ -267,7 +267,7 @@ all_properties_summaries_plot_diff_ci <- all_properties_summaries_group_by_id %>
   coord_cartesian(xlim = c(1,30)) + 
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.3, 0.95),
+    legend.position=c(0.4, 0.98),
     legend.title = element_blank(),
     legend.key = element_rect(size = 1),
     legend.key.size = unit(.9, 'lines')
@@ -298,3 +298,4 @@ all_properties_summaries_group_by_id_plot
 ggsave(paste(cwd,"/figures/spreading_time_summaries/all_properties_summaries_group_by_id_plot.pdf",sep=""),
        all_properties_summaries_group_by_id_plot
        , width = 5, height = 4)
+
