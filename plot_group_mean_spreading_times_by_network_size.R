@@ -338,3 +338,169 @@ all_summaries_network_size_plot_line_error_bar
 ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_fb100.pdf',sep=""),
        all_summaries_network_size_plot_line_error_bar,
        width = 7, height = 4)
+
+
+#plot the spread_time vs network_size group by network id
+all_summaries_network_size_plot_line_error_bar <- ggplot(
+  aes(x = network_size, 
+      y=time_to_spread_mean,
+      shape=intervention,
+      fill=intervention,
+      group=network_id),
+  data = all_summaries_group_by_id_network_size%>%filter(network_group=="Cai et al. (2015)")) +
+  scale_color_manual(name = "Cai et al. (2015)", values = intervention_colors) + 
+  scale_fill_manual(name = "Cai et al. (2015)", values = intervention_colors) +
+  scale_shape_manual(name = "Cai et al. (2015)", values = intervention_shapes) +
+  geom_errorbar(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub), 
+                width=.1) +
+  geom_line(colour = "grey") +
+  geom_point(size=2) +
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.85, 0.98),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(0.3, 'lines')
+  ) + xlab("network size") + ylab("mean time to spread")
+
+all_summaries_network_size_plot_line_error_bar
+
+ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_cai_groupby_id.pdf',sep=""),
+       all_summaries_network_size_plot_line_error_bar,
+       width = 7, height = 4)
+
+all_summaries_network_size_plot_line_error_bar <- ggplot(
+  aes(x = network_size, 
+      y=time_to_spread_mean, 
+      shape=intervention,
+      fill=intervention,
+      group=network_id),
+  data = all_summaries_group_by_id_network_size%>%filter(network_group=="Banerjee et al.\n (2013)")) +
+  scale_color_manual(name = "Banerjee et al. (2013)", values = intervention_colors) + 
+  scale_fill_manual(name = "Banerjee et al. (2013)", values = intervention_colors) +
+  scale_shape_manual(name = "Banerjee et al. (2013)", values = intervention_shapes) +
+  geom_errorbar(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub), 
+                width=.1) +
+  geom_point(size=2) + 
+  geom_line(colour = "grey") +
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.99, 0.98),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(2, 'lines')
+  )   + xlab("network size") + ylab("mean time to spread")
+
+all_summaries_network_size_plot_line_error_bar
+
+ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_banerjee_groupby_id.pdf',sep=""),
+       all_summaries_network_size_plot_line_error_bar,
+       width = 7, height = 4)
+
+all_summaries_network_size_plot_line_error_bar <- ggplot(
+  aes(x = network_size, 
+      y=time_to_spread_mean,
+      shape=intervention,
+      fill=intervention,
+      group=network_id),
+  data = all_summaries_group_by_id_network_size
+  %>%filter(network_group=="Chami et al. (2017) \n advice network")) +
+  scale_color_manual(name = "Chami et al. (2017) \n advice network", values = intervention_colors) + 
+  scale_fill_manual(name = "Chami et al. (2017) \n advice network",values = intervention_colors) +
+  scale_shape_manual(name = "Chami et al. (2017) \n advice network",values = intervention_shapes) +
+  geom_errorbar(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub), 
+                width=.1) +
+  geom_point(size=2) + 
+  geom_line(colour = "grey") +
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.98, 0.98),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(2, 'lines')
+  )   + xlab("network size") + ylab("mean time to spread")
+
+all_summaries_network_size_plot_line_error_bar
+
+ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_chami_advice_groupby_id.pdf',sep=""),
+       all_summaries_network_size_plot_line_error_bar,
+       width = 7, height = 4)
+
+all_summaries_network_size_plot_line_error_bar <- ggplot(
+  aes(x = network_size, 
+      y=time_to_spread_mean,
+      shape=intervention,
+      fill=intervention,
+      group=network_id),
+  data = all_summaries_group_by_id_network_size%>%filter(network_group=="Chami et al. (2017) \n friendship network")) +
+  scale_color_manual(name = "Chami et al. (2017) \n friendship network", values = intervention_colors) + 
+  scale_fill_manual(name = "Chami et al. (2017) \n friendship network", values = intervention_colors) +
+  scale_shape_manual(name = "Chami et al. (2017) \n friendship network", values = intervention_shapes) +
+  geom_errorbar(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub), 
+                width=.1) +
+  geom_point() +
+  geom_line(colour = "grey") +
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.9, 0.98),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(2, 'lines')
+  )  + xlab("network size") + ylab("mean time to spread")   
+
+all_summaries_network_size_plot_line_error_bar
+
+ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_chami_friendship_groupby_id.pdf',sep=""),
+       all_summaries_network_size_plot_line_error_bar,
+       width = 7, height = 4)
+
+all_summaries_network_size_plot_line_error_bar <- ggplot(
+  aes(x = network_size, 
+      y=time_to_spread_mean,
+      shape=intervention,
+      fill=intervention,
+      group=network_id),
+  data = all_summaries_group_by_id_network_size%>%filter(network_group=="Chami et al. (2017) \n friendship network")) +
+  scale_color_manual(name = "Chami et al. (2017)", values = intervention_colors) + 
+  scale_fill_manual(name = "Chami et al. (2017)", values = intervention_colors) +
+  scale_shape_manual(name = "Chami et al. (2017)", values = intervention_shapes) +
+  geom_errorbar(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub), 
+                width=.1) +
+  geom_line() +
+  geom_point(size=2) +
+  geom_line(colour = "grey") +
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.95, 0.95),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(2, 'lines')
+  )  + xlab("network size") + ylab("mean time to spread")   
+
+all_summaries_network_size_plot_line_error_bar
+
+ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_chami_union_groupby_id.pdf',sep=""),
+       all_summaries_network_size_plot_line_error_bar,
+       width = 7, height = 4)
+
+all_summaries_network_size_plot_line_error_bar <- ggplot(
+  aes(x = network_size, 
+      y=time_to_spread_mean,
+      shape=intervention,
+      fill=intervention,
+      group=network_id),
+  data = all_summaries_group_by_id_network_size%>%filter(network_group=="Traud et al. (2012)")) +
+  scale_color_manual(name = "Traud et al. (2012)", values = intervention_colors) + 
+  scale_fill_manual(name = "Traud et al. (2012)", values = intervention_colors) +
+  scale_shape_manual(name = "Traud et al. (2012)", values = intervention_shapes) +
+  geom_errorbar(aes(ymin=time_to_spread_lb, ymax=time_to_spread_ub), 
+                width=.1) +
+  geom_point(size=2) +
+  geom_line(colour = "grey") +
+  theme(
+    legend.justification=c(1, 1),
+    legend.position=c(0.3, 0.99),
+    legend.key = element_rect(size = 1),
+    legend.key.size = unit(1,2, 'lines')
+  )  + xlab("network size") + ylab("mean time to spread") + xlim(c(500,7900))   
+
+all_summaries_network_size_plot_line_error_bar
+
+ggsave(paste(cwd,'/figures/spreading_time_summaries/all_summaries_network_size_plot_line_error_bar_fb100_groupby_id.pdf',sep=""),
+       all_summaries_network_size_plot_line_error_bar,
+       width = 7, height = 4)
