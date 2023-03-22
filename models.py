@@ -8,6 +8,7 @@ from scipy.stats import norm
 
 import gc
 
+import math
 
 def measure_property(network_intervention_dataset, property='avg_clustering', sample_size=None):
 
@@ -178,6 +179,62 @@ def cycle_union_Erdos_Renyi(n, k=4, c=2, seed=None,
 
     return composed
 
+def two_d_lattice_union_Erdos_Renyi(n, c=2, seed=None,
+                                    color_the_edges=False,
+                                    square_edge_color='k',
+                                    square_edge_weights=4,
+                                    random_edge_color='b',
+                                    weight_the_edges=False,
+                                    random_edge_weights=4):
+    if seed is not None:
+        NX.seed(seed)
+
+    root_n = int(math.sqrt(n))
+    S_k = NX.generators.grid_2d_graph(root_n, root_n)
+    mapping = {node: i for i, node in enumerate(S_k.nodes())}
+    S_k = NX.relabel_nodes(S_k, mapping)
+    if color_the_edges:
+        NX.set_edge_attributes(S_k, square_edge_color, 'color')
+    if weight_the_edges:
+        NX.set_edge_attributes(S_k, square_edge_weights, 'weight')
+
+    G_npn = NX.generators.random_graphs.erdos_renyi_graph(n, c / n)
+
+    if color_the_edges:
+        NX.set_edge_attributes(G_npn, random_edge_color, 'color')
+    if weight_the_edges:
+        NX.set_edge_attributes(G_npn, random_edge_weights, 'weight')
+
+    composed = NX.compose(G_npn, S_k)
+    return composed
+
+def two_d_lattice_union_diagnostics(n, seed=None,
+                                    color_the_edges=False,
+                                    square_edge_color='k',
+                                    square_edge_weights=4,
+                                    weight_the_edges=False):
+    if seed is not None:
+        NX.seed(seed)
+
+    root_n = int(math.sqrt(n))
+    S_k = NX.grid_2d_graph(root_n, root_n)
+    mapping = {node: i for i, node in enumerate(S_k.nodes())}
+    S_k = NX.relabel_nodes(S_k, mapping)
+
+    for i in range(root_n - 1):
+
+        for j in range(root_n - 1):
+            nodes = [(i + j * root_n, i + (j + 1) * root_n + 1),
+                     (i + j * root_n, i + (j + 1) * root_n - 1),
+                     (i + 1 + j * root_n, i + 1 + (j + 1) * root_n - 1)]
+            S_k.add_edges_from([node for node in nodes])
+
+    if color_the_edges:
+        NX.set_edge_attributes(S_k, square_edge_color, 'color')
+    if weight_the_edges:
+        NX.set_edge_attributes(S_k, square_edge_weights, 'weight')
+
+    return S_k
 
 def c_1_c_2_interpolation(n, eta, add_long_ties_exp, remove_cycle_edges_exp,seed=None):
     """Return graph that interpolates C_1 and C_2.
