@@ -225,7 +225,6 @@ def two_d_lattice_union_diagnostics(n, seed=None,
 
         for j in range(root_n - 1):
             nodes = [(i + j * root_n, i + (j + 1) * root_n + 1),
-                     (i + j * root_n, i + (j + 1) * root_n - 1),
                      (i + 1 + j * root_n, i + 1 + (j + 1) * root_n - 1)]
             S_k.add_edges_from([node for node in nodes])
 
