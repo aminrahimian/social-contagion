@@ -10,6 +10,7 @@ import gc
 
 import math
 
+
 def measure_property(network_intervention_dataset, property='avg_clustering', sample_size=None):
 
     if sample_size is not None:
@@ -114,7 +115,6 @@ def random_factor_pair(value):
             factors.append((int(i), value // i))
     return RD.choice(factors)
 
-
 def newman_watts_add_fixed_number_graph(n, k=2, p=2, seed=None):
     """ Returns a Newman-Watts-Strogatz small-world graph. With a fixed - p - (not random)
     number of edges added to each node. Modified newman_watts_strogatzr_graph() in NetworkX. """
@@ -179,7 +179,7 @@ def cycle_union_Erdos_Renyi(n, k=4, c=2, seed=None,
 
     return composed
 
-def two_d_lattice_union_Erdos_Renyi(n, c=2, seed=None,
+def two_d_lattice_union_Erdos_Renyi(n, c=4, seed=None,
                                     color_the_edges=False,
                                     square_edge_color='k',
                                     square_edge_weights=4,
@@ -222,7 +222,6 @@ def two_d_lattice_union_diagnostics(n, seed=None,
     S_k = NX.relabel_nodes(S_k, mapping)
 
     for i in range(root_n - 1):
-
         for j in range(root_n - 1):
             nodes = [(i + j * root_n, i + (j + 1) * root_n + 1),
                      (i + 1 + j * root_n, i + 1 + (j + 1) * root_n - 1)]
@@ -392,6 +391,20 @@ class NetworkModel(object):
                 self.params['network'] = cycle_union_Erdos_Renyi(self.params['size'], self.params['nearest_neighbors'],
                                                                  self.params['c'])
 
+            elif self.params['network_model'] == 'two_d_lattice_union_Erdos_Renyi':
+                if 'c' not in self.fixed_params:
+                    self.params['c'] = 2
+                if 'nearest_neighbors' not in self.fixed_params:
+                    self.params['nearest_neighbors'] = 2
+                self.params['network'] = two_d_lattice_union_Erdos_Renyi(self.params['size'], self.params['nearest_neighbors'])
+
+            elif self.params['network_model'] == 'two_d_lattice_union_diagnostics':
+                if 'c' not in self.fixed_params:
+                    self.params['c'] = 2
+                if 'nearest_neighbors' not in self.fixed_params:
+                    self.params['nearest_neighbors'] = 2
+                self.params['network'] = two_d_lattice_union_diagnostics(self.params['size'])
+
             elif self.params['network_model'] == 'c_1_c_2_interpolation':
                 if 'c' not in self.fixed_params:
                     self.params['c'] = 2
@@ -535,6 +548,19 @@ class NetworkModel(object):
                                                                    self.params['initial_infection_number'],
                                                                    replace=False)
                 self.params['initial_states'] = 1.0*np.zeros(self.params['size'])
+                self.params['initial_states'][initially_infected_node_indexes] = infected * active
+                # all nodes are initially active by default
+                self.params['initial_states'] = list(self.params['initial_states'])
+
+            # new mode to start from the center
+            elif self.params['initialization_mode'] is 'fixed_number_initial_infection_at_center':
+
+                if 'initial_infection_number' not in self.fixed_params:
+                    self.params['initial_infection_number'] = 2
+                    print('warning: The initial_infection_not supplied, set to default 2.')
+
+                initially_infected_node_indexes = [int(network_size/2 + int(math.sqrt(network_size))/2), int(network_size/2 - int(math.sqrt(network_size))/2)]
+                self.params['initial_states'] = 1.0 * np.zeros(self.params['size'])
                 self.params['initial_states'][initially_infected_node_indexes] = infected * active
                 # all nodes are initially active by default
                 self.params['initial_states'] = list(self.params['initial_states'])
@@ -806,7 +832,7 @@ class ContagionModel(NetworkModel):
         self.number_of_active_infected_neighbors_is_updated = False
         self.list_of_most_recent_activations_is_updated = False
 
-    def time_the_total_spread(self, cap=0.99,
+    def time_the_total_spread(self, cap=1,
                               get_time_series=False,
                               verbose=False):
         time = 0
@@ -872,7 +898,7 @@ class ContagionModel(NetworkModel):
 
         return interventioned_networks
 
-    def avg_speed_of_spread(self, dataset_size=1000, cap=0.9, mode='max'):
+    def avg_speed_of_spread(self, dataset_size, cap=0.9, mode='max'):
         # avg time to spread over the dataset.
         # The time to spread is measured in one of the modes:
         # integral, max, and total.
@@ -956,7 +982,7 @@ class ContagionModel(NetworkModel):
             sum_of_infection_sizes = 0
             count = 1
             while count <= dataset_size:
-                total_spread_time, infection_size,l1,l2 = self.time_the_total_spread(cap=0.99999, get_time_series=True)
+                total_spread_time, infection_size,l1,l2 = self.time_the_total_spread(cap=1, get_time_series=True)
                 if total_spread_time == float('Inf'):
                     dataset_size += -1
                     total_spread_times += [float('Inf')]
@@ -2245,8 +2271,8 @@ class SimpleOnlyAlongC1(ContagionModel):
     def __init__(self, params):
         super(SimpleOnlyAlongC1, self).__init__(params)
         self.classification_label = COMPLEX
-        assert self.params['network_model'] in ['c_1_c_2_interpolation', 'cycle_union_Erdos_Renyi'], \
-            "this contagion model is only suitable for c_1_c_2_interpolation or cycle_union_Erdos_Renyi"
+        assert self.params['network_model'] in ['c_1_c_2_interpolation', 'cycle_union_Erdos_Renyi', 'two_d_lattice_union_Erdos_Renyi'], \
+            "this contagion model is only suitable for c_1_c_2_interpolation or cycle_union_Erdos_Renyi or two_d_lattice_union_Erdos_Renyi"
 
     def step(self):
         current_network = copy.deepcopy(self.params['network'])
@@ -2613,7 +2639,3 @@ class NewModel(ContagionModel):
         self.number_of_infected_neighbors_is_updated = True
 
         del current_network
-
-
-
-
