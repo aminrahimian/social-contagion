@@ -7,13 +7,14 @@ import random as RD
 import numpy as np
 from numpy import random
 import pickle
+import pandas as pd
 import os
 import errno
 import networkx as NX
 import re
 import sys
 from random import choices
-import pandas as pd
+import matplotlib
 
 susceptible = 0.0
 infected = 1.0
@@ -34,8 +35,8 @@ assert (sys.version_info >= (3, 6) and sys.version_info <= (3,7)), 'please use p
 # print(sys.version_info)
 # print(type(NX.__version__))
 
-#assert(NX.__version__ == '2.3'), 'please use networkx 2.3'
-#assert(matplotlib.__version__ == '2.3'), 'please use networkx 2.3'
+assert(NX.__version__ == '2.3'), 'please use networkx 2.3'
+# assert(matplotlib.__version__ == '2.3'), 'please use networkx 2.3'
 
 
 def get_n_smallest_key_values(dictionary, n):
@@ -58,7 +59,7 @@ def natural_keys(text):
 
 
 # real world networks simulation settings:
-network_group = 'cai_edgelist_'
+network_group = 'chami_friendship_edgelist_'
 #'chami_union_edgelist_'
 # 'chami_union_edgelist_'
 # 'fb100_edgelist_'
@@ -371,15 +372,15 @@ except OSError as e:
 # simulator_mode = False
 
 # # # for plotting:
-do_computations = False
-do_multiprocessing = False
-save_computations = False
-load_computations = True
-do_plots = True
-save_plots = True # False
-show_plots = False # True
-data_dump = False
-simulator_mode = False
+# do_computations = False
+# do_multiprocessing = False
+# save_computations = False
+# load_computations = True
+# do_plots = True
+# save_plots = False # False
+# show_plots = True # True
+# data_dump = False
+# simulator_mode = False
 
 # # # # for data_dump:
 # do_computations = False
@@ -393,16 +394,16 @@ simulator_mode = False
 # simulator_mode = False
 
 # # #for simulator: # only used for visualizing_spread.py
-# do_computations = True
-# do_multiprocessing = False
-# save_computations = True
-# load_computations = False
+do_computations = True
+do_multiprocessing = False
+save_computations = True
+load_computations = False
 # #simulator uses a different mathplotlib setting for plotting
-# do_plots = False
-# save_plots = False
-# show_plots = False
-# data_dump = False
-# simulator_mode = True
+do_plots = False
+save_plots = False
+show_plots = False
+data_dump = False
+simulator_mode = True
 
 
 #  check that different modes are set consistently
@@ -431,10 +432,12 @@ assert not (simulator_mode and do_plots), "simulator_mode and do_plots use diffe
                                           "(conflicting) matplotlib settings, and " \
                                           "cannot be both true"
 
-layout = 'circular'
+layout = 'lattice'
 # 'spring'
 # 'circular'
 # layout could be circular, spring, this the graph visualization layout
+# 'lattice'
+# 'diagnostics'
 
 # import the required packages for different modes:
 
@@ -491,16 +494,19 @@ if simulator_mode:
             'gamma': 0.0,
         }
     else:
-        simulator_ID = '44_net'
+        simulator_ID = 'videos'
 
         initial_seeds = 2
 
-        network_size = 44
+        network_size = 10000
 
         simulator_params = {
             'size': network_size,  # populationSize,
-            'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
-            'network_model': 'newman_watts_fixed_number',
+            # 'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
+            'initialization_mode': 'fixed_number_initial_infection_at_center',
+            # 'fixed_number_initial_infection_at_center', 'fixed_number_initial_infection'
+            'network_model': 'two_d_lattice_union_Erdos_Renyi',
+            # 'two_d_lattice_union_Erdos_Renyi', 'cycle_union_Erdos_Renyi', 'two_d_lattice_union_diagnostics', 'newman_watts_add_fixed_number'
             # two initial seeds, next to each other
             'delta': 0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 4,
@@ -564,3 +570,4 @@ def combine(list_of_names,output_name):
         original = np.concatenate((original,additional),axis=1)
         print(original)
     pickle.dump(original, open('./data/'+output_name+'.pkl', 'wb'))
+
