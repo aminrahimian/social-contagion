@@ -2,6 +2,7 @@
 
 from models import *
 
+root_n = int(math.sqrt(network_size))
 
 def init_viz():
     global positions, time, time_networks, labeldict
@@ -10,6 +11,11 @@ def init_viz():
         positions = NX.circular_layout(time_networks[time], scale=4)
     elif layout == 'spring':
         positions = NX.spring_layout(time_networks[time], scale=4)
+    elif layout == 'lattice':
+        positions = {}
+        for i in range(root_n):
+            for j in range(root_n):
+                positions[(i * root_n) + j] = (i, j)
     # set position to the network
     for t in range(len(time_networks)):
         for name, pos in positions.items():
@@ -27,7 +33,8 @@ def draw():
             edge_color='c',
             cmap=PL.cm.YlOrRd,
             vmin=0,
-            vmax=1)
+            vmax=1,
+            node_size=1)
     if highlight_infecting_edges:
         G = copy.deepcopy(time_networks[time])
         infected_nodes = [x for x, y in time_networks[time].nodes(data=True) if y['state'] == infected * active]
