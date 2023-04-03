@@ -3,6 +3,9 @@
 from models import *
 
 root_n = int(math.sqrt(network_size))
+network_name = 'two_d_lattice_union_Erdos_Renyi'
+# 'two_d_lattice_union_diagonals'
+# 'two_d_lattice_union_Erdos_Renyi'
 
 def init_viz():
     global positions, time, time_networks, labeldict
@@ -30,7 +33,8 @@ def draw():
             pos=positions,
             node_color=[time_networks[time].node[i]['state']*2  for i in time_networks[time].nodes()],
             with_labels=False,
-            edge_color='c',
+            # edge_color='c',
+            edge_color="w",
             cmap=PL.cm.YlOrRd,
             vmin=0,
             vmax=1,
@@ -83,12 +87,16 @@ if __name__ == '__main__':
     if save_computations:
         pickle.dump(network_time_series, open(visualizing_spread_pickle_address
                                               + 'simulator_network_time_series_'
+                                              + network_name
+                                              + '_' + str(network_size) + '_'
                                               + simulator_ID
                                               + '.pkl', 'wb'))
 
     if load_computations:
         network_time_series = pickle.load(open(visualizing_spread_pickle_address
                                                + 'simulator_network_time_series_'
+                                               + network_name
+                                               + '_' + str(network_size) + '_'
                                                + simulator_ID
                                                + '.pkl', 'rb'))
 
