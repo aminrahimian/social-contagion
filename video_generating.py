@@ -1,11 +1,11 @@
 import imageio
 from visualizing_spread import *
-
+from settings import root_visualizing_spread_address, simulator_ID
 # Set input and output paths
-input_path = './data/visualizing-spread/videos/output'
-output_path = './data/visualizing-spread/videos/' + network_name + '_'+str(network_size)+'.mp4'
+input_path = visualizing_spread_output_address
+output_path = root_visualizing_spread_address + simulator_ID + '/' + network_name + '_'+str(network_size)+'.mp4'
 if highlight_infecting_edges:
-    output_path = './data/visualizing-spread/videos/' + network_name + '_with_dynamic_red_edges_' + str(network_size) + '.mp4'
+    output_path = root_visualizing_spread_address + simulator_ID + '/' + network_name + '_with_dynamic_red_edges_' + str(network_size) + '.mp4'
 
 fps = 1
 macro_block_size = 16

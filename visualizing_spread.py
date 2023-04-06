@@ -3,9 +3,7 @@
 from models import *
 
 root_n = int(math.sqrt(network_size))
-network_name = 'two_d_lattice_union_Erdos_Renyi'
-# 'two_d_lattice_union_diagonals'
-# 'two_d_lattice_union_Erdos_Renyi'
+network_name = simulator_params['network_model']
 
 def init_viz():
     global positions, time, time_networks, labeldict
@@ -33,12 +31,11 @@ def draw():
             pos=positions,
             node_color=[time_networks[time].node[i]['state']*2  for i in time_networks[time].nodes()],
             with_labels=False,
-            # edge_color='c',
-            edge_color="w",
+            edge_color='c',
+            # edge_color='w',
             cmap=PL.cm.YlOrRd,
             vmin=0,
-            vmax=1,
-            node_size=1)
+            vmax=1)
     if highlight_infecting_edges:
         G = copy.deepcopy(time_networks[time])
         infected_nodes = [x for x, y in time_networks[time].nodes(data=True) if y['state'] == infected * active]
