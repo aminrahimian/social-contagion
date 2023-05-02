@@ -319,7 +319,7 @@ if 'SLURM_ARRAY_TASK_ID' in os.environ:
 
 # theory simulations settings:
 
-simulation_type = 'c1_union_ER'#'c1_union_ER_with_rho'
+simulation_type = 'Z2_union_ER'#'c1_union_ER_with_rho'
 #   'c1_union_ER_with_delta'
 #  'c1_union_ER'
 #  'c1_c2_interpolation'
@@ -372,17 +372,17 @@ except OSError as e:
 # simulator_mode = False
 
 # # # for plotting:
-# do_computations = False
-# do_multiprocessing = False
-# save_computations = False
-# load_computations = True
-# do_plots = True
-# save_plots = False # False
-# show_plots = True # True
-# data_dump = False
-# simulator_mode = False
+do_computations = False
+do_multiprocessing = False
+save_computations = False
+load_computations = True
+do_plots = True
+save_plots = True # False
+show_plots = False # True
+data_dump = False
+simulator_mode = False
 
-# # # # for data_dump:
+# # # # # for data_dump:
 # do_computations = False
 # do_multiprocessing = False
 # save_computations = False
@@ -394,16 +394,16 @@ except OSError as e:
 # simulator_mode = False
 
 # # #for simulator: # only used for visualizing_spread.py
-do_computations = True
-do_multiprocessing = False
-save_computations = True
-load_computations = False
-# #simulator uses a different mathplotlib setting for plotting
-do_plots = False
-save_plots = False
-show_plots = False
-data_dump = False
-simulator_mode = True
+# do_computations = True
+# do_multiprocessing = False
+# save_computations = True
+# load_computations = False
+# # #simulator uses a different mathplotlib setting for plotting
+# do_plots = False
+# save_plots = False
+# show_plots = False
+# data_dump = False
+# simulator_mode = True
 
 
 #  check that different modes are set consistently
@@ -432,7 +432,7 @@ assert not (simulator_mode and do_plots), "simulator_mode and do_plots use diffe
                                           "(conflicting) matplotlib settings, and " \
                                           "cannot be both true"
 
-layout = 'lattice'
+layout = 'circular'
 # 'spring'
 # 'circular'
 # layout could be circular, spring, this the graph visualization layout
@@ -494,19 +494,19 @@ if simulator_mode:
             'gamma': 0.0,
         }
     else:
-        simulator_ID = 'videos'
+        simulator_ID = '16_net_ER'
 
         initial_seeds = 2
 
-        network_size = 10000
+        network_size = 16
 
         simulator_params = {
             'size': network_size,  # populationSize,
-            # 'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
+            'initial_states': [infected*active] * initial_seeds + [susceptible] * (network_size - initial_seeds),
             'initialization_mode': 'fixed_number_initial_infection_at_center',
             # 'fixed_number_initial_infection_at_center', 'fixed_number_initial_infection'
-            'network_model': 'two_d_lattice_union_Erdos_Renyi',
-            # 'two_d_lattice_union_Erdos_Renyi', 'cycle_union_Erdos_Renyi', 'two_d_lattice_union_diagnostics', 'newman_watts_add_fixed_number'
+            'network_model': 'cycle_union_Erdos_Renyi',
+            # 'two_d_lattice_union_Erdos_Renyi', 'cycle_union_Erdos_Renyi', 'two_d_lattice_union_diagnostics', 'newman_watts_add_fixed_number', 'c_1_c_2_interpolation'
             # two initial seeds, next to each other
             'delta': 0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 4,
