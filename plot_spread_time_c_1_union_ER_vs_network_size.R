@@ -32,14 +32,27 @@ size_colors <- c(
   "0.05" = brewer.pal(8, "Set1")[2],
   "0.075" = brewer.pal(8, "Set1")[3]
 )
+# if it's doing for lattice graph
+# size_colors <- c(
+#   "0.01" = brewer.pal(8, "Set1")[1],
+#   "0.02" = brewer.pal(8, "Set1")[2],
+#   "0.03" = brewer.pal(8, "Set1")[3]
+# )
 
 size_shapes <- c(
   "0.025" = 20,
   "0.05" = 21,
   "0.075" = 22
 )
+# if it's doing for lattice graph
+# size_shapes <- c(
+#   "0.01" = 20,
+#   "0.02" = 21,
+#   "0.03" = 22
+# )
 
 # Use 95% confidence interval instead of SEM
+# can use the same codes to do for Z2
 c1_union_ER_vs_network_size_plot_line_error_bar <- ggplot(
   aes(x =network_size, 
       y=time_to_spread,
@@ -57,7 +70,7 @@ c1_union_ER_vs_network_size_plot_line_error_bar <- ggplot(
   geom_point(size=2) +
   theme(
     legend.justification=c(1, 1),
-    legend.position=c(0.2, 0.98),
+    legend.position=c(0.2, 0.95),
     legend.key = element_rect(size = 2),
     legend.key.size = unit(1, 'lines')
   ) + xlab("network size") + ylab("mean time to spread")
@@ -68,3 +81,6 @@ ggsave(paste(cwd,"/data/theory-simulations/c1_union_ER/output/c1_union_ER_vs_q_p
        c1_union_ER_vs_network_size_plot_line_error_bar,
        width = 5, height = 4)
 
+# ggsave(paste(cwd,"/data/theory-simulations/c1_union_ER/output/Z2_union_ER_vs_q_plot_line_error_bar.pdf",sep=""),
+#        Z2_union_ER_vs_network_size_plot_line_error_bar,
+#        width = 5, height = 4)
