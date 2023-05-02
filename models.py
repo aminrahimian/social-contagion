@@ -558,9 +558,7 @@ class NetworkModel(object):
                 if 'initial_infection_number' not in self.fixed_params:
                     self.params['initial_infection_number'] = 2
                     print('warning: The initial_infection_not supplied, set to default 2.')
-                network_size = self.params['size']
-                print("we have the network size:"+network_size)
-                print(network_size)
+
                 initially_infected_node_indexes = [int(network_size/2 + int(math.sqrt(network_size))/2), int(network_size/2 - int(math.sqrt(network_size))/2)]
                 self.params['initial_states'] = 1.0 * np.zeros(self.params['size'])
                 self.params['initial_states'][initially_infected_node_indexes] = infected * active
