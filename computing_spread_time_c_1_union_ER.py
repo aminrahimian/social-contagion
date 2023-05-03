@@ -61,7 +61,8 @@ def compute_spread_time(model,alpha):
     elif model == 'Threshold':
         params_1000_mix = {
             'zero_at_zero': True,
-            'network_model': 'cycle_union_Erdos_Renyi',
+            'network_model': 'cycle_union_Erdos_Renyi',  #'two_d_lattice_union_Erdos_Renyi', 'two_d_lattice_union_diagnostics'
+            # 'initialization_mode': 'fixed_number_initial_infection_at_center',
             'size': NET_SIZE,  # populationSize,
             'initial_states': [infected*active] + [infected*active] + [susceptible] * (NET_SIZE - 2),
             # two initial seeds, next to each other
@@ -79,7 +80,7 @@ def compute_spread_time(model,alpha):
     else:
         assert False, "model is not supported for C_1 union random graph simulations"
 
-    spread_time_avg, spread_time_std, _, _, _, _, _, _, _, _ = \
+    spread_time_avg, spread_time_std, _, _, _, _, _, _, _, _, _ = \
         dynamics.avg_speed_of_spread(dataset_size=size_of_dataset, mode='total')
 
     adoption_probabilities = dynamics.get_activation_probabilities()
@@ -106,6 +107,8 @@ if __name__ == '__main__':
 
     assert do_computations or data_dump, "we should be in do_computations or data_dump mode!"
     assert simulation_type == 'c1_union_ER', "simulation type is: " + simulation_type
+    # assert simulation_type == 'two_d_lattice_union_diagnostics', "simulation type is: " + simulation_type
+    # assert simulation_type == 'two_d_lattice_union_Erdos_Renyi', "simulation type is: " + simulation_type
 
     input_list = [(model, alpha) for model in models_list for alpha in alphas[models_list.index(model)]]
 
