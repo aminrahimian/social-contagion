@@ -15,5 +15,5 @@
 module load python/intel-3.6
 
 #module load sloan/python/modules/3.6
-python3 /ihome/arahimian/yil305/social-contagion-master/computing_spread_time_c_1_union_ER_vs_network_size.py
+python3 /ihome/arahimian/yil305/social-contagion-master/computing_spread_time_lattice_union_ER_vs_network_size.py
 
