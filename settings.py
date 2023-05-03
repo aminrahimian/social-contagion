@@ -439,7 +439,7 @@ layout = 'lattice'
 # 'circular'
 # layout could be circular, spring, this the graph visualization layout
 # 'lattice'
-# 'diagnostics'
+# 'diagonals'
 
 # import the required packages for different modes:
 
@@ -508,7 +508,7 @@ if simulator_mode:
             'initialization_mode': 'fixed_number_initial_infection_at_center',
             # 'fixed_number_initial_infection_at_center', 'fixed_number_initial_infection'
             'network_model': 'two_d_lattice_union_Erdos_Renyi',
-            # 'two_d_lattice_union_Erdos_Renyi', 'cycle_union_Erdos_Renyi', 'two_d_lattice_union_diagnostics', 'newman_watts_add_fixed_number'
+            # 'two_d_lattice_union_Erdos_Renyi', 'cycle_union_Erdos_Renyi', 'two_d_lattice_union_diagonals', 'newman_watts_add_fixed_number'
             # two initial seeds, next to each other
             'delta': 0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
             'nearest_neighbors': 4,
