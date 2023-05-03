@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="computing_spread_time_c_1_union_ER_vs_network_size"
+#SBATCH --job-name="computing_spread_time_lattice_union_ER_vs_network_size"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=30
 #SBATCH --partition=htc
