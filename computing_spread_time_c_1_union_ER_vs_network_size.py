@@ -15,7 +15,7 @@ def compute_spread_time(NET_size, Q):
     if model == 'Threshold':
         params_mix = {
             'zero_at_zero': True,
-            'network_model': 'cycle_union_Erdos_Renyi',   # 'two_d_lattice_union_diagnostics', 'two_d_lattice_union_Erdos_Renyi',
+            'network_model': 'cycle_union_Erdos_Renyi',   # 'two_d_lattice_union_diagonals', 'two_d_lattice_union_Erdos_Renyi',
             'size': NET_size,  # populationSize,
             # 'initialization_mode': 'fixed_number_initial_infection_at_center',
             'initial_states': [infected * active] + [infected * active] + [susceptible] * (NET_size - 2),
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     assert do_computations or data_dump, "we should be in do_computations or data_dump mode!"
     # assert simulation_type == 'two_d_lattice_union_Erdos_Renyi', "simulation type is: " + simulation_type
-    # assert simulation_type == 'two_d_lattice_union_diagnostics', "simulation type is: " + simulation_type
+    # assert simulation_type == 'two_d_lattice_union_diagonals', "simulation type is: " + simulation_type
 
     input_list = [(net_size, Q) for net_size in NETWORK_SIZE for Q in fixed_prob_low]
 
