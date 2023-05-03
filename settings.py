@@ -333,6 +333,8 @@ simulation_type = 'c1_union_ER'#'c1_union_ER_with_rho'
 #  'c1_c2_interpolation'
 #  'c1_union_ER'
 #  'c1_c2_interpolation_SimpleOnlyAlongC1'
+# 'Z2_union_ER'
+# 'Z4'
 
 root_theory_simulations_address = './data/theory-simulations/'
 

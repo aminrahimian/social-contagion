@@ -7,14 +7,17 @@ model = 'Threshold'
 
 fixed_prob_low = [0.025, 0.05, 0.075]
 NETWORK_SIZE = [250, 500, 750, 1000, 1250]
-
+# # if for 2d lattice calculation(Z4 and Z2_union_ER
+# fixed_prob_low = [0.01, 0.02, 0.03]
+# NETWORK_SIZE = [100, 400, 900, 1600, 2500]
 
 def compute_spread_time(NET_size, Q):
     if model == 'Threshold':
         params_mix = {
             'zero_at_zero': True,
-            'network_model': 'cycle_union_Erdos_Renyi',
+            'network_model': 'cycle_union_Erdos_Renyi',   # 'two_d_lattice_union_diagnostics', 'two_d_lattice_union_Erdos_Renyi',
             'size': NET_size,  # populationSize,
+            # 'initialization_mode': 'fixed_number_initial_infection_at_center',
             'initial_states': [infected * active] + [infected * active] + [susceptible] * (NET_size - 2),
             # two initial seeds, next to each other
             'delta': 0.0,  # recoveryProb,  # np.random.beta(5, 2, None), # recovery probability
@@ -57,6 +60,8 @@ def compute_spread_time(NET_size, Q):
 if __name__ == '__main__':
 
     assert do_computations or data_dump, "we should be in do_computations or data_dump mode!"
+    # assert simulation_type == 'two_d_lattice_union_Erdos_Renyi', "simulation type is: " + simulation_type
+    # assert simulation_type == 'two_d_lattice_union_diagnostics', "simulation type is: " + simulation_type
 
     input_list = [(net_size, Q) for net_size in NETWORK_SIZE for Q in fixed_prob_low]
 
@@ -88,12 +93,12 @@ if __name__ == '__main__':
                                                    + model + '_Q_'
                                                    + str(fixed_prob_low.index(Q))
                                                    + '_spread_time_avg.pkl', 'rb'))
-                print(spread_time_avg)
+
                 spread_time_std = pickle.load(open(address
                                                    + model + '_Q_'
                                                    + str(fixed_prob_low.index(Q))
                                                    + '_spread_time_std.pkl', 'rb'))
-                print(spread_time_std)
+
                 q = pickle.load(open(address
                                      + model + '_Q_'
                                      + str(fixed_prob_low.index(Q))
