@@ -31,8 +31,9 @@ def draw():
             pos=positions,
             node_color=[time_networks[time].node[i]['state']*2  for i in time_networks[time].nodes()],
             with_labels=False,
-            edge_color='c',
-            # edge_color='w',
+            # edge_color='c',
+            edge_color='w',
+            node_size=1,
             cmap=PL.cm.YlOrRd,
             vmin=0,
             vmax=1)
@@ -84,17 +85,15 @@ if __name__ == '__main__':
     if save_computations:
         pickle.dump(network_time_series, open(visualizing_spread_pickle_address
                                               + 'simulator_network_time_series_'
-                                              + network_name
-                                              + '_' + str(network_size) + '_'
-                                              + simulator_ID
+                                              + simulator_ID + '_'
+                                              + str(network_size)
                                               + '.pkl', 'wb'))
 
     if load_computations:
         network_time_series = pickle.load(open(visualizing_spread_pickle_address
                                                + 'simulator_network_time_series_'
-                                               + network_name
-                                               + '_' + str(network_size) + '_'
-                                               + simulator_ID
+                                               + simulator_ID + '_'
+                                               + str(network_size)
                                                + '.pkl', 'rb'))
 
         # convert the infected=1 state from old versions to infected*active = 0.5 states
