@@ -208,7 +208,7 @@ def two_d_lattice_union_Erdos_Renyi(n, c=4, seed=None,
     composed = NX.compose(G_npn, S_k)
     return composed
 
-def two_d_lattice_union_diagnostics(n, seed=None,
+def two_d_lattice_union_diagonals(n, seed=None,
                                     color_the_edges=False,
                                     square_edge_color='k',
                                     square_edge_weights=4,
@@ -398,12 +398,12 @@ class NetworkModel(object):
                     self.params['nearest_neighbors'] = 2
                 self.params['network'] = two_d_lattice_union_Erdos_Renyi(self.params['size'], self.params['nearest_neighbors'])
 
-            elif self.params['network_model'] == 'two_d_lattice_union_diagnostics':
+            elif self.params['network_model'] == 'two_d_lattice_union_diagonals':
                 if 'c' not in self.fixed_params:
                     self.params['c'] = 2
                 if 'nearest_neighbors' not in self.fixed_params:
                     self.params['nearest_neighbors'] = 2
-                self.params['network'] = two_d_lattice_union_diagnostics(self.params['size'])
+                self.params['network'] = two_d_lattice_union_diagonals(self.params['size'])
 
             elif self.params['network_model'] == 'c_1_c_2_interpolation':
                 if 'c' not in self.fixed_params:
