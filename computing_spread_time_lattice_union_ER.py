@@ -1,4 +1,5 @@
-# Spread time in C_1 uninon G(n,p_n) allowing for simple adoptions with probability (q) - theorem 2 simulations.
+# Spread time in lattice union ER allowing for simple adoptions with probability (q) - theorem 2 simulations.
+# 'c1 union ER', '2d lattice union ER'
 
 from models import *
 
@@ -61,7 +62,7 @@ def compute_spread_time(model,alpha):
     elif model == 'Threshold':
         params_1000_mix = {
             'zero_at_zero': True,
-            'network_model': 'cycle_union_Erdos_Renyi',  #'two_d_lattice_union_Erdos_Renyi', 'two_d_lattice_union_diagnostics'
+            'network_model': 'cycle_union_Erdos_Renyi',  #'two_d_lattice_union_Erdos_Renyi', 'two_d_lattice_union_diagonals'
             # 'initialization_mode': 'fixed_number_initial_infection_at_center',
             'size': NET_SIZE,  # populationSize,
             'initial_states': [infected*active] + [infected*active] + [susceptible] * (NET_SIZE - 2),
@@ -107,7 +108,7 @@ if __name__ == '__main__':
 
     assert do_computations or data_dump, "we should be in do_computations or data_dump mode!"
     assert simulation_type == 'c1_union_ER', "simulation type is: " + simulation_type
-    # assert simulation_type == 'two_d_lattice_union_diagnostics', "simulation type is: " + simulation_type
+    # assert simulation_type == 'two_d_lattice_union_diagonals', "simulation type is: " + simulation_type
     # assert simulation_type == 'two_d_lattice_union_Erdos_Renyi', "simulation type is: " + simulation_type
 
     input_list = [(model, alpha) for model in models_list for alpha in alphas[models_list.index(model)]]
