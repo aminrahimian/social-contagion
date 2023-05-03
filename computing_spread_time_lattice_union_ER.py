@@ -1,4 +1,5 @@
-# Spread time in C_1 uninon G(n,p_n) allowing for simple adoptions with probability (q) - theorem 2 simulations.
+# Spread time in lattice union ER allowing for simple adoptions with probability (q) - theorem 2 simulations.
+# 'c1 union ER', '2d lattice union ER'
 
 from models import *
 

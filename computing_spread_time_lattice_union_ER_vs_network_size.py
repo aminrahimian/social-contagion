@@ -1,4 +1,4 @@
-# Spread time in C_1 uninon G(n,p_n) allowing for simple adoptions with probability (q) - theorem 2 simulations.
+# Spread time in lattice union ER with different network size
 from models import *
 
 size_of_dataset = 500

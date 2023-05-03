@@ -1,3 +1,5 @@
+# spread time of lattice union ER vs network size graphs from computing_spread_time_lattice_union_ER_vs_network_size.py
+
 library(latex2exp)
 library(dplyr)
 library(ggplot2)
