@@ -1,7 +1,7 @@
 # plotting the computed c1_union_ER and 2d_lattice_union_ER spread times in computing_spread_time_lattice_union_ER
 
 from settings import *
-from computing_spread_time_c_1_union_ER import models_list, size_of_dataset, NET_SIZE
+from computing_spread_time_lattice_union_ER import models_list, size_of_dataset, NET_SIZE
 
 models_list = ['logit', 'probit', 'noisy 2-complex'] # renaming labels
 
