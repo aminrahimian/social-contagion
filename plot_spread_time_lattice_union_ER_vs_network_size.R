@@ -89,7 +89,7 @@ c1_union_ER_vs_network_size_plot_line_error_bar <- ggplot(
 
 c1_union_ER_vs_network_size_plot_line_error_bar
 
-ggsave(paste(cwd,"/data/theory-simulations/c1_union_ER/output/c1_union_ER_vs_q_plot_line_error_bar.pdf",sep=""),
+ggsave(paste(cwd,"/data/theory-simulations/c1_union_ER/output/c1_union_ER_vs_network_size_plot_line_error_bar.pdf",sep=""),
        c1_union_ER_vs_network_size_plot_line_error_bar,
        width = 5, height = 4)
 
