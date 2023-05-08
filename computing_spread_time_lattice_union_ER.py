@@ -149,7 +149,23 @@ if __name__ == '__main__':
                                      + model + '_alpha_'
                                      + alphas_labels[model_index][alphas[model_index].index(alpha)]
                                      + '_q.pkl', 'rb'))
-
+                # if we are doing the calculation for the C2_benchmark, we should save files to:
+                #     spread_time_avg = pickle.load(open(theory_simulation_pickle_address + 'c2_benchmark/'
+                #                                        + model + '_alpha_'
+                #                                        + alphas_labels[model_index][alphas[model_index].index(alpha)]
+                #                                        + '_spread_time_avg.pkl', 'rb'))
+                #     spread_time_std = pickle.load(open(theory_simulation_pickle_address + 'c2_benchmark/'
+                #                                        + model + '_alpha_'
+                #                                        + alphas_labels[model_index][alphas[model_index].index(alpha)]
+                #                                        + '_spread_time_std.pkl', 'rb'))
+                #     spread_time_avg = pickle.load(open(theory_simulation_pickle_address + 'c2_benchmark/'
+                #                                        + model + '_alpha_'
+                #                                        + alphas_labels[model_index][alphas[model_index].index(alpha)]
+                #                                        + '_spread_time_avg.pkl', 'rb'))
+                #     q = pickle.load(open(theory_simulation_pickle_address + 'c2_benchmark/'
+                #                          + model + '_alpha_'
+                #                          + alphas_labels[model_index][alphas[model_index].index(alpha)]
+                #                          + '_q.pkl', 'rb'))
                 qs[model_index].append(q)
 
                 spread_time_avgs[model_index].append(spread_time_avg)

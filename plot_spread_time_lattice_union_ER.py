@@ -4,6 +4,7 @@ from settings import *
 from computing_spread_time_lattice_union_ER import models_list, size_of_dataset, NET_SIZE
 
 models_list = ['logit', 'probit', 'noisy 2-complex'] # renaming labels
+models_list1 = ['C2 benchmark']
 
 if __name__ == '__main__':
 
@@ -24,6 +25,17 @@ if __name__ == '__main__':
                           + simulation_type
                           + '_qs.pkl', 'rb'))
 
+    spread_time_avgs_benchmark = pickle.load(open(theory_simulation_pickle_address + 'c2_benchmark/'
+                                                  + simulation_type
+                                                  + '_spread_time_avgs.pkl', 'rb'))
+
+    spread_time_stds_benchmark = pickle.load(open(theory_simulation_pickle_address + 'c2_benchmark/'
+                                                  + simulation_type
+                                                  + '_spread_times_std.pkl', 'rb'))
+
+    qs_benchmark = pickle.load(open(theory_simulation_pickle_address + 'c2_benchmark/'
+                                    + simulation_type
+                                    + '_qs.pkl', 'rb'))
     plt.figure(1,(7, 6))
 
     for model in models_list:
@@ -34,11 +46,14 @@ if __name__ == '__main__':
                      linewidth=1.5,
                      label=model)  # $\\sigma_n = 1/2\log(n^{\\alpha})$
 
-    plt.plot(qs[models_list.index('noisy 2-complex')],
-             [500]*len(qs[models_list.index('noisy 2-complex')]),
-             color='r', linewidth=1, linestyle='--',
-             label='$\mathcal{C}_2$ benchmark')
-
+    for model in models_list1:
+        model_index = models_list1.index(model)
+        plt.errorbar(qs_benchmark[model_index],
+                     spread_time_avgs_benchmark[model_index],
+                     yerr=[1.96 * s / np.sqrt(size_of_dataset) for s in spread_time_stds_benchmark[model_index]],
+                     linewidth=1.5,
+                     color='r', linestyle='--',
+                     label = '$\mathcal{C}_2$ benchmark')
 
     plt.xscale("log")
     plt.ylabel('time to spread', fontsize=20)
@@ -60,7 +75,7 @@ if __name__ == '__main__':
 
 
 # plotting the computed 2d lattice spread times in computing_spread_time_lattice_union_ER
-
+#
 # from settings import *
 # from computing_spread_time_c_1_union_ER import models_list, size_of_dataset, NET_SIZE
 #
