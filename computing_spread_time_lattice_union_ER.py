@@ -6,6 +6,8 @@ from models import *
 size_of_dataset = 500
 
 NET_SIZE = 1000
+# if it's for square layout('2d lattice union ER', 'two_d_lattice_union_diagonals')
+# NET_SIZE = 2500
 
 models_list = ['Logit', 'Probit', 'Threshold']
 
