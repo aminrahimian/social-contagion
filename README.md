@@ -8,6 +8,7 @@ code to reproduce simulations and plots for our paper entitled, Long ties accele
 
 + R 3.5.1
 + Python 3.6
++ ggplot2 3.3.6
 
 *Depending on the size of the dataset and parameters simulations, user might require access to high-performance computing (HPC)*
 
